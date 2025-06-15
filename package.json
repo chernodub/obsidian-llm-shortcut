@@ -1,0 +1,22 @@
+{
+  "name": "obsidian_guided_journaling",
+  "type": "module",
+  "version": "0.0.1",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "node esbuild.ts",
+    "build:dev": "NODE_ENV=development node esbuild.ts",
+    "dev": "NODE_ENV=development ESBUILD_WATCH=true node esbuild.ts"
+  },
+  "engines": {
+    "node": ">=v24.2.0"
+  },
+  "author": "chernodubv",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^24.0.1",
+    "esbuild": "^0.25.5",
+    "obsidian": "^1.8.7",
+    "typescript": "^5.8.3"
+  }
+}
