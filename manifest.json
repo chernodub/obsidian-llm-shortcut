@@ -1,9 +1,9 @@
 {
-  "id": "llm-shortcut-journaling",
+  "id": "llm-shortcut",
   "name": "LLM Shortcut",
   "version": "0.1.0",
   "minAppVersion": "0.15.0",
-  "description": "Provides a way to create shortcuts using LLM capabilities.",
+  "description": "Provides a way to create shortcuts for commands powered by LLM capabilities.",
   "author": "chernodubv",
   "authorUrl": "https://chernodub.dev",
   "isDesktopOnly": false

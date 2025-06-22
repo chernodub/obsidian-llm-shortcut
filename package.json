@@ -1,5 +1,5 @@
 {
-  "name": "obsidian_llm_shortcut",
+  "name": "obsidian-llm-shortcut",
   "type": "module",
   "version": "0.1.0",
   "main": "dist/main.js",
