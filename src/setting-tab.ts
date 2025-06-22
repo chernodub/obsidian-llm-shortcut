@@ -16,7 +16,7 @@ export class SettingTab extends PluginSettingTab {
     containerEl.createEl("h2", { text: "LLM Shortcut" });
 
     new Setting(containerEl)
-      .setName("LLM Model")
+      .setName("LLM model")
       .setDesc("The model to use for the LLM provider")
       .addText((text) =>
         text
@@ -28,7 +28,7 @@ export class SettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("API Key")
+      .setName("API key")
       .setDesc("The API key for the LLM provider")
       .addText((text) => {
         text
@@ -53,7 +53,7 @@ export class SettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Prompt Library Directory")
+      .setName("Prompt library directory")
       .setDesc("The directory where the prompt library is stored")
       .addText((text) =>
         text
