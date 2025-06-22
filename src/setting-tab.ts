@@ -13,7 +13,7 @@ export class SettingTab extends PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
 
-    containerEl.createEl("h2", { text: "LLM Shortcut Settings" });
+    containerEl.createEl("h2", { text: "LLM Shortcut" });
 
     new Setting(containerEl)
       .setName("LLM Model")
