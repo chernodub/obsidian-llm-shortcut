@@ -1,2 +1,27 @@
+# vscode
+.vscode 
+
+# Intellij
+*.iml
+.idea
+
+# logs
+npm-debug.log*
+
+# npm
+node_modules
+.npm
+
+# Devtools caches
+.eslintcache
+*.tsbuildinfo
+
+# Compiled files
 main.js
-node_modules/
+*.map
+
+# obsidian
+data.json
+
+# OS files
+.DS_Store

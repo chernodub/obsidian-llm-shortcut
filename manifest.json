@@ -1,10 +1,10 @@
 {
-	"id": "ai-guided-journaling",
-	"name": "AI Guided Journaling",
-	"version": "0.0.1",
-	"minAppVersion": "0.15.0",
-	"description": "A plugin that uses AI to guide you through journaling.",
-	"author": "Obsidian",
-	"authorUrl": "https://chernodub.dev",
-	"isDesktopOnly": false
+  "id": "llm-shortcut-journaling",
+  "name": "LLM Shortcut",
+  "version": "0.0.1",
+  "minAppVersion": "0.15.0",
+  "description": "Provides a way to create shortcuts using LLM capabilities.",
+  "author": "chernodubv",
+  "authorUrl": "https://chernodub.dev",
+  "isDesktopOnly": false
 }
