@@ -1,0 +1,19 @@
+{
+  "git": {
+    "commitMessage": "chore: release v${version}"
+  },
+  "github": {
+    "release": true,
+    "assets": ["dist/main.js", "manifest.json"]
+  },
+  "npm": {
+    "publish": false
+  },
+  "plugins": {
+    "@release-it/bumper": {
+      "in": "manifest.json",
+      "out": "manifest.json",
+      "key": "version"
+    }
+  }
+}

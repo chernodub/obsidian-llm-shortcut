@@ -10,7 +10,8 @@
     "check": "tsc",
     "build": "node esbuild.ts",
     "build:dev": "NODE_ENV=development node esbuild.ts",
-    "dev": "NODE_ENV=development ESBUILD_WATCH=true node esbuild.ts"
+    "dev": "NODE_ENV=development ESBUILD_WATCH=true node esbuild.ts",
+    "release": "release-it"
   },
   "engines": {
     "node": ">=v24.2.0"
@@ -21,12 +22,14 @@
     "@eslint/js": "^9.29.0",
     "@eslint/json": "^0.12.0",
     "@eslint/markdown": "^6.5.0",
+    "@release-it/bumper": "^7.0.5",
     "@types/node": "^24.0.1",
     "esbuild": "^0.25.5",
     "eslint": "^9.29.0",
     "globals": "^16.2.0",
     "obsidian": "^1.8.7",
     "prettier": "^3.5.3",
+    "release-it": "^19.0.3",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.34.0",
     "vitest": "^3.2.4"
