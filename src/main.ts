@@ -29,7 +29,7 @@ const DEFAULT_SETTINGS: LlmShortcutPluginSettings = {
   apiKey: "",
   providerUrl: "",
   model: "",
-  promptLibraryDirectory: "__prompts__",
+  promptLibraryDirectory: "_prompts",
 };
 
 const NEWLINE_SYMBOL = "\n";
