@@ -1,6 +1,5 @@
 import { EditorPosition } from "obsidian";
-
-const NEWLINE_SYMBOL = "\n";
+import { NEWLINE_SYMBOL } from "../constants";
 
 export function mapCursorPositionToIdx(text: string, cursor: EditorPosition) {
   let idx = 0;
