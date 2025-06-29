@@ -219,6 +219,7 @@ export default class LlmShortcutPlugin extends Plugin {
 
   async saveSettings() {
     await this.saveData(this.settings);
+    await this.loadSettings();
 
     this.loadAiClient();
     await this.reinitializeCommands();
