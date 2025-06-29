@@ -10,10 +10,10 @@ The plugin allows you to create a directory of prompts that would automatically 
 
 ## Features
 
-- LLM Provider customization (base url, API key, model name, everything's stored locally)
-- Selecting directory for prompts (`__prompts__` by default)
-- Automatic command generation based on the prompt directory tree
-- Privacy respected, nothing is stored or logged outside of your machine
+- 🤖 Multi-Provider Support: Works with any OpenAI-compatible API provider
+- 🔒 Privacy respected, nothing is stored or logged outside of your machine
+- 📚 Prompt Library: Organize prompts in a folder structure
+- 🔥 Instant Commands: Your prompts transform into Obsidian commands
 
 ## Example
 
