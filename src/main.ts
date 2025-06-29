@@ -10,6 +10,7 @@ import {
   TFile,
   TFolder,
 } from "obsidian";
+import { NEWLINE_SYMBOL } from "./constants";
 import { LLMClient } from "./llm-client";
 import { logger } from "./logger";
 import { SettingTab } from "./setting-tab";
@@ -18,24 +19,24 @@ import { LoaderStrategy, LoaderStrategyFactory } from "./utils/loader-strategy";
 import { mapCursorPositionToIdx } from "./utils/map-position-to-idx";
 import { obsidianFetchAdapter } from "./utils/obsidian-fetch-adapter";
 
-interface LlmShortcutPluginSettings {
+interface PluginSettings {
   apiKey: string;
   providerUrl: string;
   model: string;
   promptLibraryDirectory: string;
 }
 
-const DEFAULT_SETTINGS: LlmShortcutPluginSettings = {
+const DEFAULT_SETTINGS: PluginSettings = {
   apiKey: "",
   providerUrl: "",
   model: "",
   promptLibraryDirectory: "_prompts",
 };
 
-const NEWLINE_SYMBOL = "\n";
+
 
 export default class LlmShortcutPlugin extends Plugin {
-  public settings: LlmShortcutPluginSettings = DEFAULT_SETTINGS;
+  public settings: PluginSettings = DEFAULT_SETTINGS;
   private llmClient?: LLMClient;
   private readonly loaderStrategy: LoaderStrategy;
   private commands: Command[] = [];
@@ -167,6 +168,8 @@ export default class LlmShortcutPlugin extends Plugin {
     this.loaderStrategy.start();
     try {
       await this.updateEditorContentWithResponse(editor, responseStream);
+    } catch (error) {
+      logger.error("Error while updating editor content", error);
     } finally {
       this.loaderStrategy.stop();
     }
@@ -216,7 +219,6 @@ export default class LlmShortcutPlugin extends Plugin {
 
   async saveSettings() {
     await this.saveData(this.settings);
-    await this.loadSettings();
 
     this.loadAiClient();
     await this.reinitializeCommands();
