@@ -1,5 +1,6 @@
 import { OpenAI, ClientOptions as OpenAIOptions } from "openai";
-import { CURSOR_MACROS } from "./constants";
+
+const CURSOR_MACROS = "__USER_CURSOR_IS_HERE__";
 
 const INTERNAL_SYSTEM_PROMPT = `
 Internal system instructions:
