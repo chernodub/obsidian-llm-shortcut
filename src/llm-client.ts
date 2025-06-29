@@ -23,7 +23,7 @@ export class LLMClient {
   private readonly client: OpenAI;
 
   constructor(
-    options: Pick<OpenAIOptions, "apiKey" | "baseURL" | "fetch">,
+    options: Pick<OpenAIOptions, "apiKey" | "baseURL" | "fetch" | "project">,
     private readonly model: string,
   ) {
     this.client = new OpenAI({

@@ -24,6 +24,7 @@ interface PluginSettings {
   providerUrl: string;
   model: string;
   promptLibraryDirectory: string;
+  project: string;
 }
 
 const DEFAULT_SETTINGS: PluginSettings = {
@@ -31,9 +32,8 @@ const DEFAULT_SETTINGS: PluginSettings = {
   providerUrl: "",
   model: "",
   promptLibraryDirectory: "_prompts",
+  project: "",
 };
-
-
 
 export default class LlmShortcutPlugin extends Plugin {
   public settings: PluginSettings = DEFAULT_SETTINGS;
@@ -203,6 +203,7 @@ export default class LlmShortcutPlugin extends Plugin {
         apiKey: this.settings.apiKey,
         baseURL: this.settings.providerUrl,
         fetch: obsidianFetchAdapter,
+        project: this.settings.project,
       },
       this.settings.model,
     );
