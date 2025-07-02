@@ -17,7 +17,7 @@ import { SettingTab } from "./setting-tab";
 import { LoaderStrategy, LoaderStrategyFactory } from "./ui/loader-strategy";
 import { showErrorNotification } from "./ui/user-notifications";
 import { assertExists } from "./utils/assertions/assert-exists";
-import { NEWLINE_SYMBOL } from "./utils/constants";
+import { PLUGIN_NAME } from "./utils/constants";
 import { mapCursorPositionToIdx } from "./utils/obsidian/map-position-to-idx";
 import { obsidianFetchAdapter } from "./utils/obsidian/obsidian-fetch-adapter";
 
@@ -161,10 +161,16 @@ export default class LlmShortcutPlugin extends Plugin {
       const responseStream = this.llmClient.getResponse({
         userPrompt: {
           currentContent: editor.getValue(),
-          cursorPositionIdx: mapCursorPositionToIdx(
-            editor.getValue(),
-            editor.getCursor(),
-          ),
+          selection: {
+            startIdx: mapCursorPositionToIdx(
+              editor.getValue(),
+              editor.getCursor("from"),
+            ),
+            endIdx: mapCursorPositionToIdx(
+              editor.getValue(),
+              editor.getCursor("to"),
+            ),
+          },
         },
         systemPrompt,
       });
@@ -182,22 +188,42 @@ export default class LlmShortcutPlugin extends Plugin {
     editor: Editor,
     responseStream: AsyncGenerator<string, void, unknown>,
   ) {
-    let currentCursor = editor.getCursor();
+    const currentCursor = editor.getCursor("from");
 
+    let text = "";
     for await (const chunk of responseStream) {
+      text += chunk;
+
+      this.updateSelectedText(editor, text, currentCursor);
+
+      // To trigger the UI update
       await nextFrame();
-      editor.replaceRange(chunk, currentCursor);
 
-      for (const char of chunk) {
-        if (char === NEWLINE_SYMBOL) {
-          currentCursor = incLine(currentCursor, 1);
-        } else {
-          currentCursor = incChar(currentCursor, 1);
-        }
-      }
-
-      editor.setCursor(currentCursor);
+      // This is a workaround to prevent the diff from being added to the undo history,
+      // so we're not polluting the history with every single chunk.
+      editor.undo();
     }
+
+    this.updateSelectedText(editor, text, currentCursor);
+
+    editor.setSelection(incChar(currentCursor, text.length));
+  }
+
+  private updateSelectedText(
+    editor: Editor,
+    text: string,
+    currentCursor: EditorPosition,
+  ) {
+    editor.transaction(
+      {
+        replaceSelection: text,
+        selection: {
+          from: currentCursor,
+          to: incChar(currentCursor, text.length),
+        },
+      },
+      PLUGIN_NAME,
+    );
   }
 
   private loadAiClient() {
@@ -242,13 +268,6 @@ function pathToReadableCommand(currentPath: string[]): string {
     .slice(1) // skip the prompts library folder
     .join(` ${SEPARATOR_SYMBOL} `)
     .replace(/\.md$/, "");
-}
-
-function incLine(cursor: EditorPosition, line: number) {
-  return {
-    line: cursor.line + line,
-    ch: 0,
-  };
 }
 
 function incChar(cursor: EditorPosition, char: number) {
