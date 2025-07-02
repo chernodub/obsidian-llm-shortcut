@@ -1,11 +1,13 @@
 import { Notice, Platform, Plugin } from "obsidian";
+import { PLUGIN_NAME } from "../utils/constants";
 
 export interface LoaderStrategy {
   start(): void;
   stop(): void;
 }
 
-const LOADING_MESSAGE = "🤖 LLM Thinking...";
+const LOADING_MESSAGE = `${PLUGIN_NAME}: Thinking...`;
+
 export class DesktopLoaderStrategy implements LoaderStrategy {
   private statusBarItem: HTMLElement | undefined;
 

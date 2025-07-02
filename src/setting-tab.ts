@@ -1,5 +1,6 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import LlmShortcutPlugin from "./main";
+import { PLUGIN_NAME } from "./utils/constants";
 
 export class SettingTab extends PluginSettingTab {
   private plugin: LlmShortcutPlugin;
@@ -13,9 +14,8 @@ export class SettingTab extends PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
 
-    containerEl.createEl("h2", { text: "LLM Shortcut" });
+    containerEl.createEl("h2", { text: PLUGIN_NAME });
 
-    // Add helpful information about LLM providers
     const providerInfo = containerEl.createEl("div", {
       cls: "setting-item-description",
     });

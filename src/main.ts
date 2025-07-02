@@ -10,14 +10,16 @@ import {
   TFile,
   TFolder,
 } from "obsidian";
-import { NEWLINE_SYMBOL } from "./constants";
-import { LLMClient } from "./llm-client";
+import { mapLlmErrorToReadable } from "./llm/error-handler";
+import { LLMClient } from "./llm/llm-client";
 import { logger } from "./logger";
 import { SettingTab } from "./setting-tab";
-import { assertExists } from "./utils/assert-exists";
-import { LoaderStrategy, LoaderStrategyFactory } from "./utils/loader-strategy";
-import { mapCursorPositionToIdx } from "./utils/map-position-to-idx";
-import { obsidianFetchAdapter } from "./utils/obsidian-fetch-adapter";
+import { LoaderStrategy, LoaderStrategyFactory } from "./ui/loader-strategy";
+import { showErrorNotification } from "./ui/user-notifications";
+import { assertExists } from "./utils/assertions/assert-exists";
+import { NEWLINE_SYMBOL } from "./utils/constants";
+import { mapCursorPositionToIdx } from "./utils/obsidian/map-position-to-idx";
+import { obsidianFetchAdapter } from "./utils/obsidian/obsidian-fetch-adapter";
 
 interface PluginSettings {
   apiKey: string;
@@ -154,21 +156,22 @@ export default class LlmShortcutPlugin extends Plugin {
   private async handleRespond(systemPrompt: string, editor: Editor) {
     assertExists(this.llmClient, "LLM client is not initialized");
 
-    const responseStream = this.llmClient?.getResponse({
-      userPrompt: {
-        currentContent: editor.getValue(),
-        cursorPositionIdx: mapCursorPositionToIdx(
-          editor.getValue(),
-          editor.getCursor(),
-        ),
-      },
-      systemPrompt,
-    });
-
     this.loaderStrategy.start();
     try {
+      const responseStream = this.llmClient.getResponse({
+        userPrompt: {
+          currentContent: editor.getValue(),
+          cursorPositionIdx: mapCursorPositionToIdx(
+            editor.getValue(),
+            editor.getCursor(),
+          ),
+        },
+        systemPrompt,
+      });
+
       await this.updateEditorContentWithResponse(editor, responseStream);
     } catch (error) {
+      showErrorNotification(mapLlmErrorToReadable(error));
       logger.error("Error while updating editor content", error);
     } finally {
       this.loaderStrategy.stop();
