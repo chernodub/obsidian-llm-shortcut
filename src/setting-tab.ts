@@ -1,6 +1,5 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import LlmShortcutPlugin from "./main";
-import { PLUGIN_NAME } from "./utils/constants";
 
 export class SettingTab extends PluginSettingTab {
   private plugin: LlmShortcutPlugin;
@@ -14,43 +13,10 @@ export class SettingTab extends PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
 
-    containerEl.createEl("h2", { text: PLUGIN_NAME });
-
-    const providerInfo = containerEl.createEl("div", {
-      cls: "setting-item-description",
-    });
-    providerInfo.innerHTML = `
-      <p>This plugin works with any OpenAI-compatible API provider. Configure your preferred LLM service below.</p>
-      <details>
-        <summary>📋 Google Gemini API Setup Example</summary>
-        <div style="background: var(--background-secondary); padding: 12px; border-radius: 6px; margin: 8px 0;">
-          <ol>
-            <li>Get your API key from <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a></li>
-            <li>Check the <a href="https://ai.google.dev/gemini-api/docs/openai" target="_blank">OpenAI Compatibility Guide</a> for the latest endpoints and models</li>
-            <li>Configure the settings below:</li>
-          </ol>
-          <div style="background: var(--background-primary); padding: 8px; border-radius: 4px; font-family: monospace; font-size: 0.9em;">
-            <strong>🔑 API Key:</strong> AIzaSyC... (your Google API key)<br>
-            <strong>🌐 Base URL:</strong> https://generativelanguage.googleapis.com/v1beta<br>
-            <strong>🤖 Model Name:</strong> gemini-flash<br>
-            <strong>📁 Project ID:</strong> (leave empty for Gemini)
-          </div>
-          <br>
-          <div>
-            <strong>💡 Note:</strong> These values are examples and may be outdated. Always verify the current endpoints, models, and configuration requirements in the official provider docs and your project settings.
-          </div>
-        </div>
-      </details>
-      <br>
-      <div>
-        <strong>🔒 Privacy:</strong> Your API keys and configuration are never logged or stored anywhere outside your private Obsidian plugin settings.
-      </div>
-    `;
-
-    containerEl.createEl("h3", { text: "LLM Provider Settings" });
+    new Setting(containerEl).setName("LLM provider").setHeading();
 
     new Setting(containerEl)
-      .setName("🔑 API Key")
+      .setName("🔑 API key")
       .setDesc(
         "Your authentication key from the LLM provider. This is required for all API calls.",
       )
@@ -81,7 +47,7 @@ export class SettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("🤖 Model Name")
+      .setName("🤖 Model name")
       .setDesc(
         "The specific AI model to use (e.g., gpt-4, claude-3-sonnet, gemini-pro). Check your provider's model list.",
       )
@@ -96,7 +62,7 @@ export class SettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("📁 Project ID (Optional)")
+      .setName("📁 Project ID (optional)")
       .setDesc(
         "Some providers require a project identifier for billing or organization purposes. Leave empty if not required.",
       )
@@ -110,10 +76,10 @@ export class SettingTab extends PluginSettingTab {
           .setPlaceholder("project-id or leave empty"),
       );
 
-    containerEl.createEl("h3", { text: "Plugin Settings" });
+    new Setting(containerEl).setName("Prompt library").setHeading();
 
     new Setting(containerEl)
-      .setName("📚 Prompt Library Folder")
+      .setName("📚 Prompt library folder")
       .setDesc(
         "The folder in your vault where prompt files are stored. Commands will be automatically generated from this directory structure.",
       )
