@@ -1,4 +1,4 @@
-# Obsidian LLM Shortcut Plugin
+# LLM Shortcut Plugin
 
 A plugin for [Obsidian](https://obsidian.md) that provides a way to create shortcuts for commands powered by LLM capabilities.
 
@@ -15,7 +15,6 @@ So, this file-tree:
 Becomes a list of commands:
 
 <img width="350" alt="Screenshot 2025-06-29 at 09 44 16" src="https://github.com/user-attachments/assets/63296207-b950-4692-bb08-afddff9e7247" />
-
 
 ## Features
 
