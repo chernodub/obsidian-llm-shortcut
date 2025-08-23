@@ -17,7 +17,8 @@ node_modules
 *.tsbuildinfo
 
 # Compiled files
-main.js
+/main.js
+/styles.css
 *.map
 
 # obsidian
@@ -25,3 +26,6 @@ data.json
 
 # OS files
 .DS_Store
+
+# Logs
+*.log

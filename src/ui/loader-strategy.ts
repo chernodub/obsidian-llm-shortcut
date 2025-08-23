@@ -1,5 +1,6 @@
-import { Notice, Platform, Plugin, setIcon } from "obsidian";
+import { Notice, Platform, Plugin } from "obsidian";
 import { PLUGIN_NAME } from "../utils/constants";
+import { createLoadingStatusFragment } from "./loading-status/loading-status";
 
 export interface LoaderStrategy {
   start(): void;
@@ -7,41 +8,6 @@ export interface LoaderStrategy {
 }
 
 const LOADING_MESSAGE = `${PLUGIN_NAME}: Generating...`;
-
-function createLoadingStatusFragment(message: string): DocumentFragment {
-  const fragment = document.createDocumentFragment();
-  const container = document.createElement("div");
-  container.style.display = "flex";
-  container.style.alignItems = "center";
-  container.style.gap = "8px";
-  container.setAttribute("role", "status");
-  container.setAttribute("aria-live", "polite");
-
-  const spinner = document.createElement("div");
-  setIcon(spinner, "loader-2");
-  spinner.setAttribute("aria-hidden", "true");
-  spinner.style.width = "16px";
-  spinner.style.height = "16px";
-  spinner.style.display = "inline-flex";
-  spinner.style.alignItems = "center";
-  spinner.style.justifyContent = "center";
-
-  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    spinner.animate(
-      [{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }],
-      { duration: 1000, iterations: Infinity, easing: "linear" },
-    );
-  }
-
-  const text = document.createElement("span");
-  text.textContent = message;
-
-  container.appendChild(spinner);
-  container.appendChild(text);
-  fragment.appendChild(container);
-
-  return fragment;
-}
 
 export class DesktopLoaderStrategy implements LoaderStrategy {
   private statusBarItem: HTMLElement | undefined;

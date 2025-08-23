@@ -2,13 +2,14 @@
   "name": "obsidian-llm-shortcut",
   "type": "module",
   "version": "0.4.1",
-  "main": "dist/main.js",
+  "main": "main.js",
   "scripts": {
     "test": "vitest",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "check": "tsc",
     "build": "node esbuild.ts",
+    "build:clean": "rm -f main.js styles.css",
     "build:dev": "NODE_ENV=development node esbuild.ts",
     "dev": "NODE_ENV=development ESBUILD_WATCH=true node esbuild.ts",
     "release": "release-it"
@@ -35,6 +36,7 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
+    "clsx": "^2.1.1",
     "openai": "^5.3.0"
   }
 }
