@@ -4,7 +4,7 @@
   },
   "github": {
     "release": true,
-    "assets": ["main.js", "manifest.json"]
+    "assets": ["main.js", "styles.css", "manifest.json"]
   },
   "npm": {
     "publish": false

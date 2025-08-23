@@ -1,12 +1,13 @@
 import { Notice, Platform, Plugin } from "obsidian";
 import { PLUGIN_NAME } from "../utils/constants";
+import { createLoadingStatusFragment } from "./loading-status/loading-status";
 
 export interface LoaderStrategy {
   start(): void;
   stop(): void;
 }
 
-const LOADING_MESSAGE = `${PLUGIN_NAME}: Thinking...`;
+const LOADING_MESSAGE = `${PLUGIN_NAME}: Generating...`;
 
 export class DesktopLoaderStrategy implements LoaderStrategy {
   private statusBarItem: HTMLElement | undefined;
@@ -17,7 +18,8 @@ export class DesktopLoaderStrategy implements LoaderStrategy {
     this.statusBarItem?.remove();
     this.statusBarItem = this.plugin.addStatusBarItem();
     if (this.statusBarItem) {
-      this.statusBarItem.setText(LOADING_MESSAGE);
+      const fragment = createLoadingStatusFragment(LOADING_MESSAGE);
+      this.statusBarItem.appendChild(fragment);
     }
   }
 
@@ -31,8 +33,9 @@ export class MobileLoaderStrategy implements LoaderStrategy {
   private notice: Notice | undefined;
 
   start(): void {
-    // For mobile, use Obsidian's notice system which is more mobile-friendly
-    this.notice = new Notice(LOADING_MESSAGE, 0); // 0 means persistent until manually dismissed
+    // For mobile, use Obsidian's notice system which supports DocumentFragment content
+    const fragment = createLoadingStatusFragment(LOADING_MESSAGE);
+    this.notice = new Notice(fragment, 0); // 0 = persistent until manually dismissed
   }
 
   stop(): void {
