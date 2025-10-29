@@ -92,5 +92,21 @@ export class SettingTab extends PluginSettingTab {
           })
           .setPlaceholder("_prompts"),
       );
+
+    new Setting(containerEl).setName("Advanced").setHeading();
+
+    new Setting(containerEl)
+      .setName("Process selected text only")
+      .setDesc(
+        "If enabled, only selected text is processed. If disabled and no text is selected, the whole file is processed.",
+      )
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings?.processSelectionOnly)
+          .onChange(async (value) => {
+            this.plugin.settings.processSelectionOnly = value;
+            await this.plugin.saveSettings();
+          })
+      );
   }
 }

@@ -27,6 +27,7 @@ interface PluginSettings {
   model: string;
   promptLibraryDirectory: string;
   project: string;
+  processSelectionOnly: boolean;
 }
 
 const DEFAULT_SETTINGS: PluginSettings = {
@@ -35,6 +36,7 @@ const DEFAULT_SETTINGS: PluginSettings = {
   model: "",
   promptLibraryDirectory: "_prompts",
   project: "",
+  processSelectionOnly: false,
 };
 
 export default class LlmShortcutPlugin extends Plugin {
@@ -156,20 +158,30 @@ export default class LlmShortcutPlugin extends Plugin {
   private async handleRespond(systemPrompt: string, editor: Editor) {
     assertExists(this.llmClient, "LLM client is not initialized");
 
+    const editorValue = editor.getValue();
+    const cursorFrom = editor.getCursor("from");
+    const cursorTo = editor.getCursor("to");
+    const isTextSelected =
+      cursorFrom.line !== cursorTo.line || cursorFrom.ch !== cursorTo.ch;
+
+    if (!isTextSelected && this.settings.processSelectionOnly) {
+      showErrorNotification({
+        title: "No text selected",
+        suggestions: [
+          "Select some text or disable the 'Process selected text only' setting",
+        ],
+      });
+      return;
+    }
+
     this.loaderStrategy.start();
     try {
       const responseStream = this.llmClient.getResponse({
         userPrompt: {
           currentContent: editor.getValue(),
           selection: {
-            startIdx: mapCursorPositionToIdx(
-              editor.getValue(),
-              editor.getCursor("from"),
-            ),
-            endIdx: mapCursorPositionToIdx(
-              editor.getValue(),
-              editor.getCursor("to"),
-            ),
+            startIdx: mapCursorPositionToIdx(editorValue, cursorFrom),
+            endIdx: mapCursorPositionToIdx(editorValue, cursorTo),
           },
         },
         systemPrompt,
