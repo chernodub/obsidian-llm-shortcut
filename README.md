@@ -25,6 +25,30 @@ Becomes a list of commands:
 - 📚 Prompt Library: Organize prompts in a folder structure
 - 🔥 Instant Commands: Your prompts transform into Obsidian commands
 
+## Extra Features
+
+### Selection-Only Commands
+
+Some prompts work best when applied to a specific selection of text. You can mark a command as selection-only by adding frontmatter to your prompt file:
+
+```yaml
+---
+llm-shortcut-selection-mode: selection-only
+---
+
+Your prompt content here...
+```
+
+When a command is marked as selection-only, it will:
+
+- Require text to be selected before execution
+- Show an error notification if you try to run it without a selection
+- Only process the selected text (and the document context) when executed
+
+This is useful for prompts that are designed to transform, analyze, or modify specific portions of text rather than working with the entire document.
+
+<video width="350" alt="Demo Selection Only" src="https://github.com/user-attachments/assets/4eabe88a-d4c5-4928-b357-ad0928b7484b" />
+
 ## Example
 
 Probably the best way to explain the workflow is via this little vid I made:

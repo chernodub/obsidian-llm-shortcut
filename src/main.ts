@@ -21,6 +21,18 @@ import { PLUGIN_NAME } from "./utils/constants";
 import { mapCursorPositionToIdx } from "./utils/obsidian/map-position-to-idx";
 import { obsidianFetchAdapter } from "./utils/obsidian/obsidian-fetch-adapter";
 
+const SELECTION_MODE_TAG = "llm-shortcut-selection-mode";
+const SELECTION_ONLY_VALUE = "selection-only";
+
+interface CommandOptions {
+  readonly shouldHandleSelectionOnly?: boolean;
+}
+
+export interface ParsedCommandPrompt {
+  readonly content: string;
+  readonly options?: CommandOptions;
+}
+
 interface PluginSettings {
   apiKey: string;
   providerUrl: string;
@@ -63,6 +75,13 @@ export default class LlmShortcutPlugin extends Plugin {
       file.path.startsWith(this.settings.promptLibraryDirectory);
 
     this.eventRefs = [
+      this.app.metadataCache.on("changed", (file) => {
+        if (!isPromptLibraryDirectory(file)) {
+          return;
+        }
+
+        this.recurseOverAbstractFile(file, file.parent?.path.split("/") ?? []);
+      }),
       this.app.vault.on("modify", (file) => {
         if (!isPromptLibraryDirectory(file)) {
           return;
@@ -131,11 +150,14 @@ export default class LlmShortcutPlugin extends Plugin {
 
       logger.debug(`Added command ${readableCommandName}`);
 
-      this.addCommandBasedOnPrompt(
-        readableCommandName,
-        file.path,
-        await file.vault.read(file),
-      );
+      const { content, options } = await this.parseCommandPromptFromFile(file);
+
+      this.addCommandBasedOnPrompt({
+        name: readableCommandName,
+        path: file.path,
+        prompt: content,
+        options,
+      });
     } else if (file instanceof TFolder) {
       for (const child of file.children) {
         this.recurseOverAbstractFile(child, currentPath);
@@ -143,18 +165,80 @@ export default class LlmShortcutPlugin extends Plugin {
     }
   }
 
-  private addCommandBasedOnPrompt(name: string, path: string, prompt: string) {
+  private async parseCommandPromptFromFile(
+    file: TFile,
+  ): Promise<ParsedCommandPrompt> {
+    const fileContent = await file.vault.read(file);
+    // Danger! The cache could be stale (but we're listening to changes so this will be overriden next run)
+    const metadata = this.app.metadataCache.getFileCache(file);
+
+    // Use Obsidian's parsed frontmatter if available
+    if (!metadata?.frontmatter || !metadata.frontmatterPosition) {
+      return { content: fileContent };
+    }
+    const shouldHandleSelectionOnly =
+      metadata.frontmatter[SELECTION_MODE_TAG] === SELECTION_ONLY_VALUE;
+
+    const content = fileContent
+      .slice(metadata.frontmatterPosition.end.offset)
+      .trimStart();
+
+    return {
+      content,
+      options: {
+        shouldHandleSelectionOnly,
+      },
+    };
+  }
+
+  private addCommandBasedOnPrompt({
+    name,
+    path,
+    prompt,
+    options,
+  }: {
+    readonly name: string;
+    readonly path: string;
+    readonly prompt: string;
+    readonly options: CommandOptions | undefined;
+  }) {
     const command = {
       id: path,
       name,
-      editorCallback: this.handleRespond.bind(this, prompt),
+      editorCallback: this.handleRespond.bind(
+        this,
+        prompt,
+        options?.shouldHandleSelectionOnly ?? false,
+      ),
     };
     this.commands.push(command);
     this.addCommand(command);
   }
 
-  private async handleRespond(systemPrompt: string, editor: Editor) {
+  private async handleRespond(
+    systemPrompt: string,
+    requiresSelection: boolean,
+    editor: Editor,
+  ) {
     assertExists(this.llmClient, "LLM client is not initialized");
+
+    const startIdx = mapCursorPositionToIdx(
+      editor.getValue(),
+      editor.getCursor("from"),
+    );
+    const endIdx = mapCursorPositionToIdx(
+      editor.getValue(),
+      editor.getCursor("to"),
+    );
+
+    if (requiresSelection) {
+      if (startIdx === endIdx) {
+        showErrorNotification({
+          title: "This command requires text to be selected",
+        });
+        return;
+      }
+    }
 
     this.loaderStrategy.start();
     try {
@@ -162,14 +246,8 @@ export default class LlmShortcutPlugin extends Plugin {
         userPrompt: {
           currentContent: editor.getValue(),
           selection: {
-            startIdx: mapCursorPositionToIdx(
-              editor.getValue(),
-              editor.getCursor("from"),
-            ),
-            endIdx: mapCursorPositionToIdx(
-              editor.getValue(),
-              editor.getCursor("to"),
-            ),
+            startIdx,
+            endIdx,
           },
         },
         systemPrompt,
