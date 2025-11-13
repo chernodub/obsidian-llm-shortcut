@@ -20,8 +20,10 @@ export function showErrorNotification(
   let message = withSeparator(`🤖 ${PLUGIN_NAME} Error:`, TWO_LINE_SEP);
   message += withSeparator(options.title, TWO_LINE_SEP);
   message += withSeparator(options.message, TWO_LINE_SEP);
-  message += withSeparator("💡 Suggestions:", TWO_LINE_SEP);
-  message += suggestionsText;
+  if (suggestionsText) {
+    message += withSeparator("💡 Suggestions:", TWO_LINE_SEP);
+    message += suggestionsText;
+  }
 
   new Notice(message, timeout);
 }
