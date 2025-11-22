@@ -47,7 +47,8 @@ export class CustomPromptModal extends Modal {
 
     this.submitButton = buttonContainer.createEl("button", {
       text: "Submit",
-      attr: { type: "button", class: "mod-cta" },
+      cls: "mod-cta",
+      attr: { type: "button" },
     });
     this.submitButton.addClass(clsx(styles.button));
     this.submitButton.addEventListener("click", () => {
