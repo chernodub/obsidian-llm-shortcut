@@ -30,7 +30,7 @@ interface CommandOptions {
 }
 
 export interface ParsedCommandPrompt {
-  readonly content: string;
+  readonly prompt: string;
   readonly options?: CommandOptions;
 }
 
@@ -172,23 +172,20 @@ export default class LlmShortcutPlugin extends Plugin {
     // Danger! The cache could be stale (but we're listening to changes so this will be overriden next run)
     const metadata = this.app.metadataCache.getFileCache(file);
 
-    console.log(1);
-
     // Use Obsidian's parsed frontmatter if available
     if (!metadata?.frontmatter || !metadata.frontmatterPosition) {
-      return { content: fileContent };
+      logger.debug(`LLM Shortcut: No frontmatter found for file: ${file.path}`);
+      return { prompt: fileContent };
     }
     const shouldHandleSelectionOnly =
       metadata.frontmatter[SELECTION_MODE_TAG] === SELECTION_ONLY_VALUE;
-
-    console.log(2);
 
     const content = fileContent
       .slice(metadata.frontmatterPosition.end.offset)
       .trimStart();
 
     return {
-      content,
+      prompt: content,
       options: {
         shouldHandleSelectionOnly,
       },
@@ -227,10 +224,9 @@ export default class LlmShortcutPlugin extends Plugin {
       throw new Error(`LLM Shortcut: Prompt file not found: ${promptFilePath}`);
     }
 
-    const { content } = await this.parseCommandPromptFromFile(file);
+    const { prompt, options } = await this.parseCommandPromptFromFile(file);
 
-    debugger;
-    if (requiresSelection) {
+    if (options?.shouldHandleSelectionOnly) {
       if (startIdx === endIdx) {
         showErrorNotification({
           title: "This command requires text to be selected",
@@ -239,7 +235,7 @@ export default class LlmShortcutPlugin extends Plugin {
       }
     }
 
-    await this.processLlmRequest(userPrompt, editor, startIdx, endIdx);
+    await this.processLlmRequest(prompt, editor, startIdx, endIdx);
   }
 
   private async processLlmRequest(
