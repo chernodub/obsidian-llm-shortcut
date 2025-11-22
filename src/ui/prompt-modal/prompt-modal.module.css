@@ -11,16 +11,6 @@
   box-sizing: border-box;
 }
 
-.header {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.title {
-  margin: 0;
-}
-
 .form {
   flex: 1;
 }

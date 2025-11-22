@@ -13,6 +13,7 @@ export class CustomPromptModal extends Modal {
     private readonly heading: string = "LLM Shortcut",
   ) {
     super(app);
+    this.setTitle(this.heading);
   }
 
   override onOpen() {
@@ -22,7 +23,6 @@ export class CustomPromptModal extends Modal {
     contentEl.addClass(clsx(styles.content));
     this.modalEl.addClass(clsx(styles.modalRoot));
 
-    this.createHeader(contentEl);
     this.createForm(contentEl);
     this.createFooter(contentEl);
   }
@@ -69,17 +69,6 @@ export class CustomPromptModal extends Modal {
     this.textareaEl.addClass(clsx(styles.textarea));
     this.textareaEl.addEventListener("keydown", this.handleTextareaKeydown);
     this.textareaEl.focus();
-  }
-
-  private createHeader(contentEl: HTMLElement) {
-    const headerEl = contentEl.createDiv({
-      cls: clsx(styles.header),
-    });
-
-    headerEl.createEl("h2", {
-      text: this.heading,
-      cls: clsx(styles.title),
-    });
   }
 
   override onClose() {
