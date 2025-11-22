@@ -27,6 +27,10 @@ Becomes a list of commands:
 
 ## Extra Features
 
+### Custom Prompt Command
+
+The plugin includes a customizable command that allows you to enter a prompt directly without creating a prompt file. By default, this command appears as "Custom prompt" in the command palette. You can customize the label for this command in plugin settings.
+
 ### Selection-Only Commands
 
 Some prompts work best when applied to a specific selection of text. You can mark a command as selection-only by adding frontmatter to your prompt file:
