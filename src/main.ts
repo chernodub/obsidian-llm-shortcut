@@ -180,12 +180,12 @@ export default class LlmShortcutPlugin extends Plugin {
     const shouldHandleSelectionOnly =
       metadata.frontmatter[SELECTION_MODE_TAG] === SELECTION_ONLY_VALUE;
 
-    const content = fileContent
+    const prompt = fileContent
       .slice(metadata.frontmatterPosition.end.offset)
       .trimStart();
 
     return {
-      prompt: content,
+      prompt,
       options: {
         shouldHandleSelectionOnly,
       },
@@ -194,7 +194,7 @@ export default class LlmShortcutPlugin extends Plugin {
 
   private addCommandBasedOnFile({
     name,
-    promptFilePath: promptFilePath,
+    promptFilePath,
   }: {
     readonly name: string;
     readonly promptFilePath: string;
