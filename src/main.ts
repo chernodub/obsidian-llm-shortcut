@@ -290,7 +290,7 @@ export default class LlmShortcutPlugin extends Plugin {
 
     this.updateSelectedText(editor, text, currentCursor);
 
-    editor.setSelection(incChar(currentCursor, text.length));
+    editor.setSelection(currentCursor, incChar(currentCursor, text.length));
   }
 
   private updateSelectedText(
