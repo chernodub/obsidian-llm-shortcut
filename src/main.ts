@@ -30,7 +30,7 @@ interface CommandOptions {
 }
 
 export interface ParsedCommandPrompt {
-  readonly content: string;
+  readonly prompt: string;
   readonly options?: CommandOptions;
 }
 
@@ -154,13 +154,9 @@ export default class LlmShortcutPlugin extends Plugin {
 
       logger.debug(`Added command ${readableCommandName}`);
 
-      const { content, options } = await this.parseCommandPromptFromFile(file);
-
-      this.addCommandBasedOnPrompt({
+      this.addCommandBasedOnFile({
         name: readableCommandName,
-        path: file.path,
-        prompt: content,
-        options,
+        promptFilePath: file.path,
       });
     } else if (file instanceof TFolder) {
       for (const child of file.children) {
@@ -178,52 +174,41 @@ export default class LlmShortcutPlugin extends Plugin {
 
     // Use Obsidian's parsed frontmatter if available
     if (!metadata?.frontmatter || !metadata.frontmatterPosition) {
-      return { content: fileContent };
+      logger.debug(`LLM Shortcut: No frontmatter found for file: ${file.path}`);
+      return { prompt: fileContent };
     }
     const shouldHandleSelectionOnly =
       metadata.frontmatter[SELECTION_MODE_TAG] === SELECTION_ONLY_VALUE;
 
-    const content = fileContent
+    const prompt = fileContent
       .slice(metadata.frontmatterPosition.end.offset)
       .trimStart();
 
     return {
-      content,
+      prompt,
       options: {
         shouldHandleSelectionOnly,
       },
     };
   }
 
-  private addCommandBasedOnPrompt({
+  private addCommandBasedOnFile({
     name,
-    path,
-    prompt,
-    options,
+    promptFilePath,
   }: {
     readonly name: string;
-    readonly path: string;
-    readonly prompt: string;
-    readonly options: CommandOptions | undefined;
+    readonly promptFilePath: string;
   }) {
-    const command = {
-      id: path,
+    const command: Command = {
+      id: promptFilePath,
       name,
-      editorCallback: this.handleRespond.bind(
-        this,
-        prompt,
-        options?.shouldHandleSelectionOnly ?? false,
-      ),
+      editorCallback: this.handleRespond.bind(this, promptFilePath),
     };
     this.commands.push(command);
     this.addCommand(command);
   }
 
-  private async handleRespond(
-    systemPrompt: string,
-    requiresSelection: boolean,
-    editor: Editor,
-  ) {
+  private async handleRespond(promptFilePath: string, editor: Editor) {
     const startIdx = mapCursorPositionToIdx(
       editor.getValue(),
       editor.getCursor("from"),
@@ -233,7 +218,15 @@ export default class LlmShortcutPlugin extends Plugin {
       editor.getCursor("to"),
     );
 
-    if (requiresSelection) {
+    const file = this.app.vault.getFileByPath(promptFilePath);
+
+    if (!file) {
+      throw new Error(`LLM Shortcut: Prompt file not found: ${promptFilePath}`);
+    }
+
+    const { prompt, options } = await this.parseCommandPromptFromFile(file);
+
+    if (options?.shouldHandleSelectionOnly) {
       if (startIdx === endIdx) {
         showErrorNotification({
           title: "This command requires text to be selected",
@@ -242,11 +235,11 @@ export default class LlmShortcutPlugin extends Plugin {
       }
     }
 
-    await this.processLlmRequest(systemPrompt, editor, startIdx, endIdx);
+    await this.processLlmRequest(prompt, editor, startIdx, endIdx);
   }
 
   private async processLlmRequest(
-    systemPrompt: string,
+    prompt: string,
     editor: Editor,
     startIdx: number,
     endIdx: number,
@@ -263,7 +256,7 @@ export default class LlmShortcutPlugin extends Plugin {
             endIdx,
           },
         },
-        systemPrompt,
+        systemPrompt: prompt,
       });
 
       await this.updateEditorContentWithResponse(editor, responseStream);
