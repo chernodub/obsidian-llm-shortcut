@@ -351,7 +351,7 @@ export default class LlmShortcutPlugin extends Plugin {
   }
 
   private initCustomPromptCommand() {
-    this.addCommand({
+    const command = {
       id: "llm-shortcut-custom-prompt",
       name: "LLM Shortcut",
       editorCallback: (editor: Editor) => {
@@ -359,7 +359,10 @@ export default class LlmShortcutPlugin extends Plugin {
           this.handleCustomPrompt(prompt, editor),
         ).open();
       },
-    });
+    };
+    this.commands.push(command);
+
+    this.addCommand(command);
   }
 
   async handleCustomPrompt(userPrompt: string, editor: Editor) {
