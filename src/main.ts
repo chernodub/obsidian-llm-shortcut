@@ -40,6 +40,7 @@ interface PluginSettings {
   model: string;
   promptLibraryDirectory: string;
   project: string;
+  customPromptCommandLabel: string;
 }
 
 const DEFAULT_SETTINGS: PluginSettings = {
@@ -48,6 +49,7 @@ const DEFAULT_SETTINGS: PluginSettings = {
   model: "",
   promptLibraryDirectory: "_prompts",
   project: "",
+  customPromptCommandLabel: "Custom prompt",
 };
 
 export default class LlmShortcutPlugin extends Plugin {
@@ -348,15 +350,19 @@ export default class LlmShortcutPlugin extends Plugin {
     logger.debug("Reinitializing commands");
     this.destroyCommands();
     await this.initCommands();
+    this.initCustomPromptCommand();
   }
 
   private initCustomPromptCommand() {
+    const label = this.settings.customPromptCommandLabel;
     const command = {
       id: "llm-shortcut-custom-prompt",
-      name: "LLM Shortcut",
+      name: label,
       editorCallback: (editor: Editor) => {
-        new CustomPromptModal(this.app, (prompt) =>
-          this.handleCustomPrompt(prompt, editor),
+        new CustomPromptModal(
+          this.app,
+          (prompt) => this.handleCustomPrompt(prompt, editor),
+          label,
         ).open();
       },
     };
