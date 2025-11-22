@@ -92,5 +92,22 @@ export class SettingTab extends PluginSettingTab {
           })
           .setPlaceholder("_prompts"),
       );
+
+    new Setting(containerEl)
+      .setName("📝 Command label")
+      .setDesc(
+        "The label used for the custom prompt command in the command palette and modal header.",
+      )
+      .addText((text) =>
+        text
+          .setValue(
+            this.plugin.settings?.customPromptCommandLabel || "Custom prompt",
+          )
+          .onChange(async (value) => {
+            this.plugin.settings.customPromptCommandLabel = value;
+            await this.plugin.saveSettings();
+          })
+          .setPlaceholder("Custom prompt"),
+      );
   }
 }

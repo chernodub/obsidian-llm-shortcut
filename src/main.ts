@@ -15,6 +15,7 @@ import { LLMClient } from "./llm/llm-client";
 import { logger } from "./logger";
 import { SettingTab } from "./setting-tab";
 import { LoaderStrategy, LoaderStrategyFactory } from "./ui/loader-strategy";
+import { CustomPromptModal } from "./ui/prompt-modal/prompt-modal";
 import { showErrorNotification } from "./ui/user-notifications";
 import { assertExists } from "./utils/assertions/assert-exists";
 import { PLUGIN_NAME } from "./utils/constants";
@@ -39,6 +40,7 @@ interface PluginSettings {
   model: string;
   promptLibraryDirectory: string;
   project: string;
+  customPromptCommandLabel: string;
 }
 
 const DEFAULT_SETTINGS: PluginSettings = {
@@ -47,6 +49,7 @@ const DEFAULT_SETTINGS: PluginSettings = {
   model: "",
   promptLibraryDirectory: "_prompts",
   project: "",
+  customPromptCommandLabel: "Custom prompt",
 };
 
 export default class LlmShortcutPlugin extends Plugin {
@@ -66,6 +69,7 @@ export default class LlmShortcutPlugin extends Plugin {
     await this.loadSettings();
     this.initSettingsTab();
     this.initCommands();
+    this.initCustomPromptCommand();
     this.loadAiClient();
     this.listenToPromptLibraryDirectoryChanges();
   }
@@ -220,8 +224,6 @@ export default class LlmShortcutPlugin extends Plugin {
     requiresSelection: boolean,
     editor: Editor,
   ) {
-    assertExists(this.llmClient, "LLM client is not initialized");
-
     const startIdx = mapCursorPositionToIdx(
       editor.getValue(),
       editor.getCursor("from"),
@@ -239,6 +241,17 @@ export default class LlmShortcutPlugin extends Plugin {
         return;
       }
     }
+
+    await this.processLlmRequest(systemPrompt, editor, startIdx, endIdx);
+  }
+
+  private async processLlmRequest(
+    systemPrompt: string,
+    editor: Editor,
+    startIdx: number,
+    endIdx: number,
+  ) {
+    assertExists(this.llmClient, "LLM client is not initialized");
 
     this.loaderStrategy.start();
     try {
@@ -337,6 +350,38 @@ export default class LlmShortcutPlugin extends Plugin {
     logger.debug("Reinitializing commands");
     this.destroyCommands();
     await this.initCommands();
+    this.initCustomPromptCommand();
+  }
+
+  private initCustomPromptCommand() {
+    const label = this.settings.customPromptCommandLabel;
+    const command = {
+      id: "llm-shortcut-custom-prompt",
+      name: label,
+      editorCallback: (editor: Editor) => {
+        new CustomPromptModal(
+          this.app,
+          (prompt) => this.handleCustomPrompt(prompt, editor),
+          label,
+        ).open();
+      },
+    };
+    this.commands.push(command);
+
+    this.addCommand(command);
+  }
+
+  async handleCustomPrompt(userPrompt: string, editor: Editor) {
+    const startIdx = mapCursorPositionToIdx(
+      editor.getValue(),
+      editor.getCursor("from"),
+    );
+    const endIdx = mapCursorPositionToIdx(
+      editor.getValue(),
+      editor.getCursor("to"),
+    );
+
+    await this.processLlmRequest(userPrompt, editor, startIdx, endIdx);
   }
 }
 
