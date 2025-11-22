@@ -1,0 +1,83 @@
+ .modalRoot {
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: min(70vh, 520px);
+  box-sizing: border-box;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.title {
+  margin: 0;
+}
+
+.form {
+  flex: 1;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 140px;
+  height: 100%;
+  resize: none;
+}
+
+@media (pointer: fine) {
+  .textarea {
+    resize: vertical;
+  }
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.button {
+  padding: 8px 14px;
+}
+
+@media (max-width: 600px) {
+  .modalRoot {
+    width: 100%;
+    max-width: 100%;
+    height: 100vh;
+    max-height: 100vh;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .content {
+    max-height: none;
+  }
+
+  .footer {
+    margin-top: auto;
+  }
+
+  .actions {
+    width: 100%;
+  }
+
+  .button {
+    flex: 1 1 0;
+  }
+}
