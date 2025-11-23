@@ -11,7 +11,7 @@ import {
   TFolder,
 } from "obsidian";
 import { mapLlmErrorToReadable } from "./llm/error-handler";
-import { LLMClient, LlmClientSelectionParams } from "./llm/llm-client";
+import { LLMClient, LLMClientSelectionParams } from "./llm/llm-client";
 import { logger } from "./logger";
 import { SettingTab } from "./setting-tab";
 import { LoaderStrategy, LoaderStrategyFactory } from "./ui/loader-strategy";
@@ -251,7 +251,7 @@ export default class LlmShortcutPlugin extends Plugin {
   }: {
     readonly userPromptString: string;
     readonly editor: Editor;
-    readonly selection: LlmClientSelectionParams;
+    readonly selection: LLMClientSelectionParams;
   }) {
     assertExists(this.llmClient, "LLM client is not initialized");
 

@@ -54,19 +54,19 @@ Your response must always be exactly and only what should replace or be inserted
 const USER_PROMPT_PREFIX = `# USER PROMPT: \n\n`;
 const USER_CONTENT_PREFIX = `# USER CONTENT: \n\n`;
 
-export type LlmClientSelectionParams = {
+export type SelectionParams = {
   readonly startIdx: number;
   readonly endIdx: number;
 };
 
-type UserContentParameters = {
+type UserContentParams = {
   readonly currentContent: string;
-  readonly selection: LlmClientSelectionParams;
+  readonly selection: SelectionParams;
 };
 
-type GetLlmResponseParameters = {
+type ResponseParams = {
   readonly userPromptString: string;
-  readonly userContentParameters: UserContentParameters;
+  readonly userContentParameters: UserContentParams;
 };
 
 export class LLMClient {
@@ -86,11 +86,8 @@ export class LLMClient {
   async *getResponse({
     userContentParameters,
     userPromptString,
-  }: GetLlmResponseParameters) {
-    const userContent = this.insertSelectionMacros(
-      userContentParameters.currentContent,
-      userContentParameters.selection,
-    );
+  }: ResponseParams) {
+    const userContent = this.insertSelectionMacros(userContentParameters);
 
     const messages: ChatCompletionMessageParam[] = [
       {
@@ -122,10 +119,10 @@ export class LLMClient {
     }
   }
 
-  private insertSelectionMacros(
-    currentContent: string,
-    selection: LlmClientSelectionParams,
-  ): string {
+  private insertSelectionMacros({
+    currentContent,
+    selection,
+  }: UserContentParams): string {
     return (
       USER_CONTENT_PREFIX +
       (currentContent.slice(0, selection.startIdx) +
@@ -136,7 +133,7 @@ export class LLMClient {
 
   private insertSelectionMacroses(
     currentContent: string,
-    selection: LlmClientSelectionParams,
+    selection: SelectionParams,
   ) {
     if (selection.startIdx === selection.endIdx) {
       return CARET_MACROS;
