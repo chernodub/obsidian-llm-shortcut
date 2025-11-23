@@ -178,12 +178,12 @@ export default class LlmShortcutPlugin extends Plugin {
     const shouldHandleSelectionOnly =
       metadata.frontmatter[SELECTION_MODE_TAG] === SELECTION_ONLY_VALUE;
 
-    const userPrompt = fileContent
+    const userPromptString = fileContent
       .slice(metadata.frontmatterPosition.end.offset)
       .trimStart();
 
     return {
-      userPromptString: userPrompt,
+      userPromptString,
       userPromptOptions: {
         shouldHandleSelectionOnly,
       },
@@ -370,7 +370,7 @@ export default class LlmShortcutPlugin extends Plugin {
     this.addCommand(command);
   }
 
-  async handleCustomPrompt(userPrompt: string, editor: Editor) {
+  async handleCustomPrompt(userPromptString: string, editor: Editor) {
     const startIdx = mapCursorPositionToIdx(
       editor.getValue(),
       editor.getCursor("from"),
@@ -381,7 +381,7 @@ export default class LlmShortcutPlugin extends Plugin {
     );
 
     await this.processLlmRequest({
-      userPromptString: userPrompt,
+      userPromptString,
       editor,
       selection: {
         startIdx,
