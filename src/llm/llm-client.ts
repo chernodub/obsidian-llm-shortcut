@@ -120,14 +120,14 @@ export class LLMClient {
   }
 
   private insertSelectionMacros({
-    fileContent: currentContent,
+    fileContent,
     selection,
   }: UserContentParams): string {
     return (
       USER_CONTENT_PREFIX +
-      (currentContent.slice(0, selection.startIdx) +
-        this.insertSelectionMacroses(currentContent, selection) +
-        currentContent.slice(selection.endIdx))
+      (fileContent.slice(0, selection.startIdx) +
+        this.insertSelectionMacroses(fileContent, selection) +
+        fileContent.slice(selection.endIdx))
     );
   }
 
