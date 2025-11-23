@@ -1,4 +1,5 @@
 import { OpenAI, ClientOptions as OpenAIOptions } from "openai";
+import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
 const SELECTION_START_MACROS = "$$_SELECTION_START_$$";
 const SELECTION_END_MACROS = "$$_SELECTION_END_$$";
@@ -53,17 +54,19 @@ Your response must always be exactly and only what should replace or be inserted
 const USER_PROMPT_PREFIX = `# USER PROMPT: \n\n`;
 const USER_CONTENT_PREFIX = `# USER CONTENT: \n\n`;
 
-type Selection = {
+export type LlmClientSelectionParams = {
   readonly startIdx: number;
   readonly endIdx: number;
 };
 
-type ResponseOptions = {
-  readonly systemPrompt: string;
-  readonly userPrompt: {
-    readonly currentContent: string;
-    readonly selection: Selection;
-  };
+type UserContentParameters = {
+  readonly currentContent: string;
+  readonly selection: LlmClientSelectionParams;
+};
+
+type GetLlmResponseParameters = {
+  readonly userPrompt: string;
+  readonly userContentParameters: UserContentParameters;
 };
 
 export class LLMClient {
@@ -80,26 +83,35 @@ export class LLMClient {
     });
   }
 
-  async *getResponse({ userPrompt, systemPrompt }: ResponseOptions) {
+  async *getResponse({
+    userContentParameters,
+    userPrompt,
+  }: GetLlmResponseParameters) {
+    const userContent = this.insertSelectionMacros(
+      userContentParameters.currentContent,
+      userContentParameters.selection,
+    );
+
+    const messages: ChatCompletionMessageParam[] = [
+      {
+        role: "system",
+        content: INTERNAL_SYSTEM_PROMPT,
+      },
+      {
+        role: "system",
+        content: USER_PROMPT_PREFIX + userPrompt,
+      },
+      {
+        role: "user",
+        content: userContent,
+      },
+    ];
+
+    console.log(messages);
+
     const response = await this.client.chat.completions.create({
       model: this.model,
-      messages: [
-        {
-          role: "system",
-          content: INTERNAL_SYSTEM_PROMPT,
-        },
-        {
-          role: "system",
-          content: USER_PROMPT_PREFIX + systemPrompt,
-        },
-        {
-          role: "user",
-          content: this.insertSelectionMacros(
-            userPrompt.currentContent,
-            userPrompt.selection,
-          ),
-        },
-      ],
+      messages,
       stream: true,
     });
 
@@ -112,7 +124,7 @@ export class LLMClient {
 
   private insertSelectionMacros(
     currentContent: string,
-    selection: Selection,
+    selection: LlmClientSelectionParams,
   ): string {
     return (
       USER_CONTENT_PREFIX +
@@ -124,7 +136,7 @@ export class LLMClient {
 
   private insertSelectionMacroses(
     currentContent: string,
-    selection: Selection,
+    selection: LlmClientSelectionParams,
   ) {
     if (selection.startIdx === selection.endIdx) {
       return CARET_MACROS;
