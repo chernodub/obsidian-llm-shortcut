@@ -64,9 +64,12 @@ type UserContentParams = {
   readonly selection: SelectionParams;
 };
 
-type ResponseParams = {
+export type LLMPromptMode = "selection" | "caret";
+
+type GetResponseParams = {
+  readonly llmPromptMode: LLMPromptMode;
   readonly userPromptString: string;
-  readonly userContentParameters: UserContentParams;
+  readonly userContentParams: UserContentParams;
 };
 
 export class LLMClient {
@@ -84,10 +87,10 @@ export class LLMClient {
   }
 
   async *getResponse({
-    userContentParameters,
+    userContentParams,
     userPromptString,
-  }: ResponseParams) {
-    const userContent = this.insertSelectionMacros(userContentParameters);
+  }: GetResponseParams) {
+    const userContent = this.insertSelectionMacros(userContentParams);
 
     const messages: ChatCompletionMessageParam[] = [
       {

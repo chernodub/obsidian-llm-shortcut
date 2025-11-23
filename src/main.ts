@@ -29,7 +29,7 @@ interface UserPromptOptions {
   readonly shouldHandleSelectionOnly?: boolean;
 }
 
-export interface UserPrompt {
+export interface UserPromptParams {
   readonly userPromptString: string;
   readonly userPromptOptions?: UserPromptOptions;
 }
@@ -165,7 +165,9 @@ export default class LlmShortcutPlugin extends Plugin {
     }
   }
 
-  private async parseUserPromptFromFile(file: TFile): Promise<UserPrompt> {
+  private async parseUserPromptFromFile(
+    file: TFile,
+  ): Promise<UserPromptParams> {
     const fileContent = await file.vault.read(file);
     // Danger! The cache could be stale (but we're listening to changes so this will be overriden next run)
     const metadata = this.app.metadataCache.getFileCache(file);
@@ -222,20 +224,10 @@ export default class LlmShortcutPlugin extends Plugin {
       throw new Error(`LLM Shortcut: Prompt file not found: ${promptFilePath}`);
     }
 
-    const { userPromptString, userPromptOptions } =
-      await this.parseUserPromptFromFile(file);
-
-    if (userPromptOptions?.shouldHandleSelectionOnly) {
-      if (startIdx === endIdx) {
-        showErrorNotification({
-          title: "This command requires text to be selected",
-        });
-        return;
-      }
-    }
+    const userPrompt = await this.parseUserPromptFromFile(file);
 
     await this.processLlmRequest({
-      userPromptString,
+      userPromptParams: userPrompt,
       editor,
       selection: {
         startIdx,
@@ -245,24 +237,36 @@ export default class LlmShortcutPlugin extends Plugin {
   }
 
   private async processLlmRequest({
-    userPromptString,
+    userPromptParams,
     editor,
     selection,
   }: {
-    readonly userPromptString: string;
+    readonly userPromptParams: UserPromptParams;
     readonly editor: Editor;
     readonly selection: SelectionParams;
-  }) {
+  }): Promise<void> {
     assertExists(this.llmClient, "LLM client is not initialized");
+
+    const { userPromptString, userPromptOptions } = userPromptParams;
+
+    const hasSelection = selection.startIdx === selection.endIdx;
+
+    if (userPromptOptions?.shouldHandleSelectionOnly && !hasSelection) {
+      showErrorNotification({
+        title: "This command requires text to be selected",
+      });
+      return;
+    }
 
     this.loaderStrategy.start();
     try {
       const responseStream = this.llmClient.getResponse({
-        userContentParameters: {
+        userContentParams: {
           fileContent: editor.getValue(),
           selection,
         },
         userPromptString,
+        llmPromptMode: hasSelection ? "caret" : "selection",
       });
 
       await this.updateEditorContentWithResponse(editor, responseStream);
@@ -381,7 +385,9 @@ export default class LlmShortcutPlugin extends Plugin {
     );
 
     await this.processLlmRequest({
-      userPromptString,
+      userPromptParams: {
+        userPromptString,
+      },
       editor,
       selection: {
         startIdx,
