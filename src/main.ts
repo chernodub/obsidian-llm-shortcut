@@ -224,10 +224,10 @@ export default class LlmShortcutPlugin extends Plugin {
       throw new Error(`LLM Shortcut: Prompt file not found: ${promptFilePath}`);
     }
 
-    const userPrompt = await this.parseUserPromptFromFile(file);
+    const userPromptParams = await this.parseUserPromptFromFile(file);
 
     await this.processLlmRequest({
-      userPromptParams: userPrompt,
+      userPromptParams,
       editor,
       selection: {
         startIdx,
