@@ -60,7 +60,7 @@ export type SelectionParams = {
 };
 
 type UserContentParams = {
-  readonly currentContent: string;
+  readonly fileContent: string;
   readonly selection: SelectionParams;
 };
 
@@ -120,7 +120,7 @@ export class LLMClient {
   }
 
   private insertSelectionMacros({
-    currentContent,
+    fileContent: currentContent,
     selection,
   }: UserContentParams): string {
     return (

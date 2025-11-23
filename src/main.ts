@@ -259,7 +259,7 @@ export default class LlmShortcutPlugin extends Plugin {
     try {
       const responseStream = this.llmClient.getResponse({
         userContentParameters: {
-          currentContent: editor.getValue(),
+          fileContent: editor.getValue(),
           selection,
         },
         userPromptString: userPromptString,
