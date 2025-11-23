@@ -65,7 +65,7 @@ type UserContentParameters = {
 };
 
 type GetLlmResponseParameters = {
-  readonly userPrompt: string;
+  readonly userPromptString: string;
   readonly userContentParameters: UserContentParameters;
 };
 
@@ -85,7 +85,7 @@ export class LLMClient {
 
   async *getResponse({
     userContentParameters,
-    userPrompt,
+    userPromptString,
   }: GetLlmResponseParameters) {
     const userContent = this.insertSelectionMacros(
       userContentParameters.currentContent,
@@ -99,7 +99,7 @@ export class LLMClient {
       },
       {
         role: "system",
-        content: USER_PROMPT_PREFIX + userPrompt,
+        content: USER_PROMPT_PREFIX + userPromptString,
       },
       {
         role: "user",

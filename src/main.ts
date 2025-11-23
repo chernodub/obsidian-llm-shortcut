@@ -262,7 +262,7 @@ export default class LlmShortcutPlugin extends Plugin {
           currentContent: editor.getValue(),
           selection,
         },
-        userPrompt: userPromptString,
+        userPromptString: userPromptString,
       });
 
       await this.updateEditorContentWithResponse(editor, responseStream);
