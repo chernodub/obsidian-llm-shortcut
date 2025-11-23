@@ -249,7 +249,7 @@ export default class LlmShortcutPlugin extends Plugin {
 
     const { userPromptString, userPromptOptions } = userPromptParams;
 
-    const hasSelection = selection.startIdx === selection.endIdx;
+    const hasSelection = selection.startIdx !== selection.endIdx;
 
     if (userPromptOptions?.shouldHandleSelectionOnly && !hasSelection) {
       showErrorNotification({
