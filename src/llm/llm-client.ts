@@ -81,8 +81,6 @@ function getInternalSystemPrompt({
 }: GetInternalSystemPromptParams): string {
   const hasSelection = selection.startIdx !== selection.endIdx;
 
-  console.log(hasSelection);
-
   return hasSelection
     ? INTERNAL_SYSTEM_PROMPT_SELECTION
     : INTERNAL_SYSTEM_PROMPT_CARET;
@@ -142,8 +140,6 @@ export class LLMClient {
         content: userContent,
       },
     ];
-
-    console.log(messages);
 
     const response = await this.client.chat.completions.create({
       model: this.model,
