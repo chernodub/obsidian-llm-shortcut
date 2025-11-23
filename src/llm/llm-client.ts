@@ -64,10 +64,7 @@ type UserContentParams = {
   readonly selection: SelectionParams;
 };
 
-export type LLMPromptMode = "selection" | "caret";
-
 type GetResponseParams = {
-  readonly llmPromptMode: LLMPromptMode;
   readonly userPromptString: string;
   readonly userContentParams: UserContentParams;
 };

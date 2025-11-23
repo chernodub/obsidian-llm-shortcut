@@ -266,7 +266,6 @@ export default class LlmShortcutPlugin extends Plugin {
           selection,
         },
         userPromptString,
-        llmPromptMode: hasSelection ? "caret" : "selection",
       });
 
       await this.updateEditorContentWithResponse(editor, responseStream);
