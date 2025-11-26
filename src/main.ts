@@ -242,6 +242,11 @@ export default class LlmShortcutPlugin extends Plugin {
 
     const userPromptParams = await this.parseUserPromptFromFile(file);
 
+    console.log({
+      startIdx,
+      endIdx,
+    });
+
     await this.processLlmRequest({
       userPromptParams,
       editor,

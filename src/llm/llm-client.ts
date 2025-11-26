@@ -1,11 +1,7 @@
 import { OpenAI, ClientOptions as OpenAIOptions } from "openai";
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import { UserPromptOptions } from "../main";
-import {
-  CARET_MACROS,
-  SELECTION_END_MACROS,
-  SELECTION_START_MACROS,
-} from "./MACROS";
+import { prepareUserContent } from "../utils/prepareUserContent/prepareUserContent";
 import { getInternalSystemPrompt } from "./getInternalSystemPrompt";
 
 const USER_PROMPT_PREFIX = `# USER PROMPT: \n\n`;
@@ -47,10 +43,10 @@ export class LLMClient {
     userPromptOptions,
   }: GetResponseParams) {
     const { selection } = userContentParams;
-    const userContent = this.prepareUserContent(
+    const userContent = prepareUserContent({
       userContentParams,
       userPromptOptions,
-    );
+    });
 
     console.log(userContent);
 
@@ -69,7 +65,7 @@ export class LLMClient {
       },
       {
         role: "user",
-        content: userContentString,
+        content: USER_CONTENT_PREFIX + userContentString,
       },
     ];
 
@@ -84,58 +80,5 @@ export class LLMClient {
         yield chunk.choices[0]?.delta.content;
       }
     }
-  }
-
-  private prepareUserContent(
-    { fileContent, selection }: UserContentParams,
-    {
-      contextSizeBeforeSelection,
-      contextSizeAfterSelection,
-    }: UserPromptOptions,
-  ): {
-    ignoredSizeBeforeContext: number;
-    ignoredSizeAfterContext: number;
-    userContentString: string;
-  } {
-    let ignoredSizeBeforeContext = 0;
-    if (contextSizeBeforeSelection !== undefined) {
-      if (selection.startIdx > contextSizeBeforeSelection) {
-        ignoredSizeBeforeContext =
-          selection.startIdx - contextSizeBeforeSelection;
-      }
-    }
-
-    let ignoredSizeAfterContext = 0;
-    if (contextSizeAfterSelection !== undefined) {
-      const contentLengthAfterSelection = fileContent.length - selection.endIdx;
-      if (contentLengthAfterSelection > contextSizeAfterSelection) {
-        ignoredSizeAfterContext =
-          contentLengthAfterSelection - contextSizeAfterSelection;
-      }
-    }
-
-    const contentBeforeSelection = fileContent.slice(
-      ignoredSizeBeforeContext,
-      selection.startIdx,
-    );
-    const contentAfterSelection = fileContent.slice(
-      selection.endIdx,
-      fileContent.length - ignoredSizeAfterContext,
-    );
-
-    const contentWithMacros =
-      selection.startIdx === selection.endIdx
-        ? CARET_MACROS
-        : SELECTION_START_MACROS +
-          fileContent.slice(selection.startIdx, selection.endIdx) +
-          SELECTION_END_MACROS;
-
-    return {
-      userContentString:
-        USER_CONTENT_PREFIX +
-        (contentBeforeSelection + contentWithMacros + contentAfterSelection),
-      ignoredSizeBeforeContext,
-      ignoredSizeAfterContext,
-    };
   }
 }
