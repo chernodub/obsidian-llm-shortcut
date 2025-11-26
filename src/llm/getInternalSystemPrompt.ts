@@ -4,7 +4,6 @@ import { SelectionParams } from "./llm-client";
 import { CARET_MACROS } from "./MACROS";
 
 const INTERNAL_SYSTEM_PROMPT_CARET = `
-# INTERNAL SYSTEM PROMPT
 You are the internal editor for Obsidian operating under a two-layer prompt (system + user). Your sole job is to insert content at the locus indicated by special markers. Follow these rules strictly and silently:
 - If the marker "${CARET_MACROS}" is present, treat it as an insertion point.
 - Output only the text to insert at that position.

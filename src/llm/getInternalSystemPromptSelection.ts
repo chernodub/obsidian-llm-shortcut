@@ -5,11 +5,19 @@ import {
 } from "./llm-client";
 import { SELECTION_END_MACROS, SELECTION_START_MACROS } from "./MACROS";
 
-const INTERNAL_SYSTEM_PROMPT_SELECTION = `
-# INTERNAL SYSTEM PROMPT
+export function getInternalSystemPromptSelection({
+  ignoredSizeAfterContext,
+  ignoredSizeBeforeContext,
+}: UserContent): string {
+  let contextExplanation = "the entire content of the Obsidian note";
 
+  if (ignoredSizeAfterContext || ignoredSizeBeforeContext) {
+    contextExplanation = `the part of the Obsidian note content. The whole note contains ${ignoredSizeBeforeContext} characters before and ${ignoredSizeAfterContext} after the ${USER_CONTENT_SECTION_TITLE} section`;
+  }
+
+  return `
 You are the internal editor for Obsidian app operating under a two-layer prompt (system + user).
-The text in ${USER_CONTENT_SECTION_TITLE} section is the entire content of the Obsidian note.
+The text in ${USER_CONTENT_SECTION_TITLE} section is ${contextExplanation}.
 The text in ${USER_CONTENT_SECTION_TITLE} section between macro "${SELECTION_START_MACROS}" and macro "${SELECTION_END_MACROS}" is the selected text.
 The text in ${USER_PROMPT_SECTION_TITLE} section is the user's instruction to apply to the selected text.
 Your sole job is to create output that will satisfy the ${USER_PROMPT_SECTION_TITLE} and replace the selected text in ${USER_CONTENT_SECTION_TITLE}.
@@ -39,9 +47,4 @@ SAFETY AND PRIVACY
 
 Your response must always be exactly and only what should replace the selected text in ${USER_CONTENT_SECTION_TITLE}
 `;
-
-export function getInternalSystemPromptSelection(
-  userContent: UserContent,
-): string {
-  return INTERNAL_SYSTEM_PROMPT_SELECTION;
 }

@@ -4,6 +4,7 @@ import { UserPromptOptions } from "../main";
 import { prepareUserContent } from "../utils/prepareUserContent/prepareUserContent";
 import { getInternalSystemPrompt } from "./getInternalSystemPrompt";
 
+export const INTERNAL_SYSTEM_PROMPT_SECTION_TITLE = "INTERNAL SYSTEM PROMPT";
 export const USER_PROMPT_SECTION_TITLE = "USER PROMPT";
 export const USER_CONTENT_SECTION_TITLE = "USER CONTENT";
 
@@ -55,22 +56,25 @@ export class LLMClient {
       userContent,
     });
 
-    console.log("internalSystemPrompt", internalSystemPrompt);
-    console.log("userPromptString", userPromptString);
-    console.log("userContentString", userContentString);
+    const internalSystemPromptSection =
+      `# ${INTERNAL_SYSTEM_PROMPT_SECTION_TITLE}:\n\n` + internalSystemPrompt;
+    const userPromptSection =
+      `# ${USER_PROMPT_SECTION_TITLE}:\n\n` + userPromptString;
+    const userContentSection =
+      `# ${USER_CONTENT_SECTION_TITLE}:\n\n` + userContentString;
 
     const messages: ChatCompletionMessageParam[] = [
       {
         role: "system",
-        content: internalSystemPrompt,
+        content: internalSystemPromptSection,
       },
       {
         role: "system",
-        content: `# ${USER_PROMPT_SECTION_TITLE}: \n\n` + userPromptString,
+        content: userPromptSection,
       },
       {
         role: "user",
-        content: `# ${USER_CONTENT_SECTION_TITLE}: \n\n` + userContentString,
+        content: userContentSection,
       },
     ];
 
