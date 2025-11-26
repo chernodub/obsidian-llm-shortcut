@@ -4,8 +4,8 @@ import { UserPromptOptions } from "../main";
 import { prepareUserContent } from "../utils/prepareUserContent/prepareUserContent";
 import { getInternalSystemPrompt } from "./getInternalSystemPrompt";
 
-const USER_PROMPT_PREFIX = `# USER PROMPT: \n\n`;
-const USER_CONTENT_PREFIX = `# USER CONTENT: \n\n`;
+export const USER_PROMPT_SECTION_TITLE = "USER PROMPT";
+export const USER_CONTENT_SECTION_TITLE = "USER CONTENT";
 
 export type SelectionParams = {
   readonly startIdx: number;
@@ -48,11 +48,16 @@ export class LLMClient {
       userPromptOptions,
     });
 
-    console.log(userContent);
-
     const { userContentString } = userContent;
 
-    const internalSystemPrompt = getInternalSystemPrompt({ selection });
+    const internalSystemPrompt = getInternalSystemPrompt({
+      selection,
+      userContent,
+    });
+
+    console.log("internalSystemPrompt", internalSystemPrompt);
+    console.log("userPromptString", userPromptString);
+    console.log("userContentString", userContentString);
 
     const messages: ChatCompletionMessageParam[] = [
       {
@@ -61,11 +66,11 @@ export class LLMClient {
       },
       {
         role: "system",
-        content: USER_PROMPT_PREFIX + userPromptString,
+        content: `# ${USER_PROMPT_SECTION_TITLE}: \n\n` + userPromptString,
       },
       {
         role: "user",
-        content: USER_CONTENT_PREFIX + userContentString,
+        content: `# ${USER_CONTENT_SECTION_TITLE}: \n\n` + userContentString,
       },
     ];
 

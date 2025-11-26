@@ -6,18 +6,19 @@ import {
 } from "../../llm/MACROS";
 import { UserPromptOptions } from "../../main";
 
+export type UserContent = {
+  ignoredSizeBeforeContext: number;
+  ignoredSizeAfterContext: number;
+  userContentString: string;
+};
+
 export function prepareUserContent({
   userContentParams: { fileContent, selection },
   userPromptOptions: { contextSizeBeforeSelection, contextSizeAfterSelection },
 }: {
   userContentParams: UserContentParams;
   userPromptOptions: UserPromptOptions;
-}): {
-  ignoredSizeBeforeContext: number;
-  ignoredSizeAfterContext: number;
-  userContentString: string;
-} {
-  console.log({ selection });
+}): UserContent {
   let ignoredSizeBeforeContext = 0;
   if (contextSizeBeforeSelection !== undefined) {
     if (selection.startIdx > contextSizeBeforeSelection) {
