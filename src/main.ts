@@ -4,6 +4,7 @@ import {
   Editor,
   EditorPosition,
   EventRef,
+  FrontMatterCache,
   Plugin,
   PluginManifest,
   TAbstractFile,
@@ -22,16 +23,90 @@ import { PLUGIN_NAME } from "./utils/constants";
 import { mapCursorPositionToIdx } from "./utils/obsidian/map-position-to-idx";
 import { obsidianFetchAdapter } from "./utils/obsidian/obsidian-fetch-adapter";
 
-const SELECTION_MODE_TAG = "llm-shortcut-selection-mode";
-const SELECTION_ONLY_VALUE = "selection-only";
+const SELECTION_MODE_PROP_NAME = "llm-shortcut-selection-mode";
+const SELECTION_ONLY_PROP_VALUE = "selection-only";
+
+const CONTEXT_SIZE_BEFORE_SELECTION_PROP_NAME =
+  "llm-shortcut-context-size-before-selection";
+const CONTEXT_SIZE_AFTER_SELECTION_PROP_NAME =
+  "llm-shortcut-context-size-after-selection";
+
+function parseNumericFileProperty(
+  fileProperties: FrontMatterCache,
+  propertyName: string,
+): number | undefined {
+  const value = fileProperties[propertyName];
+
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (typeof value !== "string") {
+    throw new Error(
+      `Invalid prompt file property=[${propertyName}] unknown value type [${value}]`,
+    );
+  }
+
+  const int = parseInt(value, 10);
+  if (int.toString(10) !== value) {
+    throw new Error(
+      `Invalid prompt file property=[${propertyName}] value should be an integer, but got [${value}]`,
+    );
+  }
+
+  if (int < 0) {
+    throw new Error(
+      `Invalid prompt file property=[${propertyName}] value should be positive, but got [${value}]`,
+    );
+  }
+
+  return int;
+}
+
+function parseUserPromptOptionsFromFileProperties(
+  fileProperties: FrontMatterCache,
+): UserPromptOptions {
+  let shouldHandleSelectionOnly: boolean;
+  const shouldHandleSelectionOnlyValue =
+    fileProperties[SELECTION_MODE_PROP_NAME];
+  if (shouldHandleSelectionOnlyValue === undefined) {
+    shouldHandleSelectionOnly = false;
+  } else if (shouldHandleSelectionOnlyValue === SELECTION_ONLY_PROP_VALUE) {
+    shouldHandleSelectionOnly = true;
+  } else {
+    throw new Error(
+      `Invalid prompt file property=[${SELECTION_MODE_PROP_NAME}] value should be [${SELECTION_ONLY_PROP_VALUE}], but got [${shouldHandleSelectionOnlyValue}]`,
+    );
+  }
+
+  return {
+    shouldHandleSelectionOnly,
+    contextSizeBeforeSelection: parseNumericFileProperty(
+      fileProperties,
+      CONTEXT_SIZE_BEFORE_SELECTION_PROP_NAME,
+    ),
+    contextSizeAfterSelection: parseNumericFileProperty(
+      fileProperties,
+      CONTEXT_SIZE_AFTER_SELECTION_PROP_NAME,
+    ),
+  };
+}
+
+const DEFAULT_USER_PROMPT_OPTIONS: UserPromptOptions = {
+  shouldHandleSelectionOnly: false,
+  contextSizeBeforeSelection: undefined,
+  contextSizeAfterSelection: undefined,
+};
 
 interface UserPromptOptions {
-  readonly shouldHandleSelectionOnly?: boolean;
+  readonly shouldHandleSelectionOnly: boolean;
+  readonly contextSizeBeforeSelection: number | undefined;
+  readonly contextSizeAfterSelection: number | undefined;
 }
 
 export interface UserPromptParams {
   readonly userPromptString: string;
-  readonly userPromptOptions?: UserPromptOptions;
+  readonly userPromptOptions: UserPromptOptions;
 }
 
 interface PluginSettings {
@@ -175,20 +250,25 @@ export default class LlmShortcutPlugin extends Plugin {
     // Use Obsidian's parsed frontmatter if available
     if (!metadata?.frontmatter || !metadata.frontmatterPosition) {
       logger.debug(`LLM Shortcut: No frontmatter found for file: ${file.path}`);
-      return { userPromptString: fileContent };
+      return {
+        userPromptString: fileContent,
+        userPromptOptions: DEFAULT_USER_PROMPT_OPTIONS,
+      };
     }
-    const shouldHandleSelectionOnly =
-      metadata.frontmatter[SELECTION_MODE_TAG] === SELECTION_ONLY_VALUE;
 
     const userPromptString = fileContent
       .slice(metadata.frontmatterPosition.end.offset)
       .trimStart();
 
+    const userPromptOptions = parseUserPromptOptionsFromFileProperties(
+      metadata.frontmatter,
+    );
+
+    console.log(userPromptOptions);
+
     return {
       userPromptString,
-      userPromptOptions: {
-        shouldHandleSelectionOnly,
-      },
+      userPromptOptions,
     };
   }
 
@@ -202,7 +282,18 @@ export default class LlmShortcutPlugin extends Plugin {
     const command: Command = {
       id: promptFilePath,
       name,
-      editorCallback: this.handleRespond.bind(this, promptFilePath),
+      editorCallback: async (editor: Editor) => {
+        try {
+          await this.handleRespond(promptFilePath, editor);
+        } catch (error) {
+          const title = `Error while executing command based on file: ${promptFilePath}`;
+          showErrorNotification({
+            title,
+            message: error instanceof Error ? error.message : "Unknown error",
+          });
+          logger.error(`LLM Shortcut: ${title}`, error);
+        }
+      },
     };
     this.commands.push(command);
     this.addCommand(command);
@@ -386,6 +477,7 @@ export default class LlmShortcutPlugin extends Plugin {
     await this.processLlmRequest({
       userPromptParams: {
         userPromptString,
+        userPromptOptions: DEFAULT_USER_PROMPT_OPTIONS,
       },
       editor,
       selection: {
