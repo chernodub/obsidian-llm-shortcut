@@ -1,5 +1,6 @@
 import { OpenAI, ClientOptions as OpenAIOptions } from "openai";
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
+import { UserPromptOptions } from "../main";
 import {
   CARET_MACROS,
   SELECTION_END_MACROS,
@@ -23,6 +24,7 @@ export type UserContentParams = {
 type GetResponseParams = {
   readonly userPromptString: string;
   readonly userContentParams: UserContentParams;
+  readonly userPromptOptions: UserPromptOptions;
 };
 
 export class LLMClient {
@@ -42,10 +44,19 @@ export class LLMClient {
   async *getResponse({
     userContentParams,
     userPromptString,
+    userPromptOptions,
   }: GetResponseParams) {
-    const userContent = this.insertSelectionMacros(userContentParams);
+    const { selection } = userContentParams;
+    const userContent = this.prepareUserContent(
+      userContentParams,
+      userPromptOptions,
+    );
 
-    const internalSystemPrompt = getInternalSystemPrompt({ userContentParams });
+    console.log(userContent);
+
+    const { userContentString } = userContent;
+
+    const internalSystemPrompt = getInternalSystemPrompt({ selection });
 
     const messages: ChatCompletionMessageParam[] = [
       {
@@ -58,7 +69,7 @@ export class LLMClient {
       },
       {
         role: "user",
-        content: userContent,
+        content: userContentString,
       },
     ];
 
@@ -75,30 +86,56 @@ export class LLMClient {
     }
   }
 
-  private insertSelectionMacros({
-    fileContent,
-    selection,
-  }: UserContentParams): string {
-    return (
-      USER_CONTENT_PREFIX +
-      (fileContent.slice(0, selection.startIdx) +
-        this.insertSelectionMacroses(fileContent, selection) +
-        fileContent.slice(selection.endIdx))
-    );
-  }
-
-  private insertSelectionMacroses(
-    currentContent: string,
-    selection: SelectionParams,
-  ) {
-    if (selection.startIdx === selection.endIdx) {
-      return CARET_MACROS;
+  private prepareUserContent(
+    { fileContent, selection }: UserContentParams,
+    {
+      contextSizeBeforeSelection,
+      contextSizeAfterSelection,
+    }: UserPromptOptions,
+  ): {
+    ignoredSizeBeforeContext: number;
+    ignoredSizeAfterContext: number;
+    userContentString: string;
+  } {
+    let ignoredSizeBeforeContext = 0;
+    if (contextSizeBeforeSelection !== undefined) {
+      if (selection.startIdx > contextSizeBeforeSelection) {
+        ignoredSizeBeforeContext =
+          selection.startIdx - contextSizeBeforeSelection;
+      }
     }
 
-    return (
-      SELECTION_START_MACROS +
-      currentContent.slice(selection.startIdx, selection.endIdx) +
-      SELECTION_END_MACROS
+    let ignoredSizeAfterContext = 0;
+    if (contextSizeAfterSelection !== undefined) {
+      const contentLengthAfterSelection = fileContent.length - selection.endIdx;
+      if (contentLengthAfterSelection > contextSizeAfterSelection) {
+        ignoredSizeAfterContext =
+          contentLengthAfterSelection - contextSizeAfterSelection;
+      }
+    }
+
+    const contentBeforeSelection = fileContent.slice(
+      ignoredSizeBeforeContext,
+      selection.startIdx,
     );
+    const contentAfterSelection = fileContent.slice(
+      selection.endIdx,
+      fileContent.length - ignoredSizeAfterContext,
+    );
+
+    const contentWithMacros =
+      selection.startIdx === selection.endIdx
+        ? CARET_MACROS
+        : SELECTION_START_MACROS +
+          fileContent.slice(selection.startIdx, selection.endIdx) +
+          SELECTION_END_MACROS;
+
+    return {
+      userContentString:
+        USER_CONTENT_PREFIX +
+        (contentBeforeSelection + contentWithMacros + contentAfterSelection),
+      ignoredSizeBeforeContext,
+      ignoredSizeAfterContext,
+    };
   }
 }

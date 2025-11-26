@@ -1,4 +1,4 @@
-import { UserContentParams } from "./llm-client";
+import { SelectionParams } from "./llm-client";
 import {
   CARET_MACROS,
   SELECTION_END_MACROS,
@@ -72,11 +72,11 @@ Your response must always be exactly and only what should replace at the indicat
 `;
 
 export type GetInternalSystemPromptParams = {
-  userContentParams: UserContentParams;
+  readonly selection: SelectionParams;
 };
 
 export function getInternalSystemPrompt({
-  userContentParams: { selection },
+  selection,
 }: GetInternalSystemPromptParams): string {
   const hasSelection = selection.startIdx !== selection.endIdx;
 
