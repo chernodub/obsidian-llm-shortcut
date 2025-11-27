@@ -43,14 +43,13 @@ export class LLMClient {
     userPromptString,
     userPromptOptions,
   }: GetResponseParams) {
-    const { selection } = userContentParams;
     const { userContentString } = prepareUserContent({
       userContentParams,
       userPromptOptions,
     });
 
     const internalSystemPrompt = getInternalSystemPrompt({
-      selection,
+      userContentParams,
     });
 
     const internalSystemPromptSection =
