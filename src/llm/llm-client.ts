@@ -60,10 +60,6 @@ export class LLMClient {
     const userContentSection =
       `# ${USER_CONTENT_SECTION_TITLE}:\n\n` + userContentString;
 
-    console.log(internalSystemPromptSection);
-    console.log(userPromptSection);
-    console.log(userContentSection);
-
     const messages: ChatCompletionMessageParam[] = [
       {
         role: "system",
