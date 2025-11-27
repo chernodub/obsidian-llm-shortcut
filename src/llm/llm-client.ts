@@ -44,16 +44,13 @@ export class LLMClient {
     userPromptOptions,
   }: GetResponseParams) {
     const { selection } = userContentParams;
-    const userContent = prepareUserContent({
+    const { userContentString } = prepareUserContent({
       userContentParams,
       userPromptOptions,
     });
 
-    const { userContentString } = userContent;
-
     const internalSystemPrompt = getInternalSystemPrompt({
       selection,
-      userContent,
     });
 
     const internalSystemPromptSection =
@@ -62,6 +59,10 @@ export class LLMClient {
       `# ${USER_PROMPT_SECTION_TITLE}:\n\n` + userPromptString;
     const userContentSection =
       `# ${USER_CONTENT_SECTION_TITLE}:\n\n` + userContentString;
+
+    console.log(internalSystemPromptSection);
+    console.log(userPromptSection);
+    console.log(userContentSection);
 
     const messages: ChatCompletionMessageParam[] = [
       {
