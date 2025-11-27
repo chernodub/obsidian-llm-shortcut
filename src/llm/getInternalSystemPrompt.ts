@@ -40,7 +40,6 @@ Your response must always be exactly and only what should be inserted at the ind
 `;
 
 const INTERNAL_SYSTEM_PROMPT_SELECTION = `
-# INTERNAL SYSTEM PROMPT
 You are the internal editor for Obsidian operating under a two-layer prompt (system + user). Your sole job is to transform content at the locus indicated by special markers. Follow these rules strictly and silently:
 - The exact span between "${SELECTION_START_MACROS}" and "${SELECTION_END_MACROS}" is the only text to transform.
 - Replace that span with your output.
