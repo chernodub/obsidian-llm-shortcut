@@ -14,7 +14,7 @@ import { mapLlmErrorToReadable } from "./llm/error-handler";
 import { LLMClient } from "./llm/llm-client";
 import { logger } from "./logger";
 import { parseUserPromptOptionsFromFileProperties } from "./prompt/parse-user-prompt-options-from-file-properties/parse-user-prompt-options-from-file-properties";
-import { SelectionParams } from "./prompt/user-content-params";
+import { UserContentSelectionParams } from "./prompt/user-content-params";
 import { DEFAULT_USER_PROMPT_OPTIONS } from "./prompt/user-prompt-options";
 import { UserPromptParams } from "./prompt/user-prompt-params";
 import { SettingTab } from "./setting-tab";
@@ -249,7 +249,7 @@ export default class LlmShortcutPlugin extends Plugin {
   }: {
     readonly userPromptParams: UserPromptParams;
     readonly editor: Editor;
-    readonly selection: SelectionParams;
+    readonly selection: UserContentSelectionParams;
   }): Promise<void> {
     assertExists(this.llmClient, "LLM client is not initialized");
 
