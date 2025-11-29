@@ -2,9 +2,9 @@ import {
   CARET_MACROS,
   SELECTION_END_MACROS,
   SELECTION_START_MACROS,
-} from "../const";
-import { UserContentParams } from "../llm-client";
-import { UserPromptOptions } from "../user-prompt/user-prompt-options";
+} from "../../llm/const";
+import { UserContentParams } from "../user-content-params";
+import { UserPromptOptions } from "../user-prompt-options";
 
 export type UserContent = {
   ignoredSizeBeforeContext: number;

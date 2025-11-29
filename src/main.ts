@@ -11,11 +11,12 @@ import {
   TFolder,
 } from "obsidian";
 import { mapLlmErrorToReadable } from "./llm/error-handler";
-import { LLMClient, SelectionParams } from "./llm/llm-client";
-import { parseUserPromptOptionsFromFileProperties } from "./llm/user-prompt/parse-user-prompt-options-from-file-properties/parse-user-prompt-options-from-file-properties";
-import { DEFAULT_USER_PROMPT_OPTIONS } from "./llm/user-prompt/user-prompt-options";
-import { UserPromptParams } from "./llm/user-prompt/user-prompt-params";
+import { LLMClient } from "./llm/llm-client";
 import { logger } from "./logger";
+import { parseUserPromptOptionsFromFileProperties } from "./prompt/parse-user-prompt-options-from-file-properties/parse-user-prompt-options-from-file-properties";
+import { SelectionParams } from "./prompt/user-content-params";
+import { DEFAULT_USER_PROMPT_OPTIONS } from "./prompt/user-prompt-options";
+import { UserPromptParams } from "./prompt/user-prompt-params";
 import { SettingTab } from "./setting-tab";
 import { LoaderStrategy, LoaderStrategyFactory } from "./ui/loader-strategy";
 import { CustomPromptModal } from "./ui/prompt-modal/prompt-modal";

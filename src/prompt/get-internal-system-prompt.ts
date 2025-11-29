@@ -2,8 +2,8 @@ import {
   CARET_MACROS,
   SELECTION_END_MACROS,
   SELECTION_START_MACROS,
-} from "./const";
-import { UserContentParams } from "./llm-client";
+} from "../llm/const";
+import { UserContentParams } from "./user-content-params";
 
 const INTERNAL_SYSTEM_PROMPT_CARET = `
 You are the internal editor for Obsidian operating under a two-layer prompt (system + user). Your sole job is to insert content at the locus indicated by special markers. Follow these rules strictly and silently:

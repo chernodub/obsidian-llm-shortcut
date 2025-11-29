@@ -1,18 +1,9 @@
 import { OpenAI, ClientOptions as OpenAIOptions } from "openai";
+import { getInternalSystemPrompt } from "../prompt/get-internal-system-prompt";
+import { prepareUserContent } from "../prompt/prepare-user-content/prepare-user-content";
+import { UserContentParams } from "../prompt/user-content-params";
+import { UserPromptOptions } from "../prompt/user-prompt-options";
 import { createOpenAiRequestMessages } from "./create-open-ai-request-messages";
-import { getInternalSystemPrompt } from "./get-internal-system-prompt";
-import { prepareUserContent } from "./prepare-user-content/prepare-user-content";
-import { UserPromptOptions } from "./user-prompt/user-prompt-options";
-
-export type SelectionParams = {
-  readonly startIdx: number;
-  readonly endIdx: number;
-};
-
-export type UserContentParams = {
-  readonly fileContent: string;
-  readonly selection: SelectionParams;
-};
 
 type GetResponseParams = {
   readonly userPromptString: string;
