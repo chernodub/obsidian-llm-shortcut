@@ -11,8 +11,12 @@ import {
   TFolder,
 } from "obsidian";
 import { mapLlmErrorToReadable } from "./llm/error-handler";
-import { LLMClient, SelectionParams } from "./llm/llm-client";
+import { LLMClient } from "./llm/llm-client";
 import { logger } from "./logger";
+import { parseUserPromptOptionsFromFileProperties } from "./prompt/parse-user-prompt-options-from-file-properties/parse-user-prompt-options-from-file-properties";
+import { UserContentSelectionParams } from "./prompt/user-content-params";
+import { DEFAULT_USER_PROMPT_OPTIONS } from "./prompt/user-prompt-options";
+import { UserPromptParams } from "./prompt/user-prompt-params";
 import { SettingTab } from "./setting-tab";
 import { LoaderStrategy, LoaderStrategyFactory } from "./ui/loader-strategy";
 import { CustomPromptModal } from "./ui/prompt-modal/prompt-modal";
@@ -21,18 +25,6 @@ import { assertExists } from "./utils/assertions/assert-exists";
 import { PLUGIN_NAME } from "./utils/constants";
 import { mapCursorPositionToIdx } from "./utils/obsidian/map-position-to-idx";
 import { obsidianFetchAdapter } from "./utils/obsidian/obsidian-fetch-adapter";
-
-const SELECTION_MODE_TAG = "llm-shortcut-selection-mode";
-const SELECTION_ONLY_VALUE = "selection-only";
-
-interface UserPromptOptions {
-  readonly shouldHandleSelectionOnly?: boolean;
-}
-
-export interface UserPromptParams {
-  readonly userPromptString: string;
-  readonly userPromptOptions?: UserPromptOptions;
-}
 
 interface PluginSettings {
   apiKey: string;
@@ -175,20 +167,23 @@ export default class LlmShortcutPlugin extends Plugin {
     // Use Obsidian's parsed frontmatter if available
     if (!metadata?.frontmatter || !metadata.frontmatterPosition) {
       logger.debug(`LLM Shortcut: No frontmatter found for file: ${file.path}`);
-      return { userPromptString: fileContent };
+      return {
+        userPromptString: fileContent,
+        userPromptOptions: DEFAULT_USER_PROMPT_OPTIONS,
+      };
     }
-    const shouldHandleSelectionOnly =
-      metadata.frontmatter[SELECTION_MODE_TAG] === SELECTION_ONLY_VALUE;
 
     const userPromptString = fileContent
       .slice(metadata.frontmatterPosition.end.offset)
       .trimStart();
 
+    const userPromptOptions = parseUserPromptOptionsFromFileProperties(
+      metadata.frontmatter,
+    );
+
     return {
       userPromptString,
-      userPromptOptions: {
-        shouldHandleSelectionOnly,
-      },
+      userPromptOptions,
     };
   }
 
@@ -202,7 +197,18 @@ export default class LlmShortcutPlugin extends Plugin {
     const command: Command = {
       id: promptFilePath,
       name,
-      editorCallback: this.handleRespond.bind(this, promptFilePath),
+      editorCallback: async (editor: Editor) => {
+        try {
+          await this.handleRespond(promptFilePath, editor);
+        } catch (error) {
+          const title = `Error while executing command based on file: ${promptFilePath}`;
+          showErrorNotification({
+            title,
+            message: error instanceof Error ? error.message : "Unknown error",
+          });
+          logger.error(`LLM Shortcut: ${title}`, error);
+        }
+      },
     };
     this.commands.push(command);
     this.addCommand(command);
@@ -243,7 +249,7 @@ export default class LlmShortcutPlugin extends Plugin {
   }: {
     readonly userPromptParams: UserPromptParams;
     readonly editor: Editor;
-    readonly selection: SelectionParams;
+    readonly selection: UserContentSelectionParams;
   }): Promise<void> {
     assertExists(this.llmClient, "LLM client is not initialized");
 
@@ -251,7 +257,7 @@ export default class LlmShortcutPlugin extends Plugin {
 
     const hasSelection = selection.startIdx !== selection.endIdx;
 
-    if (userPromptOptions?.shouldHandleSelectionOnly && !hasSelection) {
+    if (userPromptOptions.shouldHandleSelectionOnly && !hasSelection) {
       showErrorNotification({
         title: "This command requires text to be selected",
       });
@@ -266,6 +272,7 @@ export default class LlmShortcutPlugin extends Plugin {
           selection,
         },
         userPromptString,
+        userPromptOptions,
       });
 
       await this.updateEditorContentWithResponse(editor, responseStream);
@@ -386,6 +393,7 @@ export default class LlmShortcutPlugin extends Plugin {
     await this.processLlmRequest({
       userPromptParams: {
         userPromptString,
+        userPromptOptions: DEFAULT_USER_PROMPT_OPTIONS,
       },
       editor,
       selection: {

@@ -1,12 +1,11 @@
-import { UserContentParams } from "./llm-client";
 import {
   CARET_MACROS,
   SELECTION_END_MACROS,
   SELECTION_START_MACROS,
-} from "./MACROS";
+} from "./constants";
+import { UserContentParams } from "./user-content-params";
 
 const INTERNAL_SYSTEM_PROMPT_CARET = `
-# INTERNAL SYSTEM PROMPT
 You are the internal editor for Obsidian operating under a two-layer prompt (system + user). Your sole job is to insert content at the locus indicated by special markers. Follow these rules strictly and silently:
 - If the marker "${CARET_MACROS}" is present, treat it as an insertion point.
 - Output only the text to insert at that position.
@@ -41,7 +40,6 @@ Your response must always be exactly and only what should be inserted at the ind
 `;
 
 const INTERNAL_SYSTEM_PROMPT_SELECTION = `
-# INTERNAL SYSTEM PROMPT
 You are the internal editor for Obsidian operating under a two-layer prompt (system + user). Your sole job is to transform content at the locus indicated by special markers. Follow these rules strictly and silently:
 - The exact span between "${SELECTION_START_MACROS}" and "${SELECTION_END_MACROS}" is the only text to transform.
 - Replace that span with your output.
@@ -72,7 +70,7 @@ Your response must always be exactly and only what should replace at the indicat
 `;
 
 export type GetInternalSystemPromptParams = {
-  userContentParams: UserContentParams;
+  readonly userContentParams: UserContentParams;
 };
 
 export function getInternalSystemPrompt({

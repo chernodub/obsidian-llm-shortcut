@@ -5,7 +5,7 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  lint-and-build:
+  pass-checks-and-build:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,8 +21,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Check types
+        run: npm run check
+
       - name: Lint
         run: npm run lint
+
+      - name: Test
+        run: npm run test
 
       - name: Build
         run: npm run build
