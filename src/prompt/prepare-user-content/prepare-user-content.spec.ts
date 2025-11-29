@@ -18,8 +18,8 @@ describe("prepareUserContent", () => {
       };
       const userPromptOptions: UserPromptOptions = {
         shouldHandleSelectionOnly: undefined,
-        contextSizeBeforeSelection: undefined,
-        contextSizeAfterSelection: undefined,
+        contextSizeBefore: undefined,
+        contextSizeAfter: undefined,
       };
 
       const result = prepareUserContent({
@@ -46,8 +46,8 @@ describe("prepareUserContent", () => {
       };
       const userPromptOptions: UserPromptOptions = {
         shouldHandleSelectionOnly: undefined,
-        contextSizeBeforeSelection: undefined,
-        contextSizeAfterSelection: undefined,
+        contextSizeBefore: undefined,
+        contextSizeAfter: undefined,
       };
 
       const result = prepareUserContent({
@@ -68,8 +68,8 @@ describe("prepareUserContent", () => {
       };
       const userPromptOptions: UserPromptOptions = {
         shouldHandleSelectionOnly: undefined,
-        contextSizeBeforeSelection: undefined,
-        contextSizeAfterSelection: undefined,
+        contextSizeBefore: undefined,
+        contextSizeAfter: undefined,
       };
 
       const result = prepareUserContent({
@@ -90,8 +90,8 @@ describe("prepareUserContent", () => {
       };
       const userPromptOptions: UserPromptOptions = {
         shouldHandleSelectionOnly: undefined,
-        contextSizeBeforeSelection: undefined,
-        contextSizeAfterSelection: undefined,
+        contextSizeBefore: undefined,
+        contextSizeAfter: undefined,
       };
 
       const result = prepareUserContent({
@@ -114,8 +114,8 @@ describe("prepareUserContent", () => {
       };
       const userPromptOptions: UserPromptOptions = {
         shouldHandleSelectionOnly: undefined,
-        contextSizeBeforeSelection: undefined,
-        contextSizeAfterSelection: undefined,
+        contextSizeBefore: undefined,
+        contextSizeAfter: undefined,
       };
 
       const result = prepareUserContent({
@@ -138,8 +138,8 @@ describe("prepareUserContent", () => {
       };
       const userPromptOptions: UserPromptOptions = {
         shouldHandleSelectionOnly: undefined,
-        contextSizeBeforeSelection: undefined,
-        contextSizeAfterSelection: undefined,
+        contextSizeBefore: undefined,
+        contextSizeAfter: undefined,
       };
 
       const result = prepareUserContent({
@@ -164,8 +164,8 @@ describe("prepareUserContent", () => {
       };
       const userPromptOptions: UserPromptOptions = {
         shouldHandleSelectionOnly: undefined,
-        contextSizeBeforeSelection: 100,
-        contextSizeAfterSelection: undefined,
+        contextSizeBefore: 100,
+        contextSizeAfter: undefined,
       };
 
       const result = prepareUserContent({
@@ -188,8 +188,8 @@ describe("prepareUserContent", () => {
       };
       const userPromptOptions: UserPromptOptions = {
         shouldHandleSelectionOnly: undefined,
-        contextSizeBeforeSelection: 5,
-        contextSizeAfterSelection: undefined,
+        contextSizeBefore: 5,
+        contextSizeAfter: undefined,
       };
 
       const result = prepareUserContent({
@@ -216,8 +216,8 @@ describe("prepareUserContent", () => {
       };
       const userPromptOptions: UserPromptOptions = {
         shouldHandleSelectionOnly: undefined,
-        contextSizeBeforeSelection: 6,
-        contextSizeAfterSelection: undefined,
+        contextSizeBefore: 6,
+        contextSizeAfter: undefined,
       };
 
       const result = prepareUserContent({
@@ -240,8 +240,8 @@ describe("prepareUserContent", () => {
       };
       const userPromptOptions: UserPromptOptions = {
         shouldHandleSelectionOnly: undefined,
-        contextSizeBeforeSelection: 0,
-        contextSizeAfterSelection: undefined,
+        contextSizeBefore: 0,
+        contextSizeAfter: undefined,
       };
 
       const result = prepareUserContent({
@@ -264,8 +264,8 @@ describe("prepareUserContent", () => {
       };
       const userPromptOptions: UserPromptOptions = {
         shouldHandleSelectionOnly: undefined,
-        contextSizeBeforeSelection: 5,
-        contextSizeAfterSelection: undefined,
+        contextSizeBefore: 5,
+        contextSizeAfter: undefined,
       };
 
       const result = prepareUserContent({
@@ -290,8 +290,8 @@ describe("prepareUserContent", () => {
       };
       const userPromptOptions: UserPromptOptions = {
         shouldHandleSelectionOnly: undefined,
-        contextSizeBeforeSelection: undefined,
-        contextSizeAfterSelection: 100,
+        contextSizeBefore: undefined,
+        contextSizeAfter: 100,
       };
 
       const result = prepareUserContent({
@@ -314,8 +314,8 @@ describe("prepareUserContent", () => {
       };
       const userPromptOptions: UserPromptOptions = {
         shouldHandleSelectionOnly: undefined,
-        contextSizeBeforeSelection: undefined,
-        contextSizeAfterSelection: 5,
+        contextSizeBefore: undefined,
+        contextSizeAfter: 5,
       };
 
       const result = prepareUserContent({
@@ -338,8 +338,8 @@ describe("prepareUserContent", () => {
       };
       const userPromptOptions: UserPromptOptions = {
         shouldHandleSelectionOnly: undefined,
-        contextSizeBeforeSelection: undefined,
-        contextSizeAfterSelection: 6,
+        contextSizeBefore: undefined,
+        contextSizeAfter: 6,
       };
 
       const result = prepareUserContent({
@@ -362,8 +362,8 @@ describe("prepareUserContent", () => {
       };
       const userPromptOptions: UserPromptOptions = {
         shouldHandleSelectionOnly: undefined,
-        contextSizeBeforeSelection: undefined,
-        contextSizeAfterSelection: 0,
+        contextSizeBefore: undefined,
+        contextSizeAfter: 0,
       };
 
       const result = prepareUserContent({
@@ -386,8 +386,8 @@ describe("prepareUserContent", () => {
       };
       const userPromptOptions: UserPromptOptions = {
         shouldHandleSelectionOnly: undefined,
-        contextSizeBeforeSelection: undefined,
-        contextSizeAfterSelection: 5,
+        contextSizeBefore: undefined,
+        contextSizeAfter: 5,
       };
 
       const result = prepareUserContent({
@@ -412,8 +412,8 @@ describe("prepareUserContent", () => {
       };
       const userPromptOptions: UserPromptOptions = {
         shouldHandleSelectionOnly: undefined,
-        contextSizeBeforeSelection: 5,
-        contextSizeAfterSelection: 5,
+        contextSizeBefore: 5,
+        contextSizeAfter: 5,
       };
 
       const result = prepareUserContent({
@@ -440,8 +440,8 @@ describe("prepareUserContent", () => {
       };
       const userPromptOptions: UserPromptOptions = {
         shouldHandleSelectionOnly: undefined,
-        contextSizeBeforeSelection: 100,
-        contextSizeAfterSelection: 100,
+        contextSizeBefore: 100,
+        contextSizeAfter: 100,
       };
 
       const result = prepareUserContent({
@@ -464,8 +464,8 @@ describe("prepareUserContent", () => {
       };
       const userPromptOptions: UserPromptOptions = {
         shouldHandleSelectionOnly: undefined,
-        contextSizeBeforeSelection: 0,
-        contextSizeAfterSelection: 0,
+        contextSizeBefore: 0,
+        contextSizeAfter: 0,
       };
 
       const result = prepareUserContent({
@@ -488,8 +488,8 @@ describe("prepareUserContent", () => {
       };
       const userPromptOptions: UserPromptOptions = {
         shouldHandleSelectionOnly: undefined,
-        contextSizeBeforeSelection: 3,
-        contextSizeAfterSelection: 3,
+        contextSizeBefore: 3,
+        contextSizeAfter: 3,
       };
 
       const result = prepareUserContent({
@@ -512,8 +512,8 @@ describe("prepareUserContent", () => {
       };
       const userPromptOptions: UserPromptOptions = {
         shouldHandleSelectionOnly: undefined,
-        contextSizeBeforeSelection: undefined,
-        contextSizeAfterSelection: undefined,
+        contextSizeBefore: undefined,
+        contextSizeAfter: undefined,
       };
 
       const result = prepareUserContent({
@@ -540,8 +540,8 @@ describe("prepareUserContent", () => {
       };
       const userPromptOptions: UserPromptOptions = {
         shouldHandleSelectionOnly: undefined,
-        contextSizeBeforeSelection: undefined,
-        contextSizeAfterSelection: undefined,
+        contextSizeBefore: undefined,
+        contextSizeAfter: undefined,
       };
 
       const result = prepareUserContent({
@@ -568,8 +568,8 @@ describe("prepareUserContent", () => {
       };
       const userPromptOptions: UserPromptOptions = {
         shouldHandleSelectionOnly: undefined,
-        contextSizeBeforeSelection: 1000000,
-        contextSizeAfterSelection: 1000000,
+        contextSizeBefore: 1000000,
+        contextSizeAfter: 1000000,
       };
 
       const result = prepareUserContent({

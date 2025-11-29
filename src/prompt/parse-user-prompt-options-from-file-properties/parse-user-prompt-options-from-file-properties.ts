@@ -7,10 +7,8 @@ import {
 export const SELECTION_MODE_PROP_NAME = "llm-shortcut-selection-mode";
 export const SELECTION_ONLY_PROP_VALUE = "selection-only";
 
-export const CONTEXT_SIZE_BEFORE_SELECTION_PROP_NAME =
-  "llm-shortcut-context-size-before-selection";
-export const CONTEXT_SIZE_AFTER_SELECTION_PROP_NAME =
-  "llm-shortcut-context-size-after-selection";
+export const CONTEXT_SIZE_BEFORE_PROP_NAME = "llm-shortcut-context-size-before";
+export const CONTEXT_SIZE_AFTER_PROP_NAME = "llm-shortcut-context-size-after";
 
 function parseNumericFileProperty(
   fileProperties: FrontMatterCache,
@@ -63,13 +61,13 @@ export function parseUserPromptOptionsFromFileProperties(
 
   return {
     shouldHandleSelectionOnly,
-    contextSizeBeforeSelection: parseNumericFileProperty(
+    contextSizeBefore: parseNumericFileProperty(
       fileProperties,
-      CONTEXT_SIZE_BEFORE_SELECTION_PROP_NAME,
+      CONTEXT_SIZE_BEFORE_PROP_NAME,
     ),
-    contextSizeAfterSelection: parseNumericFileProperty(
+    contextSizeAfter: parseNumericFileProperty(
       fileProperties,
-      CONTEXT_SIZE_AFTER_SELECTION_PROP_NAME,
+      CONTEXT_SIZE_AFTER_PROP_NAME,
     ),
   };
 }

@@ -14,33 +14,31 @@ export type UserContent = {
 
 export function prepareUserContent({
   userContentParams: { fileContent, selection },
-  userPromptOptions: { contextSizeBeforeSelection, contextSizeAfterSelection },
+  userPromptOptions: { contextSizeBefore, contextSizeAfter },
 }: {
   userContentParams: UserContentParams;
   userPromptOptions: UserPromptOptions;
 }): UserContent {
   let ignoredSizeBeforeContext = 0;
-  if (contextSizeBeforeSelection !== undefined) {
-    if (selection.startIdx > contextSizeBeforeSelection) {
-      ignoredSizeBeforeContext =
-        selection.startIdx - contextSizeBeforeSelection;
+  if (contextSizeBefore !== undefined) {
+    if (selection.startIdx > contextSizeBefore) {
+      ignoredSizeBeforeContext = selection.startIdx - contextSizeBefore;
     }
   }
 
   let ignoredSizeAfterContext = 0;
-  if (contextSizeAfterSelection !== undefined) {
-    const contentLengthAfterSelection = fileContent.length - selection.endIdx;
-    if (contentLengthAfterSelection > contextSizeAfterSelection) {
-      ignoredSizeAfterContext =
-        contentLengthAfterSelection - contextSizeAfterSelection;
+  if (contextSizeAfter !== undefined) {
+    const contentLengthAfter = fileContent.length - selection.endIdx;
+    if (contentLengthAfter > contextSizeAfter) {
+      ignoredSizeAfterContext = contentLengthAfter - contextSizeAfter;
     }
   }
 
-  const contentBeforeSelection = fileContent.slice(
+  const contentBefore = fileContent.slice(
     ignoredSizeBeforeContext,
     selection.startIdx,
   );
-  const contentAfterSelection = fileContent.slice(
+  const contentAfter = fileContent.slice(
     selection.endIdx,
     fileContent.length - ignoredSizeAfterContext,
   );
@@ -53,8 +51,7 @@ export function prepareUserContent({
         SELECTION_END_MACROS;
 
   return {
-    userContentString:
-      contentBeforeSelection + contentWithMacros + contentAfterSelection,
+    userContentString: contentBefore + contentWithMacros + contentAfter,
     ignoredSizeBeforeContext,
     ignoredSizeAfterContext,
   };

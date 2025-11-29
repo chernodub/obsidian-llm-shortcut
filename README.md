@@ -64,14 +64,14 @@ To configure the context size, add these parameters to your prompt file's frontm
 
 ```yaml
 ---
-llm-shortcut-context-size-before-selection: 256
-llm-shortcut-context-size-after-selection: 0
+llm-shortcut-context-size-before: 256
+llm-shortcut-context-size-after: 0
 ---
 Your prompt content here...
 ```
 
-- `llm-shortcut-context-size-before-selection`: Number of characters to include before the selection (default: entire file)
-- `llm-shortcut-context-size-after-selection`: Number of characters to include after the selection (default: entire file)
+- `llm-shortcut-context-size-before`: Number of characters to include before the selection (default: entire file)
+- `llm-shortcut-context-size-after`: Number of characters to include after the selection (default: entire file)
 
 ## Example
 
