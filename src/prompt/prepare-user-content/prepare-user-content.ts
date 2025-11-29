@@ -2,7 +2,7 @@ import {
   CARET_MACROS,
   SELECTION_END_MACROS,
   SELECTION_START_MACROS,
-} from "../../llm/const";
+} from "../../llm/constants";
 import { UserContentParams } from "../user-content-params";
 import { UserPromptOptions } from "../user-prompt-options";
 

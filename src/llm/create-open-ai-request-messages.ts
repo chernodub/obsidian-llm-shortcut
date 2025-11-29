@@ -1,6 +1,6 @@
 import {
+  ChatCompletionDeveloperMessageParam,
   ChatCompletionMessageParam,
-  ChatCompletionSystemMessageParam,
   ChatCompletionUserMessageParam,
 } from "openai/resources/chat/completions";
 import { getObjectEntries } from "../utils/object/get-object-entries";
@@ -11,7 +11,7 @@ export const USER_CONTENT_SECTION_TITLE = "USER CONTENT";
 
 export const OPEN_AI_REQUEST_SECTIONS = {
   internalSystemPrompt: {
-    role: "system",
+    role: "developer",
     title: INTERNAL_SYSTEM_PROMPT_SECTION_TITLE,
   },
   userPrompt: {
@@ -26,7 +26,7 @@ export const OPEN_AI_REQUEST_SECTIONS = {
   string,
   {
     role:
-      | ChatCompletionSystemMessageParam["role"]
+      | ChatCompletionDeveloperMessageParam["role"]
       | ChatCompletionUserMessageParam["role"];
     title: string;
   }
