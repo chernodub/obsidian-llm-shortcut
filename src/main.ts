@@ -12,9 +12,9 @@ import {
 } from "obsidian";
 import { mapLlmErrorToReadable } from "./llm/error-handler";
 import { LLMClient, SelectionParams } from "./llm/llm-client";
-import { parseUserPromptOptionsFromFileProperties } from "./llm/user-prompt-params/parse-user-prompt-options-from-file-properties/parse-user-prompt-options-from-file-properties";
-import { DEFAULT_USER_PROMPT_OPTIONS } from "./llm/user-prompt-params/user-prompt-options";
-import { UserPromptParams } from "./llm/user-prompt-params/user-prompt-params";
+import { parseUserPromptOptionsFromFileProperties } from "./llm/user-prompt/parse-user-prompt-options-from-file-properties/parse-user-prompt-options-from-file-properties";
+import { DEFAULT_USER_PROMPT_OPTIONS } from "./llm/user-prompt/user-prompt-options";
+import { UserPromptParams } from "./llm/user-prompt/user-prompt-params";
 import { logger } from "./logger";
 import { SettingTab } from "./setting-tab";
 import { LoaderStrategy, LoaderStrategyFactory } from "./ui/loader-strategy";
