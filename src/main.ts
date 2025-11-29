@@ -265,7 +265,7 @@ export default class LlmShortcutPlugin extends Plugin {
 
     const hasSelection = selection.startIdx !== selection.endIdx;
 
-    if (userPromptOptions?.shouldHandleSelectionOnly && !hasSelection) {
+    if (userPromptOptions.shouldHandleSelectionOnly && !hasSelection) {
       showErrorNotification({
         title: "This command requires text to be selected",
       });
