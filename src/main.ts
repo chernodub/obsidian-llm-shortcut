@@ -23,12 +23,6 @@ import { mapCursorPositionToIdx } from "./utils/obsidian/map-position-to-idx";
 import { obsidianFetchAdapter } from "./utils/obsidian/obsidian-fetch-adapter";
 import { parseUserPromptOptionsFromFileProperties } from "./utils/parse-user-prompt-options-from-file-properties/parse-user-prompt-options-from-file-properties";
 
-export interface UserPromptOptions {
-  readonly shouldHandleSelectionOnly: boolean;
-  readonly contextSizeBeforeSelection: number | undefined;
-  readonly contextSizeAfterSelection: number | undefined;
-}
-
 export interface UserPromptParams {
   readonly userPromptString: string;
   readonly userPromptOptions: UserPromptOptions;
