@@ -1,12 +1,8 @@
 import { OpenAI, ClientOptions as OpenAIOptions } from "openai";
-import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import { UserPromptOptions } from "../main";
 import { prepareUserContent } from "../utils/prepare-user-content/prepare-user-content";
+import { createOpenAiRequestMessages } from "./create-open-ai-request-messages";
 import { getInternalSystemPrompt } from "./get-internal-system-prompt";
-
-export const INTERNAL_SYSTEM_PROMPT_SECTION_TITLE = "INTERNAL SYSTEM PROMPT";
-export const USER_PROMPT_SECTION_TITLE = "USER PROMPT";
-export const USER_CONTENT_SECTION_TITLE = "USER CONTENT";
 
 export type SelectionParams = {
   readonly startIdx: number;
@@ -52,27 +48,11 @@ export class LLMClient {
       userContentParams,
     });
 
-    const internalSystemPromptSection =
-      `# ${INTERNAL_SYSTEM_PROMPT_SECTION_TITLE}:\n\n` + internalSystemPrompt;
-    const userPromptSection =
-      `# ${USER_PROMPT_SECTION_TITLE}:\n\n` + userPromptString;
-    const userContentSection =
-      `# ${USER_CONTENT_SECTION_TITLE}:\n\n` + userContentString;
-
-    const messages: ChatCompletionMessageParam[] = [
-      {
-        role: "system",
-        content: internalSystemPromptSection,
-      },
-      {
-        role: "system",
-        content: userPromptSection,
-      },
-      {
-        role: "user",
-        content: userContentSection,
-      },
-    ];
+    const messages = createOpenAiRequestMessages({
+      internalSystemPrompt: internalSystemPrompt,
+      userPrompt: userPromptString,
+      userContent: userContentString,
+    });
 
     const response = await this.client.chat.completions.create({
       model: this.model,
