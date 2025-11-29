@@ -5,7 +5,7 @@ import {
   SELECTION_START_MACROS,
 } from "../../llm/const";
 import { UserContentParams } from "../../llm/llm-client";
-import { UserPromptOptions } from "../constants";
+import { UserPromptOptions } from "../../llm/user-prompt-params/user-prompt-options";
 import { prepareUserContent } from "./prepare-user-content";
 
 describe("prepareUserContent", () => {

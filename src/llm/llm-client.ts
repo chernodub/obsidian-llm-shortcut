@@ -1,8 +1,8 @@
 import { OpenAI, ClientOptions as OpenAIOptions } from "openai";
-import { UserPromptOptions } from "../utils/constants";
 import { prepareUserContent } from "../utils/prepare-user-content/prepare-user-content";
 import { createOpenAiRequestMessages } from "./create-open-ai-request-messages";
 import { getInternalSystemPrompt } from "./get-internal-system-prompt";
+import { UserPromptOptions } from "./user-prompt-params/user-prompt-options";
 
 export type SelectionParams = {
   readonly startIdx: number;

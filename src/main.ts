@@ -12,25 +12,18 @@ import {
 } from "obsidian";
 import { mapLlmErrorToReadable } from "./llm/error-handler";
 import { LLMClient, SelectionParams } from "./llm/llm-client";
+import { parseUserPromptOptionsFromFileProperties } from "./llm/user-prompt-params/parse-user-prompt-options-from-file-properties/parse-user-prompt-options-from-file-properties";
+import { DEFAULT_USER_PROMPT_OPTIONS } from "./llm/user-prompt-params/user-prompt-options";
+import { UserPromptParams } from "./llm/user-prompt-params/user-prompt-params";
 import { logger } from "./logger";
 import { SettingTab } from "./setting-tab";
 import { LoaderStrategy, LoaderStrategyFactory } from "./ui/loader-strategy";
 import { CustomPromptModal } from "./ui/prompt-modal/prompt-modal";
 import { showErrorNotification } from "./ui/user-notifications";
 import { assertExists } from "./utils/assertions/assert-exists";
-import {
-  DEFAULT_USER_PROMPT_OPTIONS,
-  PLUGIN_NAME,
-  UserPromptOptions,
-} from "./utils/constants";
+import { PLUGIN_NAME } from "./utils/constants";
 import { mapCursorPositionToIdx } from "./utils/obsidian/map-position-to-idx";
 import { obsidianFetchAdapter } from "./utils/obsidian/obsidian-fetch-adapter";
-import { parseUserPromptOptionsFromFileProperties } from "./utils/parse-user-prompt-options-from-file-properties/parse-user-prompt-options-from-file-properties";
-
-export interface UserPromptParams {
-  readonly userPromptString: string;
-  readonly userPromptOptions: UserPromptOptions;
-}
 
 interface PluginSettings {
   apiKey: string;

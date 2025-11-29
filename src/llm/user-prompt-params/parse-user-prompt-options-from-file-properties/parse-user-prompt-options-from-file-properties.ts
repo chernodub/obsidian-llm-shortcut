@@ -1,5 +1,8 @@
 import { FrontMatterCache } from "obsidian";
-import { DEFAULT_USER_PROMPT_OPTIONS, UserPromptOptions } from "../constants";
+import {
+  DEFAULT_USER_PROMPT_OPTIONS,
+  UserPromptOptions,
+} from "../user-prompt-options";
 
 export const SELECTION_MODE_PROP_NAME = "llm-shortcut-selection-mode";
 export const SELECTION_ONLY_PROP_VALUE = "selection-only";

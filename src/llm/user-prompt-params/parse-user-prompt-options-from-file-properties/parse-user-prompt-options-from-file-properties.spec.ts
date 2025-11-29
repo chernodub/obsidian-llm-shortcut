@@ -1,13 +1,13 @@
 import { FrontMatterCache } from "obsidian";
 import { describe, expect, it } from "vitest";
-import { DEFAULT_USER_PROMPT_OPTIONS } from "../constants.js";
+import { DEFAULT_USER_PROMPT_OPTIONS } from "../user-prompt-options.js";
 import {
   CONTEXT_SIZE_AFTER_SELECTION_PROP_NAME,
   CONTEXT_SIZE_BEFORE_SELECTION_PROP_NAME,
   parseUserPromptOptionsFromFileProperties,
   SELECTION_MODE_PROP_NAME,
   SELECTION_ONLY_PROP_VALUE,
-} from "./parse-user-prompt-options-from-file-properties";
+} from "./parse-user-prompt-options-from-file-properties.js";
 
 describe("parseUserPromptOptionsFromFileProperties", () => {
   describe("default values", () => {
