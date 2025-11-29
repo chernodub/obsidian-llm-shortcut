@@ -7,7 +7,7 @@ import {
   parseUserPromptOptionsFromFileProperties,
   SELECTION_MODE_PROP_NAME,
   SELECTION_ONLY_PROP_VALUE,
-} from "./parseUserPromptOptionsFromFileProperties.js";
+} from "./parse-user-prompt-options-from-file-properties";
 
 describe("parseUserPromptOptionsFromFileProperties", () => {
   describe("default values", () => {

@@ -21,7 +21,7 @@ import { assertExists } from "./utils/assertions/assert-exists";
 import { DEFAULT_USER_PROMPT_OPTIONS, PLUGIN_NAME } from "./utils/constants";
 import { mapCursorPositionToIdx } from "./utils/obsidian/map-position-to-idx";
 import { obsidianFetchAdapter } from "./utils/obsidian/obsidian-fetch-adapter";
-import { parseUserPromptOptionsFromFileProperties } from "./utils/parseUserPromptOptionsFromFileProperties/parseUserPromptOptionsFromFileProperties";
+import { parseUserPromptOptionsFromFileProperties } from "./utils/parse-user-prompt-options-from-file-properties/parse-user-prompt-options-from-file-properties";
 
 export interface UserPromptOptions {
   readonly shouldHandleSelectionOnly: boolean;

@@ -1,8 +1,8 @@
 import { OpenAI, ClientOptions as OpenAIOptions } from "openai";
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import { UserPromptOptions } from "../main";
-import { prepareUserContent } from "../utils/prepareUserContent/prepareUserContent";
-import { getInternalSystemPrompt } from "./getInternalSystemPrompt";
+import { prepareUserContent } from "../utils/prepare-user-content/prepare-user-content";
+import { getInternalSystemPrompt } from "./get-internal-system-prompt";
 
 export const INTERNAL_SYSTEM_PROMPT_SECTION_TITLE = "INTERNAL SYSTEM PROMPT";
 export const USER_PROMPT_SECTION_TITLE = "USER PROMPT";

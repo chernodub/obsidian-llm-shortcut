@@ -3,7 +3,7 @@ import {
   CARET_MACROS,
   SELECTION_END_MACROS,
   SELECTION_START_MACROS,
-} from "../../llm/MACROS";
+} from "../../llm/macros";
 import { UserPromptOptions } from "../../main";
 
 export type UserContent = {
