@@ -4,7 +4,7 @@ import {
   SELECTION_START_MACROS,
 } from "../../llm/const";
 import { UserContentParams } from "../../llm/llm-client";
-import { UserPromptOptions } from "../../main";
+import { UserPromptOptions } from "../constants";
 
 export type UserContent = {
   ignoredSizeBeforeContext: number;
