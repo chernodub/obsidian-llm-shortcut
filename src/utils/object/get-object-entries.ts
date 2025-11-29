@@ -1,5 +1,5 @@
 /**
- * Type guard for getting the entries of an object
+ * Type guard for native Object.entries
  */
 export function getObjectEntries<Key extends string, Value>(
   object: Record<Key, Value>,
