@@ -1,9 +1,9 @@
-import { UserContentParams } from "../../llm/llm-client";
 import {
   CARET_MACROS,
   SELECTION_END_MACROS,
   SELECTION_START_MACROS,
-} from "../../llm/XXX";
+} from "../../llm/const";
+import { UserContentParams } from "../../llm/llm-client";
 import { UserPromptOptions } from "../../main";
 
 export type UserContent = {
