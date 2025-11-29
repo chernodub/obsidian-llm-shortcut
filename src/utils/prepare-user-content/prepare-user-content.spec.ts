@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { UserContentParams } from "../../llm/llm-client.js";
+import { UserContentParams } from "../../llm/llm-client";
 import {
   CARET_MACROS,
   SELECTION_END_MACROS,
   SELECTION_START_MACROS,
-} from "../../llm/macros.js";
-import { UserPromptOptions } from "../../main.js";
-import { prepareUserContent } from "./prepare-user-content.js";
+} from "../../llm/macros";
+import { UserPromptOptions } from "../../main";
+import { prepareUserContent } from "./prepare-user-content";
 
 describe("prepareUserContent", () => {
   describe("basic functionality", () => {
