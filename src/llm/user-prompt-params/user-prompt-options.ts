@@ -1,11 +1,11 @@
 export interface UserPromptOptions {
-  readonly shouldHandleSelectionOnly: boolean;
+  readonly shouldHandleSelectionOnly: true | undefined;
   readonly contextSizeBeforeSelection: number | undefined;
   readonly contextSizeAfterSelection: number | undefined;
 }
 
 export const DEFAULT_USER_PROMPT_OPTIONS: UserPromptOptions = {
-  shouldHandleSelectionOnly: false,
+  shouldHandleSelectionOnly: undefined,
   contextSizeBeforeSelection: undefined,
   contextSizeAfterSelection: undefined,
 };

@@ -302,7 +302,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
       const result = parseUserPromptOptionsFromFileProperties(fileProperties);
 
       expect(result).toEqual({
-        shouldHandleSelectionOnly: false,
+        shouldHandleSelectionOnly: undefined,
         contextSizeBeforeSelection: 7,
         contextSizeAfterSelection: 14,
       });

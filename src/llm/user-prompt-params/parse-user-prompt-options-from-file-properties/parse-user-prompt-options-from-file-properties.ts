@@ -47,7 +47,7 @@ function parseNumericFileProperty(
 export function parseUserPromptOptionsFromFileProperties(
   fileProperties: FrontMatterCache,
 ): UserPromptOptions {
-  let shouldHandleSelectionOnly: boolean;
+  let shouldHandleSelectionOnly: true | undefined;
   const shouldHandleSelectionOnlyValue =
     fileProperties[SELECTION_MODE_PROP_NAME];
   if (shouldHandleSelectionOnlyValue === undefined) {
