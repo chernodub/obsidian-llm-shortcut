@@ -2,7 +2,7 @@ import {
   CARET_MACROS,
   SELECTION_END_MACROS,
   SELECTION_START_MACROS,
-} from "../llm/constants";
+} from "./constants";
 import { UserContentParams } from "./user-content-params";
 
 const INTERNAL_SYSTEM_PROMPT_CARET = `
