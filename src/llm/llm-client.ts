@@ -30,7 +30,7 @@ export class LLMClient {
     userPromptString,
     userPromptOptions,
   }: GetResponseParams) {
-    const { userContentString } = prepareUserContent({
+    const userContentString = prepareUserContent({
       userContentParams,
       userPromptOptions,
     });

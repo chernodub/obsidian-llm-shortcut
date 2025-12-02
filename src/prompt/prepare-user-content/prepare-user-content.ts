@@ -6,7 +6,7 @@ import {
 import { UserContentParams } from "../user-content-params";
 import { UserPromptOptions } from "../user-prompt-options";
 
-export function cropContextAroundSelection({
+export function getContextAroundSelection({
   userContentParams: { fileContent, selection },
   userPromptOptions: { contextSizeBefore, contextSizeAfter },
 }: {
@@ -64,7 +64,7 @@ export function prepareUserContent({
   userContentParams: UserContentParams;
   userPromptOptions: UserPromptOptions;
 }): string {
-  const { contentBefore, contentAfter } = cropContextAroundSelection({
+  const { contentBefore, contentAfter } = getContextAroundSelection({
     userPromptOptions,
     userContentParams,
   });
