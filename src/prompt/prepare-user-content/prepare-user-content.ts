@@ -6,19 +6,16 @@ import {
 import { UserContentParams } from "../user-content-params";
 import { UserPromptOptions } from "../user-prompt-options";
 
-export type UserContent = {
-  ignoredSizeBeforeContext: number;
-  ignoredSizeAfterContext: number;
-  userContentString: string;
-};
-
-export function prepareUserContent({
+export function cropContextAroundSelection({
   userContentParams: { fileContent, selection },
   userPromptOptions: { contextSizeBefore, contextSizeAfter },
 }: {
   userContentParams: UserContentParams;
   userPromptOptions: UserPromptOptions;
-}): UserContent {
+}): {
+  contentBefore: string;
+  contentAfter: string;
+} {
   let ignoredSizeBeforeContext = 0;
   if (contextSizeBefore !== undefined) {
     if (selection.startIdx > contextSizeBefore) {
@@ -43,16 +40,36 @@ export function prepareUserContent({
     fileContent.length - ignoredSizeAfterContext,
   );
 
-  const contentWithMacros =
-    selection.startIdx === selection.endIdx
-      ? CARET_MACROS
-      : SELECTION_START_MACROS +
+  return {
+    contentBefore,
+    contentAfter,
+  };
+}
+
+export function getSelectedContentWithMacros({
+  fileContent,
+  selection,
+}: UserContentParams) {
+  return selection.startIdx === selection.endIdx
+    ? CARET_MACROS
+    : SELECTION_START_MACROS +
         fileContent.slice(selection.startIdx, selection.endIdx) +
         SELECTION_END_MACROS;
+}
 
-  return {
-    userContentString: contentBefore + contentWithMacros + contentAfter,
-    ignoredSizeBeforeContext,
-    ignoredSizeAfterContext,
-  };
+export function prepareUserContent({
+  userContentParams,
+  userPromptOptions,
+}: {
+  userContentParams: UserContentParams;
+  userPromptOptions: UserPromptOptions;
+}): string {
+  const { contentBefore, contentAfter } = cropContextAroundSelection({
+    userPromptOptions,
+    userContentParams,
+  });
+
+  const contentWithMacros = getSelectedContentWithMacros(userContentParams);
+
+  return contentBefore + contentWithMacros + contentAfter;
 }

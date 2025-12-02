@@ -27,15 +27,13 @@ describe("prepareUserContent", () => {
         userPromptOptions,
       });
 
-      expect(result.userContentString).toBe(
+      expect(result).toBe(
         "Hello " +
           SELECTION_START_MACROS +
           "world" +
           SELECTION_END_MACROS +
           ", this is a test",
       );
-      expect(result.ignoredSizeBeforeContext).toBe(0);
-      expect(result.ignoredSizeAfterContext).toBe(0);
     });
 
     it("should use caret macro when startIdx equals endIdx", () => {
@@ -55,9 +53,7 @@ describe("prepareUserContent", () => {
         userPromptOptions,
       });
 
-      expect(result.userContentString).toBe("Hello" + CARET_MACROS + " world");
-      expect(result.ignoredSizeBeforeContext).toBe(0);
-      expect(result.ignoredSizeAfterContext).toBe(0);
+      expect(result).toBe("Hello" + CARET_MACROS + " world");
     });
 
     it("should handle empty file content", () => {
@@ -77,9 +73,7 @@ describe("prepareUserContent", () => {
         userPromptOptions,
       });
 
-      expect(result.userContentString).toBe(CARET_MACROS);
-      expect(result.ignoredSizeBeforeContext).toBe(0);
-      expect(result.ignoredSizeAfterContext).toBe(0);
+      expect(result).toBe(CARET_MACROS);
     });
 
     it("should handle selection at the start of file", () => {
@@ -99,11 +93,9 @@ describe("prepareUserContent", () => {
         userPromptOptions,
       });
 
-      expect(result.userContentString).toBe(
+      expect(result).toBe(
         SELECTION_START_MACROS + "Hello" + SELECTION_END_MACROS + " world",
       );
-      expect(result.ignoredSizeBeforeContext).toBe(0);
-      expect(result.ignoredSizeAfterContext).toBe(0);
     });
 
     it("should handle selection at the end of file", () => {
@@ -123,11 +115,9 @@ describe("prepareUserContent", () => {
         userPromptOptions,
       });
 
-      expect(result.userContentString).toBe(
+      expect(result).toBe(
         "Hello " + SELECTION_START_MACROS + "world" + SELECTION_END_MACROS,
       );
-      expect(result.ignoredSizeBeforeContext).toBe(0);
-      expect(result.ignoredSizeAfterContext).toBe(0);
     });
 
     it("should handle selection covering entire file", () => {
@@ -147,11 +137,9 @@ describe("prepareUserContent", () => {
         userPromptOptions,
       });
 
-      expect(result.userContentString).toBe(
+      expect(result).toBe(
         SELECTION_START_MACROS + "Hello" + SELECTION_END_MACROS,
       );
-      expect(result.ignoredSizeBeforeContext).toBe(0);
-      expect(result.ignoredSizeAfterContext).toBe(0);
     });
   });
 
@@ -173,11 +161,9 @@ describe("prepareUserContent", () => {
         userPromptOptions,
       });
 
-      expect(result.userContentString).toBe(
+      expect(result).toBe(
         "Hello " + SELECTION_START_MACROS + "world" + SELECTION_END_MACROS,
       );
-      expect(result.ignoredSizeBeforeContext).toBe(0);
-      expect(result.ignoredSizeAfterContext).toBe(0);
     });
 
     it("should limit context when context size is smaller than available content", () => {
@@ -197,15 +183,13 @@ describe("prepareUserContent", () => {
         userPromptOptions,
       });
 
-      expect(result.userContentString).toBe(
+      expect(result).toBe(
         "long " +
           SELECTION_START_MACROS +
           "text" +
           SELECTION_END_MACROS +
           " with many words",
       );
-      expect(result.ignoredSizeBeforeContext).toBe(15); // 20 - 5
-      expect(result.ignoredSizeAfterContext).toBe(0);
     });
 
     it("should handle context size equal to available content before selection", () => {
@@ -225,11 +209,9 @@ describe("prepareUserContent", () => {
         userPromptOptions,
       });
 
-      expect(result.userContentString).toBe(
+      expect(result).toBe(
         "Hello " + SELECTION_START_MACROS + "world" + SELECTION_END_MACROS,
       );
-      expect(result.ignoredSizeBeforeContext).toBe(0);
-      expect(result.ignoredSizeAfterContext).toBe(0);
     });
 
     it("should handle zero context size before selection", () => {
@@ -249,11 +231,9 @@ describe("prepareUserContent", () => {
         userPromptOptions,
       });
 
-      expect(result.userContentString).toBe(
+      expect(result).toBe(
         SELECTION_START_MACROS + "world" + SELECTION_END_MACROS,
       );
-      expect(result.ignoredSizeBeforeContext).toBe(6); // 6 - 0
-      expect(result.ignoredSizeAfterContext).toBe(0);
     });
 
     it("should handle selection at start with context size", () => {
@@ -273,11 +253,9 @@ describe("prepareUserContent", () => {
         userPromptOptions,
       });
 
-      expect(result.userContentString).toBe(
+      expect(result).toBe(
         SELECTION_START_MACROS + "Hello" + SELECTION_END_MACROS + " world",
       );
-      expect(result.ignoredSizeBeforeContext).toBe(0);
-      expect(result.ignoredSizeAfterContext).toBe(0);
     });
   });
 
@@ -299,11 +277,9 @@ describe("prepareUserContent", () => {
         userPromptOptions,
       });
 
-      expect(result.userContentString).toBe(
+      expect(result).toBe(
         SELECTION_START_MACROS + "Hello" + SELECTION_END_MACROS + " world",
       );
-      expect(result.ignoredSizeBeforeContext).toBe(0);
-      expect(result.ignoredSizeAfterContext).toBe(0);
     });
 
     it("should limit context when context size is smaller than available content", () => {
@@ -323,11 +299,9 @@ describe("prepareUserContent", () => {
         userPromptOptions,
       });
 
-      expect(result.userContentString).toBe(
+      expect(result).toBe(
         SELECTION_START_MACROS + "This" + SELECTION_END_MACROS + " is a",
       );
-      expect(result.ignoredSizeBeforeContext).toBe(0);
-      expect(result.ignoredSizeAfterContext).toBe(31);
     });
 
     it("should handle context size equal to available content after selection", () => {
@@ -347,11 +321,9 @@ describe("prepareUserContent", () => {
         userPromptOptions,
       });
 
-      expect(result.userContentString).toBe(
+      expect(result).toBe(
         SELECTION_START_MACROS + "Hello" + SELECTION_END_MACROS + " world",
       );
-      expect(result.ignoredSizeBeforeContext).toBe(0);
-      expect(result.ignoredSizeAfterContext).toBe(0);
     });
 
     it("should handle zero context size after selection", () => {
@@ -371,11 +343,9 @@ describe("prepareUserContent", () => {
         userPromptOptions,
       });
 
-      expect(result.userContentString).toBe(
+      expect(result).toBe(
         SELECTION_START_MACROS + "Hello" + SELECTION_END_MACROS,
       );
-      expect(result.ignoredSizeBeforeContext).toBe(0);
-      expect(result.ignoredSizeAfterContext).toBe(6); // 6 - 0
     });
 
     it("should handle selection at end with context size", () => {
@@ -395,11 +365,9 @@ describe("prepareUserContent", () => {
         userPromptOptions,
       });
 
-      expect(result.userContentString).toBe(
+      expect(result).toBe(
         "Hello " + SELECTION_START_MACROS + "world" + SELECTION_END_MACROS,
       );
-      expect(result.ignoredSizeBeforeContext).toBe(0);
-      expect(result.ignoredSizeAfterContext).toBe(0);
     });
   });
 
@@ -421,15 +389,13 @@ describe("prepareUserContent", () => {
         userPromptOptions,
       });
 
-      expect(result.userContentString).toBe(
+      expect(result).toBe(
         "very " +
           SELECTION_START_MACROS +
           "long" +
           SELECTION_END_MACROS +
           " text",
       );
-      expect(result.ignoredSizeBeforeContext).toBe(10); // 15 - 5
-      expect(result.ignoredSizeAfterContext).toBe(22); // 29 - 5
     });
 
     it("should handle both context sizes when content is smaller than context sizes", () => {
@@ -449,11 +415,9 @@ describe("prepareUserContent", () => {
         userPromptOptions,
       });
 
-      expect(result.userContentString).toBe(
+      expect(result).toBe(
         "Hello " + SELECTION_START_MACROS + "world" + SELECTION_END_MACROS,
       );
-      expect(result.ignoredSizeBeforeContext).toBe(0);
-      expect(result.ignoredSizeAfterContext).toBe(0);
     });
 
     it("should handle both context sizes with zero values", () => {
@@ -473,11 +437,9 @@ describe("prepareUserContent", () => {
         userPromptOptions,
       });
 
-      expect(result.userContentString).toBe(
+      expect(result).toBe(
         SELECTION_START_MACROS + "world" + SELECTION_END_MACROS,
       );
-      expect(result.ignoredSizeBeforeContext).toBe(6);
-      expect(result.ignoredSizeAfterContext).toBe(0);
     });
 
     it("should handle caret with both context sizes", () => {
@@ -497,9 +459,7 @@ describe("prepareUserContent", () => {
         userPromptOptions,
       });
 
-      expect(result.userContentString).toBe("is " + CARET_MACROS + "a t");
-      expect(result.ignoredSizeBeforeContext).toBe(5); // 8 - 3
-      expect(result.ignoredSizeAfterContext).toBe(3); // 6 - 3
+      expect(result).toBe("is " + CARET_MACROS + "a t");
     });
   });
 
@@ -521,15 +481,13 @@ describe("prepareUserContent", () => {
         userPromptOptions,
       });
 
-      expect(result.userContentString).toBe(
+      expect(result).toBe(
         "Line 1\n" +
           SELECTION_START_MACROS +
           "Line 2" +
           SELECTION_END_MACROS +
           "\nLine 3",
       );
-      expect(result.ignoredSizeBeforeContext).toBe(0);
-      expect(result.ignoredSizeAfterContext).toBe(0);
     });
 
     it("should handle content with special characters", () => {
@@ -549,15 +507,13 @@ describe("prepareUserContent", () => {
         userPromptOptions,
       });
 
-      expect(result.userContentString).toBe(
+      expect(result).toBe(
         "Hello " +
           SELECTION_START_MACROS +
           "$world$" +
           SELECTION_END_MACROS +
           " {test} [example]",
       );
-      expect(result.ignoredSizeBeforeContext).toBe(0);
-      expect(result.ignoredSizeAfterContext).toBe(0);
     });
 
     it("should handle very large context sizes", () => {
@@ -577,11 +533,9 @@ describe("prepareUserContent", () => {
         userPromptOptions,
       });
 
-      expect(result.userContentString).toBe(
+      expect(result).toBe(
         "Sh" + SELECTION_START_MACROS + "o" + SELECTION_END_MACROS + "rt",
       );
-      expect(result.ignoredSizeBeforeContext).toBe(0);
-      expect(result.ignoredSizeAfterContext).toBe(0);
     });
   });
 });
