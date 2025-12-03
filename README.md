@@ -31,6 +31,8 @@ Becomes a list of commands:
 
 The plugin includes a customizable command that allows you to enter a prompt directly without creating a prompt file. By default, this command appears as "Custom prompt" in the command palette. You can customize the label for this command in plugin settings.
 
+## Customization
+
 ### Selection-Only Commands
 
 Some prompts work best when applied to a specific selection of text. You can mark a command as selection-only by adding frontmatter to your prompt file:
@@ -39,7 +41,6 @@ Some prompts work best when applied to a specific selection of text. You can mar
 ---
 llm-shortcut-selection-mode: selection-only
 ---
-
 Your prompt content here...
 ```
 
@@ -52,6 +53,25 @@ When a command is marked as selection-only, it will:
 This is useful for prompts that are designed to transform, analyze, or modify specific portions of text rather than working with the entire document.
 
 <video width="350" alt="Demo Selection Only" src="https://github.com/user-attachments/assets/4eabe88a-d4c5-4928-b357-ad0928b7484b" />
+
+### Context for LLM
+
+By default, the plugin sends the entire file content to the LLM, marking the areas that should be modified (either a text selection or the caret position). The LLM uses the full file as context when making modifications.
+
+You can limit the context window by specifying the number of characters to include before and after the selection or caret position. This is particularly useful when working with very long documents or when you want to focus the LLM's attention on a specific area.
+
+To configure the context size, add these parameters to your prompt file's frontmatter:
+
+```yaml
+---
+llm-shortcut-context-size-before: 256
+llm-shortcut-context-size-after: 0
+---
+Your prompt content here...
+```
+
+- `llm-shortcut-context-size-before`: Number of characters to include before the selection (default: entire file)
+- `llm-shortcut-context-size-after`: Number of characters to include after the selection (default: entire file)
 
 ## Example
 

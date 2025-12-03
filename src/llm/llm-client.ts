@@ -1,28 +1,14 @@
 import { OpenAI, ClientOptions as OpenAIOptions } from "openai";
-import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
-import {
-  CARET_MACROS,
-  SELECTION_END_MACROS,
-  SELECTION_START_MACROS,
-} from "./MACROS";
-import { getInternalSystemPrompt } from "./getInternalSystemPrompt";
-
-const USER_PROMPT_PREFIX = `# USER PROMPT: \n\n`;
-const USER_CONTENT_PREFIX = `# USER CONTENT: \n\n`;
-
-export type SelectionParams = {
-  readonly startIdx: number;
-  readonly endIdx: number;
-};
-
-export type UserContentParams = {
-  readonly fileContent: string;
-  readonly selection: SelectionParams;
-};
+import { getInternalSystemPrompt } from "../prompt/get-internal-system-prompt";
+import { prepareUserContent } from "../prompt/prepare-user-content/prepare-user-content";
+import { UserContentParams } from "../prompt/user-content-params";
+import { UserPromptOptions } from "../prompt/user-prompt-options";
+import { createOpenAiRequestMessages } from "./create-open-ai-request-messages";
 
 type GetResponseParams = {
   readonly userPromptString: string;
   readonly userContentParams: UserContentParams;
+  readonly userPromptOptions: UserPromptOptions;
 };
 
 export class LLMClient {
@@ -42,25 +28,22 @@ export class LLMClient {
   async *getResponse({
     userContentParams,
     userPromptString,
+    userPromptOptions,
   }: GetResponseParams) {
-    const userContent = this.insertSelectionMacros(userContentParams);
+    const userContentString = prepareUserContent({
+      userContentParams,
+      userPromptOptions,
+    });
 
-    const internalSystemPrompt = getInternalSystemPrompt({ userContentParams });
+    const internalSystemPrompt = getInternalSystemPrompt({
+      userContentParams,
+    });
 
-    const messages: ChatCompletionMessageParam[] = [
-      {
-        role: "system",
-        content: internalSystemPrompt,
-      },
-      {
-        role: "system",
-        content: USER_PROMPT_PREFIX + userPromptString,
-      },
-      {
-        role: "user",
-        content: userContent,
-      },
-    ];
+    const messages = createOpenAiRequestMessages({
+      internalSystemPrompt: internalSystemPrompt,
+      userPrompt: userPromptString,
+      userContent: userContentString,
+    });
 
     const response = await this.client.chat.completions.create({
       model: this.model,
@@ -73,32 +56,5 @@ export class LLMClient {
         yield chunk.choices[0]?.delta.content;
       }
     }
-  }
-
-  private insertSelectionMacros({
-    fileContent,
-    selection,
-  }: UserContentParams): string {
-    return (
-      USER_CONTENT_PREFIX +
-      (fileContent.slice(0, selection.startIdx) +
-        this.insertSelectionMacroses(fileContent, selection) +
-        fileContent.slice(selection.endIdx))
-    );
-  }
-
-  private insertSelectionMacroses(
-    currentContent: string,
-    selection: SelectionParams,
-  ) {
-    if (selection.startIdx === selection.endIdx) {
-      return CARET_MACROS;
-    }
-
-    return (
-      SELECTION_START_MACROS +
-      currentContent.slice(selection.startIdx, selection.endIdx) +
-      SELECTION_END_MACROS
-    );
   }
 }
