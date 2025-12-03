@@ -52,7 +52,7 @@ When a command is marked as selection-only, it will:
 
 This is useful for prompts that are designed to transform, analyze, or modify specific portions of text rather than working with the entire document.
 
-<video width="350" alt="Demo Selection Only" src="https://github.com/user-attachments/assets/4eabe88a-d4c5-4928-b357-ad0928b7484b" />
+<video width="350" alt="Demo Selection Only" src="https://github.com/user-attachments/assets/4eabe88a-d4c5-4928-b357-ad0928b7484b"></video>
 
 ### Context for LLM
 
