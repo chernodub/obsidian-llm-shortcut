@@ -10,6 +10,8 @@ export const SELECTION_ONLY_PROP_VALUE = "selection-only";
 export const CONTEXT_SIZE_BEFORE_PROP_NAME = "llm-shortcut-context-size-before";
 export const CONTEXT_SIZE_AFTER_PROP_NAME = "llm-shortcut-context-size-after";
 
+export const PROMPT_MODE_PROP_NAME = "llm-shortcut-prompt-mode";
+
 function parseNumericFileProperty(
   fileProperties: FrontMatterCache,
   propertyName: string,
@@ -56,6 +58,17 @@ export function parseUserPromptOptionsFromFileProperties(
   } else {
     throw new Error(
       `Invalid prompt file property=[${SELECTION_MODE_PROP_NAME}] value should be [${SELECTION_ONLY_PROP_VALUE}], but got [${shouldHandleSelectionOnlyValue}]`,
+    );
+  }
+
+  const promptModeValue = fileProperties[PROMPT_MODE_PROP_NAME];
+  if (promptModeValue === undefined) {
+    promptMode = DEFAULT_USER_PROMPT_OPTIONS.promptMode;
+  } else if (promptModeValue === PROMPT_MODE_PROP_VALUE) {
+    promptMode = true;
+  } else {
+    throw new Error(
+      `Invalid prompt file property=[${PROMPT_MODE_PROP_NAME}] value should be [${PROMPT_MODE_PROP_VALUE}], but got [${promptModeValue}]`,
     );
   }
 
