@@ -4,7 +4,7 @@ export const PromptModeDict = {
    * Replace the selection with the LLM response
    * If there is no selection, insert the LLM response at the cursor position
    */
-  "replace-selected": undefined,
+  replace: undefined,
   /**
    * Show LLM response in a popup window
    */
