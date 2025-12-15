@@ -165,10 +165,13 @@ export default class LlmShortcutPlugin extends Plugin {
     // Danger! The cache could be stale (but we're listening to changes so this will be overriden next run)
     const metadata = this.app.metadataCache.getFileCache(file);
 
+    const userPromptName = file.basename;
+
     // Use Obsidian's parsed frontmatter if available
     if (!metadata?.frontmatter || !metadata.frontmatterPosition) {
       logger.debug(`LLM Shortcut: No frontmatter found for file: ${file.path}`);
       return {
+        userPromptName,
         userPromptString: fileContent,
         userPromptOptions: DEFAULT_USER_PROMPT_OPTIONS,
       };
@@ -183,6 +186,7 @@ export default class LlmShortcutPlugin extends Plugin {
     );
 
     return {
+      userPromptName,
       userPromptString,
       userPromptOptions,
     };
@@ -254,7 +258,8 @@ export default class LlmShortcutPlugin extends Plugin {
   }): Promise<void> {
     assertExists(this.llmClient, "LLM client is not initialized");
 
-    const { userPromptString, userPromptOptions } = userPromptParams;
+    const { userPromptName, userPromptString, userPromptOptions } =
+      userPromptParams;
 
     const hasSelection = selection.startIdx !== selection.endIdx;
 
@@ -277,9 +282,9 @@ export default class LlmShortcutPlugin extends Plugin {
       });
 
       if (userPromptOptions.promptMode === "info") {
-        await this.showPopUpWithResponse(responseStream);
+        await this.showPopUpWithResponse({ userPromptName, responseStream });
       } else {
-        await this.updateEditorContentWithResponse(editor, responseStream);
+        await this.updateEditorContentWithResponse({ editor, responseStream });
       }
     } catch (error) {
       showErrorNotification(mapLlmErrorToReadable(error));
@@ -289,10 +294,13 @@ export default class LlmShortcutPlugin extends Plugin {
     }
   }
 
-  private async updateEditorContentWithResponse(
-    editor: Editor,
-    responseStream: AsyncGenerator<string, void, unknown>,
-  ) {
+  private async updateEditorContentWithResponse({
+    editor,
+    responseStream,
+  }: {
+    editor: Editor;
+    responseStream: AsyncGenerator<string, void, unknown>;
+  }) {
     const currentCursor = editor.getCursor("from");
 
     let text = "";
@@ -314,21 +322,28 @@ export default class LlmShortcutPlugin extends Plugin {
     editor.setSelection(currentCursor, incChar(currentCursor, text.length));
   }
 
-  private async showPopUpWithResponse(
-    responseStream: AsyncGenerator<string, void, unknown>,
-  ) {
-    const infoModal = new InfoModal(this.app, "laksjdf;lsjdf;lj");
+  private async showPopUpWithResponse({
+    userPromptName,
+    responseStream,
+  }: {
+    userPromptName: string;
+    responseStream: AsyncGenerator<string, void, unknown>;
+  }) {
+    const infoModal = new InfoModal(this.app, userPromptName);
     infoModal.open();
 
-    let text = "";
-    for await (const chunk of responseStream) {
-      text += chunk;
+    try {
+      let text = "";
+      for await (const chunk of responseStream) {
+        text += chunk;
 
-      infoModal.setInfo(text);
+        await infoModal.setInfo(text);
 
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      await nextFrame();
+        await nextFrame();
+      }
+    } catch (error) {
+      infoModal.close();
+      throw error;
     }
   }
 
@@ -386,15 +401,21 @@ export default class LlmShortcutPlugin extends Plugin {
   }
 
   private initCustomPromptCommand() {
-    const label = this.settings.customPromptCommandLabel;
+    const userPromptName = this.settings.customPromptCommandLabel;
+
     const command = {
       id: "llm-shortcut-custom-prompt",
-      name: label,
+      name: userPromptName,
       editorCallback: (editor: Editor) => {
         new CustomPromptModal(
           this.app,
-          (prompt) => this.handleCustomPrompt(prompt, editor),
-          label,
+          (userPromptString) =>
+            this.handleCustomPrompt({
+              userPromptName,
+              userPromptString,
+              editor,
+            }),
+          userPromptName,
         ).open();
       },
     };
@@ -403,7 +424,15 @@ export default class LlmShortcutPlugin extends Plugin {
     this.addCommand(command);
   }
 
-  async handleCustomPrompt(userPromptString: string, editor: Editor) {
+  async handleCustomPrompt({
+    userPromptName,
+    userPromptString,
+    editor,
+  }: {
+    userPromptName: string;
+    userPromptString: string;
+    editor: Editor;
+  }) {
     const startIdx = mapCursorPositionToIdx(
       editor.getValue(),
       editor.getCursor("from"),
@@ -415,6 +444,7 @@ export default class LlmShortcutPlugin extends Plugin {
 
     await this.processLlmRequest({
       userPromptParams: {
+        userPromptName,
         userPromptString,
         userPromptOptions: DEFAULT_USER_PROMPT_OPTIONS,
       },

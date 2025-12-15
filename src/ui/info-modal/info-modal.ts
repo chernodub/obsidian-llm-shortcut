@@ -1,20 +1,34 @@
 import clsx from "clsx";
-import { App, Modal } from "obsidian";
+import { App, Component, MarkdownRenderer, Modal } from "obsidian";
 import styles from "./info-modal.module.css";
 
 export class InfoModal extends Modal {
-  private infoEl: HTMLParagraphElement | null = null;
+  private infoEl?: HTMLDivElement;
+  private markdownComponent: Component;
 
   constructor(
     app: App,
     private readonly heading: string,
   ) {
     super(app);
+    this.markdownComponent = new Component();
     this.setTitle(this.heading);
   }
 
-  public setInfo(info: string) {
-    this.infoEl?.setText(info);
+  public async setInfo(str: string) {
+    if (!this.infoEl) {
+      return;
+    }
+
+    this.infoEl.empty();
+
+    await MarkdownRenderer.render(
+      this.app,
+      str,
+      this.infoEl,
+      "",
+      this.markdownComponent,
+    );
   }
 
   override onOpen() {
@@ -24,6 +38,7 @@ export class InfoModal extends Modal {
     contentEl.addClass(clsx(styles.content));
     this.modalEl.addClass(clsx(styles.modalRoot));
 
+    this.markdownComponent.load();
     this.createForm(contentEl);
     this.createFooter(contentEl);
   }
@@ -52,16 +67,16 @@ export class InfoModal extends Modal {
       cls: clsx(styles.form),
     });
 
-    this.infoEl = formEl.createEl("p");
+    this.infoEl = formEl.createDiv();
     this.infoEl.addClass(clsx(styles.info));
   }
 
   override onClose() {
     const { contentEl } = this;
 
+    this.markdownComponent.unload();
     contentEl.removeClass(clsx(styles.content));
     contentEl.empty();
     this.modalEl.removeClass(clsx(styles.modalRoot));
-    this.infoEl = null;
   }
 }
