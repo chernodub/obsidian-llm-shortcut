@@ -18,6 +18,7 @@ import { UserContentSelectionParams } from "./prompt/user-content-params";
 import { DEFAULT_USER_PROMPT_OPTIONS } from "./prompt/user-prompt-options";
 import { UserPromptParams } from "./prompt/user-prompt-params";
 import { SettingTab } from "./setting-tab";
+import { InfoModal } from "./ui/info-modal/info-modal";
 import { LoaderStrategy, LoaderStrategyFactory } from "./ui/loader-strategy";
 import { CustomPromptModal } from "./ui/prompt-modal/prompt-modal";
 import { showErrorNotification } from "./ui/user-notifications";
@@ -316,12 +317,17 @@ export default class LlmShortcutPlugin extends Plugin {
   private async showPopUpWithResponse(
     responseStream: AsyncGenerator<string, void, unknown>,
   ) {
+    const infoModal = new InfoModal(this.app, "laksjdf;lsjdf;lj");
+    infoModal.open();
+
     let text = "";
     for await (const chunk of responseStream) {
       text += chunk;
 
-      console.log(text);
-      // To trigger the UI update
+      infoModal.setInfo(text);
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
       await nextFrame();
     }
   }
