@@ -275,7 +275,11 @@ export default class LlmShortcutPlugin extends Plugin {
         userPromptOptions,
       });
 
-      await this.updateEditorContentWithResponse(editor, responseStream);
+      if (userPromptOptions.promptMode === "info") {
+        await this.showPopUpWithResponse(responseStream);
+      } else {
+        await this.updateEditorContentWithResponse(editor, responseStream);
+      }
     } catch (error) {
       showErrorNotification(mapLlmErrorToReadable(error));
       logger.error("Error while updating editor content", error);
@@ -307,6 +311,19 @@ export default class LlmShortcutPlugin extends Plugin {
     this.updateSelectedText(editor, text, currentCursor);
 
     editor.setSelection(currentCursor, incChar(currentCursor, text.length));
+  }
+
+  private async showPopUpWithResponse(
+    responseStream: AsyncGenerator<string, void, unknown>,
+  ) {
+    let text = "";
+    for await (const chunk of responseStream) {
+      text += chunk;
+
+      console.log(text);
+      // To trigger the UI update
+      await nextFrame();
+    }
   }
 
   private updateSelectedText(

@@ -1,15 +1,20 @@
-export const PromptModeDict = {
+import { getObjectKeys } from "../utils/object/get-object-keys";
+
+const PromptModeDict = {
   /**
-   * (Default)
-   * Replace the selection with the LLM response
-   * If there is no selection, insert the LLM response at the cursor position (replace nothing)
+   * For selection mode - replace the selection with the LLM response
+   * For cursor mode - insert the LLM response at the cursor position
    */
-  replace: undefined,
+  default: undefined,
   /**
    * Show LLM response in a popup window
    */
   info: undefined,
 } as const;
+
+export const ALL_PROMPT_MODES = new Set<PromptMode>(
+  getObjectKeys(PromptModeDict),
+);
 
 export type PromptMode = keyof typeof PromptModeDict;
 

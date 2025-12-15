@@ -1,6 +1,8 @@
 import { FrontMatterCache } from "obsidian";
 import {
+  ALL_PROMPT_MODES,
   DEFAULT_USER_PROMPT_OPTIONS,
+  PromptMode,
   UserPromptOptions,
 } from "../user-prompt-options";
 
@@ -61,14 +63,15 @@ export function parseUserPromptOptionsFromFileProperties(
     );
   }
 
+  let promptMode: PromptMode | undefined;
   const promptModeValue = fileProperties[PROMPT_MODE_PROP_NAME];
   if (promptModeValue === undefined) {
     promptMode = DEFAULT_USER_PROMPT_OPTIONS.promptMode;
-  } else if (promptModeValue === PROMPT_MODE_PROP_VALUE) {
-    promptMode = true;
+  } else if (ALL_PROMPT_MODES.has(promptModeValue)) {
+    promptMode = promptModeValue;
   } else {
     throw new Error(
-      `Invalid prompt file property=[${PROMPT_MODE_PROP_NAME}] value should be [${PROMPT_MODE_PROP_VALUE}], but got [${promptModeValue}]`,
+      `Invalid prompt file property=[${PROMPT_MODE_PROP_NAME}] value should be one of the values [${[...ALL_PROMPT_MODES.values()]}], but got [${promptModeValue}]`,
     );
   }
 
@@ -82,5 +85,6 @@ export function parseUserPromptOptionsFromFileProperties(
       fileProperties,
       CONTEXT_SIZE_AFTER_PROP_NAME,
     ),
+    promptMode,
   };
 }
