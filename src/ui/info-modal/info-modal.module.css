@@ -9,40 +9,18 @@
      gap: 12px;
      max-height: min(70vh, 520px);
      box-sizing: border-box;
- }
 
- .form {
-     flex: 1;
- }
-
- .info {
      width: 100%;
      min-height: 140px;
      height: 100%;
      resize: none;
+     padding-bottom: 12px;
  }
 
  @media (pointer: fine) {
-     .info {
+     .content {
          resize: vertical;
      }
- }
-
- .footer {
-     display: flex;
-     flex-direction: column;
-     gap: 8px;
-     margin-top: 4px;
- }
-
- .actions {
-     display: flex;
-     justify-content: flex-end;
-     gap: 8px;
- }
-
- .button {
-     padding: 8px 14px;
  }
 
  @media (max-width: 600px) {
@@ -57,17 +35,5 @@
 
      .content {
          max-height: none;
-     }
-
-     .footer {
-         margin-top: auto;
-     }
-
-     .actions {
-         width: 100%;
-     }
-
-     .button {
-         flex: 1 1 0;
      }
  }

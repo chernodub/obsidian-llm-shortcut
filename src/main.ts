@@ -329,7 +329,8 @@ export default class LlmShortcutPlugin extends Plugin {
     userPromptName: string;
     responseStream: AsyncGenerator<string, void, unknown>;
   }) {
-    const infoModal = new InfoModal(this.app, userPromptName);
+    const infoModal = new InfoModal(this.app);
+    infoModal.setTitle(userPromptName);
     infoModal.open();
 
     try {
