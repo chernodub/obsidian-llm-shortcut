@@ -64,21 +64,19 @@ export function parseUserPromptOptionsFromFileProperties(
     );
   }
 
-  let promptResponseProcessingMethod: PromptResponseProcessingMode | undefined;
-  const promptResponseProcessingMethodValue =
+  let promptResponseProcessingMode: PromptResponseProcessingMode | undefined;
+  const promptResponseProcessingModeValue =
     fileProperties[PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME];
-  if (promptResponseProcessingMethodValue === undefined) {
-    promptResponseProcessingMethod =
-      DEFAULT_USER_PROMPT_OPTIONS.promptResponseProcessingMethod;
+  if (promptResponseProcessingModeValue === undefined) {
+    promptResponseProcessingMode =
+      DEFAULT_USER_PROMPT_OPTIONS.promptResponseProcessingMode;
   } else if (
-    ALL_PROMPT_RESPONSE_PROCESSING_MODES.has(
-      promptResponseProcessingMethodValue,
-    )
+    ALL_PROMPT_RESPONSE_PROCESSING_MODES.has(promptResponseProcessingModeValue)
   ) {
-    promptResponseProcessingMethod = promptResponseProcessingMethodValue;
+    promptResponseProcessingMode = promptResponseProcessingModeValue;
   } else {
     throw new Error(
-      `Invalid prompt file property=[${PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME}] value should be one of the values [${[...ALL_PROMPT_RESPONSE_PROCESSING_MODES.values()]}], but got [${promptResponseProcessingMethodValue}]`,
+      `Invalid prompt file property=[${PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME}] value should be one of the values [${[...ALL_PROMPT_RESPONSE_PROCESSING_MODES.values()]}], but got [${promptResponseProcessingModeValue}]`,
     );
   }
 
@@ -92,6 +90,6 @@ export function parseUserPromptOptionsFromFileProperties(
       fileProperties,
       CONTEXT_SIZE_AFTER_PROP_NAME,
     ),
-    promptResponseProcessingMethod: promptResponseProcessingMethod,
+    promptResponseProcessingMode,
   };
 }

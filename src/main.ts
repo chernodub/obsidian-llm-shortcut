@@ -281,7 +281,7 @@ export default class LlmShortcutPlugin extends Plugin {
         userPromptOptions,
       });
 
-      if (userPromptOptions.promptResponseProcessingMethod === "info") {
+      if (userPromptOptions.promptResponseProcessingMode === "info") {
         await this.showPopUpWithResponse({ userPromptName, responseStream });
       } else {
         await this.updateEditorContentWithResponse({ editor, responseStream });

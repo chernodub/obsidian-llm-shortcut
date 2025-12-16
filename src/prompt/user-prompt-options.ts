@@ -27,7 +27,7 @@ export interface UserPromptOptions {
   readonly shouldHandleSelectionOnly: true | undefined;
   readonly contextSizeBefore: number | undefined;
   readonly contextSizeAfter: number | undefined;
-  readonly promptResponseProcessingMethod:
+  readonly promptResponseProcessingMode:
     | PromptResponseProcessingMode
     | undefined;
 }
@@ -36,5 +36,5 @@ export const DEFAULT_USER_PROMPT_OPTIONS: UserPromptOptions = {
   shouldHandleSelectionOnly: undefined,
   contextSizeBefore: undefined,
   contextSizeAfter: undefined,
-  promptResponseProcessingMethod: undefined,
+  promptResponseProcessingMode: undefined,
 };

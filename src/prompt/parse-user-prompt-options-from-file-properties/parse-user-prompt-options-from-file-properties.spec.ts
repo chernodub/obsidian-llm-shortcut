@@ -38,8 +38,8 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
       };
       const result = parseUserPromptOptionsFromFileProperties(fileProperties);
 
-      expect(result.promptResponseProcessingMethod).toBe(
-        DEFAULT_USER_PROMPT_OPTIONS.promptResponseProcessingMethod,
+      expect(result.promptResponseProcessingMode).toBe(
+        DEFAULT_USER_PROMPT_OPTIONS.promptResponseProcessingMode,
       );
     });
   });
@@ -209,7 +209,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
       };
       const result = parseUserPromptOptionsFromFileProperties(fileProperties);
 
-      expect(result.promptResponseProcessingMethod).toBe("default");
+      expect(result.promptResponseProcessingMode).toBe("default");
     });
 
     it("should parse valid 'info' mode", () => {
@@ -218,14 +218,14 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
       };
       const result = parseUserPromptOptionsFromFileProperties(fileProperties);
 
-      expect(result.promptResponseProcessingMethod).toBe("info");
+      expect(result.promptResponseProcessingMode).toBe("info");
     });
 
     it("should return undefined when property is missing", () => {
       const fileProperties: FrontMatterCache = {};
       const result = parseUserPromptOptionsFromFileProperties(fileProperties);
 
-      expect(result.promptResponseProcessingMethod).toBeUndefined();
+      expect(result.promptResponseProcessingMode).toBeUndefined();
     });
 
     it("should throw error for invalid processing mode value", () => {
@@ -366,7 +366,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
         shouldHandleSelectionOnly: true,
         contextSizeBefore: 5,
         contextSizeAfter: 10,
-        promptResponseProcessingMethod: "info",
+        promptResponseProcessingMode: "info",
       });
     });
 
@@ -381,7 +381,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
         shouldHandleSelectionOnly: true,
         contextSizeBefore: 3,
         contextSizeAfter: undefined,
-        promptResponseProcessingMethod: undefined,
+        promptResponseProcessingMode: undefined,
       });
     });
 
@@ -396,7 +396,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
         shouldHandleSelectionOnly: undefined,
         contextSizeBefore: 7,
         contextSizeAfter: 14,
-        promptResponseProcessingMethod: undefined,
+        promptResponseProcessingMode: undefined,
       });
     });
 
@@ -411,7 +411,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
         shouldHandleSelectionOnly: undefined,
         contextSizeBefore: 5,
         contextSizeAfter: undefined,
-        promptResponseProcessingMethod: "default",
+        promptResponseProcessingMode: "default",
       });
     });
 
