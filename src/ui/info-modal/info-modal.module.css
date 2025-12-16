@@ -1,20 +1,13 @@
  .modalRoot {
-     display: flex;
-     flex-direction: column;
+     /* display: flex;
+     flex-direction: column; */
  }
 
  .content {
-     display: flex;
-     flex-direction: column;
-     gap: 12px;
-     max-height: min(70vh, 520px);
-     box-sizing: border-box;
-
      width: 100%;
      min-height: 140px;
      height: 100%;
      resize: none;
-     padding-bottom: 12px;
  }
 
  @media (pointer: fine) {
