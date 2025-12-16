@@ -1,8 +1,8 @@
 import { FrontMatterCache } from "obsidian";
 import {
-  ALL_PROMPT_MODES,
+  ALL_PROMPT_RESPONSE_PROCESSING_MODES,
   DEFAULT_USER_PROMPT_OPTIONS,
-  PromptMode,
+  PromptResponseProcessingMode,
   UserPromptOptions,
 } from "../user-prompt-options";
 
@@ -12,7 +12,8 @@ export const SELECTION_ONLY_PROP_VALUE = "selection-only";
 export const CONTEXT_SIZE_BEFORE_PROP_NAME = "llm-shortcut-context-size-before";
 export const CONTEXT_SIZE_AFTER_PROP_NAME = "llm-shortcut-context-size-after";
 
-export const PROMPT_MODE_PROP_NAME = "llm-shortcut-prompt-mode";
+export const PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME =
+  "llm-shortcut-prompt-response-processing-mode";
 
 function parseNumericFileProperty(
   fileProperties: FrontMatterCache,
@@ -63,15 +64,21 @@ export function parseUserPromptOptionsFromFileProperties(
     );
   }
 
-  let promptMode: PromptMode | undefined;
-  const promptModeValue = fileProperties[PROMPT_MODE_PROP_NAME];
-  if (promptModeValue === undefined) {
-    promptMode = DEFAULT_USER_PROMPT_OPTIONS.promptMode;
-  } else if (ALL_PROMPT_MODES.has(promptModeValue)) {
-    promptMode = promptModeValue;
+  let promptResponseProcessingMethod: PromptResponseProcessingMode | undefined;
+  const promptResponseProcessingMethodValue =
+    fileProperties[PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME];
+  if (promptResponseProcessingMethodValue === undefined) {
+    promptResponseProcessingMethod =
+      DEFAULT_USER_PROMPT_OPTIONS.promptResponseProcessingMethod;
+  } else if (
+    ALL_PROMPT_RESPONSE_PROCESSING_MODES.has(
+      promptResponseProcessingMethodValue,
+    )
+  ) {
+    promptResponseProcessingMethod = promptResponseProcessingMethodValue;
   } else {
     throw new Error(
-      `Invalid prompt file property=[${PROMPT_MODE_PROP_NAME}] value should be one of the values [${[...ALL_PROMPT_MODES.values()]}], but got [${promptModeValue}]`,
+      `Invalid prompt file property=[${PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME}] value should be one of the values [${[...ALL_PROMPT_RESPONSE_PROCESSING_MODES.values()]}], but got [${promptResponseProcessingMethodValue}]`,
     );
   }
 
@@ -85,6 +92,6 @@ export function parseUserPromptOptionsFromFileProperties(
       fileProperties,
       CONTEXT_SIZE_AFTER_PROP_NAME,
     ),
-    promptMode,
+    promptResponseProcessingMethod: promptResponseProcessingMethod,
   };
 }
