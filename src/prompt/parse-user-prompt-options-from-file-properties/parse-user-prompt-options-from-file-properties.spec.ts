@@ -5,6 +5,7 @@ import {
   CONTEXT_SIZE_AFTER_PROP_NAME,
   CONTEXT_SIZE_BEFORE_PROP_NAME,
   parseUserPromptOptionsFromFileProperties,
+  PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME,
   SELECTION_MODE_PROP_NAME,
   SELECTION_ONLY_PROP_VALUE,
 } from "./parse-user-prompt-options-from-file-properties.js";
@@ -27,6 +28,18 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
 
       expect(result.shouldHandleSelectionOnly).toBe(
         DEFAULT_USER_PROMPT_OPTIONS.shouldHandleSelectionOnly,
+      );
+    });
+
+    it("should return default prompt response processing mode when property is missing", () => {
+      const fileProperties: FrontMatterCache = {
+        [CONTEXT_SIZE_BEFORE_PROP_NAME]: "10",
+        [CONTEXT_SIZE_AFTER_PROP_NAME]: "20",
+      };
+      const result = parseUserPromptOptionsFromFileProperties(fileProperties);
+
+      expect(result.promptResponseProcessingMethod).toBe(
+        DEFAULT_USER_PROMPT_OPTIONS.promptResponseProcessingMethod,
       );
     });
   });
@@ -189,6 +202,81 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
     });
   });
 
+  describe("prompt response processing mode", () => {
+    it("should parse valid 'default' mode", () => {
+      const fileProperties: FrontMatterCache = {
+        [PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME]: "default",
+      };
+      const result = parseUserPromptOptionsFromFileProperties(fileProperties);
+
+      expect(result.promptResponseProcessingMethod).toBe("default");
+    });
+
+    it("should parse valid 'info' mode", () => {
+      const fileProperties: FrontMatterCache = {
+        [PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME]: "info",
+      };
+      const result = parseUserPromptOptionsFromFileProperties(fileProperties);
+
+      expect(result.promptResponseProcessingMethod).toBe("info");
+    });
+
+    it("should return undefined when property is missing", () => {
+      const fileProperties: FrontMatterCache = {};
+      const result = parseUserPromptOptionsFromFileProperties(fileProperties);
+
+      expect(result.promptResponseProcessingMethod).toBeUndefined();
+    });
+
+    it("should throw error for invalid processing mode value", () => {
+      const fileProperties: FrontMatterCache = {
+        [PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME]: "invalid-mode",
+      };
+
+      expect(() =>
+        parseUserPromptOptionsFromFileProperties(fileProperties),
+      ).toThrow(
+        `Invalid prompt file property=[${PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME}] value should be one of the values [default,info], but got [invalid-mode]`,
+      );
+    });
+
+    it("should throw error when processing mode is not a string", () => {
+      const fileProperties: FrontMatterCache = {
+        [PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME]: 123,
+      };
+
+      expect(() =>
+        parseUserPromptOptionsFromFileProperties(fileProperties),
+      ).toThrow(
+        `Invalid prompt file property=[${PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME}] value should be one of the values [default,info], but got [123]`,
+      );
+    });
+
+    it("should throw error when processing mode is boolean", () => {
+      const fileProperties: FrontMatterCache = {
+        [PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME]: true,
+      };
+
+      expect(() =>
+        parseUserPromptOptionsFromFileProperties(fileProperties),
+      ).toThrow(
+        `Invalid prompt file property=[${PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME}] value should be one of the values [default,info], but got [true]`,
+      );
+    });
+
+    it("should throw error for empty string", () => {
+      const fileProperties: FrontMatterCache = {
+        [PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME]: "",
+      };
+
+      expect(() =>
+        parseUserPromptOptionsFromFileProperties(fileProperties),
+      ).toThrow(
+        `Invalid prompt file property=[${PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME}] value should be one of the values [default,info], but got []`,
+      );
+    });
+  });
+
   describe("context size after selection", () => {
     it("should parse valid positive integer", () => {
       const fileProperties: FrontMatterCache = {
@@ -270,6 +358,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
         [SELECTION_MODE_PROP_NAME]: SELECTION_ONLY_PROP_VALUE,
         [CONTEXT_SIZE_BEFORE_PROP_NAME]: "5",
         [CONTEXT_SIZE_AFTER_PROP_NAME]: "10",
+        [PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME]: "info",
       };
       const result = parseUserPromptOptionsFromFileProperties(fileProperties);
 
@@ -277,6 +366,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
         shouldHandleSelectionOnly: true,
         contextSizeBefore: 5,
         contextSizeAfter: 10,
+        promptResponseProcessingMethod: "info",
       });
     });
 
@@ -291,6 +381,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
         shouldHandleSelectionOnly: true,
         contextSizeBefore: 3,
         contextSizeAfter: undefined,
+        promptResponseProcessingMethod: undefined,
       });
     });
 
@@ -305,6 +396,22 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
         shouldHandleSelectionOnly: undefined,
         contextSizeBefore: 7,
         contextSizeAfter: 14,
+        promptResponseProcessingMethod: undefined,
+      });
+    });
+
+    it("should parse prompt response processing mode with other properties", () => {
+      const fileProperties: FrontMatterCache = {
+        [PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME]: "default",
+        [CONTEXT_SIZE_BEFORE_PROP_NAME]: "5",
+      };
+      const result = parseUserPromptOptionsFromFileProperties(fileProperties);
+
+      expect(result).toEqual({
+        shouldHandleSelectionOnly: undefined,
+        contextSizeBefore: 5,
+        contextSizeAfter: undefined,
+        promptResponseProcessingMethod: "default",
       });
     });
 
