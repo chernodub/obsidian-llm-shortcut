@@ -1,3 +1,7 @@
+ .modalRoot {
+     user-select: text;
+ }
+
  .content {
      width: 100%;
      min-height: 140px;
