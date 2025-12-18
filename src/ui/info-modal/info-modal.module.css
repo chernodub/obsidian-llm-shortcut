@@ -5,12 +5,6 @@
      resize: none;
  }
 
- @media (pointer: fine) {
-     .content {
-         resize: vertical;
-     }
- }
-
  @media (max-width: 600px) {
      .modalRoot {
          width: 100%;
