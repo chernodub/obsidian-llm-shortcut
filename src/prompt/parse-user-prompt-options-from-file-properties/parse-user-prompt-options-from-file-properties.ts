@@ -71,7 +71,9 @@ export function parseUserPromptOptionsFromFileProperties(
     promptResponseProcessingMode =
       DEFAULT_USER_PROMPT_OPTIONS.promptResponseProcessingMode;
   } else if (
-    ALL_PROMPT_RESPONSE_PROCESSING_MODES.has(promptResponseProcessingModeValue)
+    ALL_PROMPT_RESPONSE_PROCESSING_MODES.includes(
+      promptResponseProcessingModeValue,
+    )
   ) {
     promptResponseProcessingMode = promptResponseProcessingModeValue;
   } else {

@@ -1,27 +1,17 @@
-import { getObjectKeys } from "../utils/object/get-object-keys";
-
-/**
- * LLM response processing method
- */
-const PromptResponseProcessingMode = {
+export const ALL_PROMPT_RESPONSE_PROCESSING_MODES = [
   /**
    * For selection mode - replace the selection with the LLM response
    * For cursor mode - insert the LLM response at the cursor position
    */
-  default: undefined,
+  "default",
   /**
    * Show LLM response in a popup modal
    */
-  info: undefined,
-} as const;
-
-export const ALL_PROMPT_RESPONSE_PROCESSING_MODES =
-  new Set<PromptResponseProcessingMode>(
-    getObjectKeys(PromptResponseProcessingMode),
-  );
+  "info",
+] as const;
 
 export type PromptResponseProcessingMode =
-  keyof typeof PromptResponseProcessingMode;
+  (typeof ALL_PROMPT_RESPONSE_PROCESSING_MODES)[number];
 
 export interface UserPromptOptions {
   readonly shouldHandleSelectionOnly: true | undefined;
