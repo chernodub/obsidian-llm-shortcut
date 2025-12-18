@@ -5,7 +5,10 @@ import {
   SELECTION_START_MACROS,
 } from "../constants";
 import { UserContentParams } from "../user-content-params";
-import { UserPromptOptions } from "../user-prompt-options";
+import {
+  DEFAULT_USER_PROMPT_OPTIONS,
+  UserPromptOptions,
+} from "../user-prompt-options";
 import { prepareUserContent } from "./prepare-user-content";
 
 describe("prepareUserContent", () => {
@@ -17,9 +20,7 @@ describe("prepareUserContent", () => {
         endIdx: 11,
       };
       const userPromptOptions: UserPromptOptions = {
-        shouldHandleSelectionOnly: undefined,
-        contextSizeBefore: undefined,
-        contextSizeAfter: undefined,
+        ...DEFAULT_USER_PROMPT_OPTIONS,
       };
 
       const result = prepareUserContent({
@@ -43,9 +44,7 @@ describe("prepareUserContent", () => {
         endIdx: 5,
       };
       const userPromptOptions: UserPromptOptions = {
-        shouldHandleSelectionOnly: undefined,
-        contextSizeBefore: undefined,
-        contextSizeAfter: undefined,
+        ...DEFAULT_USER_PROMPT_OPTIONS,
       };
 
       const result = prepareUserContent({
@@ -63,9 +62,7 @@ describe("prepareUserContent", () => {
         endIdx: 0,
       };
       const userPromptOptions: UserPromptOptions = {
-        shouldHandleSelectionOnly: undefined,
-        contextSizeBefore: undefined,
-        contextSizeAfter: undefined,
+        ...DEFAULT_USER_PROMPT_OPTIONS,
       };
 
       const result = prepareUserContent({
@@ -83,9 +80,7 @@ describe("prepareUserContent", () => {
         endIdx: 5,
       };
       const userPromptOptions: UserPromptOptions = {
-        shouldHandleSelectionOnly: undefined,
-        contextSizeBefore: undefined,
-        contextSizeAfter: undefined,
+        ...DEFAULT_USER_PROMPT_OPTIONS,
       };
 
       const result = prepareUserContent({
@@ -105,9 +100,7 @@ describe("prepareUserContent", () => {
         endIdx: 11,
       };
       const userPromptOptions: UserPromptOptions = {
-        shouldHandleSelectionOnly: undefined,
-        contextSizeBefore: undefined,
-        contextSizeAfter: undefined,
+        ...DEFAULT_USER_PROMPT_OPTIONS,
       };
 
       const result = prepareUserContent({
@@ -127,9 +120,7 @@ describe("prepareUserContent", () => {
         endIdx: 5,
       };
       const userPromptOptions: UserPromptOptions = {
-        shouldHandleSelectionOnly: undefined,
-        contextSizeBefore: undefined,
-        contextSizeAfter: undefined,
+        ...DEFAULT_USER_PROMPT_OPTIONS,
       };
 
       const result = prepareUserContent({
@@ -151,9 +142,8 @@ describe("prepareUserContent", () => {
         endIdx: 11,
       };
       const userPromptOptions: UserPromptOptions = {
-        shouldHandleSelectionOnly: undefined,
+        ...DEFAULT_USER_PROMPT_OPTIONS,
         contextSizeBefore: 100,
-        contextSizeAfter: undefined,
       };
 
       const result = prepareUserContent({
@@ -173,9 +163,8 @@ describe("prepareUserContent", () => {
         endIdx: 24,
       };
       const userPromptOptions: UserPromptOptions = {
-        shouldHandleSelectionOnly: undefined,
+        ...DEFAULT_USER_PROMPT_OPTIONS,
         contextSizeBefore: 5,
-        contextSizeAfter: undefined,
       };
 
       const result = prepareUserContent({
@@ -199,9 +188,8 @@ describe("prepareUserContent", () => {
         endIdx: 11,
       };
       const userPromptOptions: UserPromptOptions = {
-        shouldHandleSelectionOnly: undefined,
+        ...DEFAULT_USER_PROMPT_OPTIONS,
         contextSizeBefore: 6,
-        contextSizeAfter: undefined,
       };
 
       const result = prepareUserContent({
@@ -221,9 +209,8 @@ describe("prepareUserContent", () => {
         endIdx: 11,
       };
       const userPromptOptions: UserPromptOptions = {
-        shouldHandleSelectionOnly: undefined,
+        ...DEFAULT_USER_PROMPT_OPTIONS,
         contextSizeBefore: 0,
-        contextSizeAfter: undefined,
       };
 
       const result = prepareUserContent({
@@ -243,9 +230,8 @@ describe("prepareUserContent", () => {
         endIdx: 5,
       };
       const userPromptOptions: UserPromptOptions = {
-        shouldHandleSelectionOnly: undefined,
+        ...DEFAULT_USER_PROMPT_OPTIONS,
         contextSizeBefore: 5,
-        contextSizeAfter: undefined,
       };
 
       const result = prepareUserContent({
@@ -267,8 +253,7 @@ describe("prepareUserContent", () => {
         endIdx: 5,
       };
       const userPromptOptions: UserPromptOptions = {
-        shouldHandleSelectionOnly: undefined,
-        contextSizeBefore: undefined,
+        ...DEFAULT_USER_PROMPT_OPTIONS,
         contextSizeAfter: 100,
       };
 
@@ -289,8 +274,7 @@ describe("prepareUserContent", () => {
         endIdx: 4,
       };
       const userPromptOptions: UserPromptOptions = {
-        shouldHandleSelectionOnly: undefined,
-        contextSizeBefore: undefined,
+        ...DEFAULT_USER_PROMPT_OPTIONS,
         contextSizeAfter: 5,
       };
 
@@ -311,8 +295,7 @@ describe("prepareUserContent", () => {
         endIdx: 5,
       };
       const userPromptOptions: UserPromptOptions = {
-        shouldHandleSelectionOnly: undefined,
-        contextSizeBefore: undefined,
+        ...DEFAULT_USER_PROMPT_OPTIONS,
         contextSizeAfter: 6,
       };
 
@@ -333,8 +316,7 @@ describe("prepareUserContent", () => {
         endIdx: 5,
       };
       const userPromptOptions: UserPromptOptions = {
-        shouldHandleSelectionOnly: undefined,
-        contextSizeBefore: undefined,
+        ...DEFAULT_USER_PROMPT_OPTIONS,
         contextSizeAfter: 0,
       };
 
@@ -355,8 +337,7 @@ describe("prepareUserContent", () => {
         endIdx: 11,
       };
       const userPromptOptions: UserPromptOptions = {
-        shouldHandleSelectionOnly: undefined,
-        contextSizeBefore: undefined,
+        ...DEFAULT_USER_PROMPT_OPTIONS,
         contextSizeAfter: 5,
       };
 
@@ -379,7 +360,7 @@ describe("prepareUserContent", () => {
         endIdx: 19,
       };
       const userPromptOptions: UserPromptOptions = {
-        shouldHandleSelectionOnly: undefined,
+        ...DEFAULT_USER_PROMPT_OPTIONS,
         contextSizeBefore: 5,
         contextSizeAfter: 5,
       };
@@ -405,7 +386,7 @@ describe("prepareUserContent", () => {
         endIdx: 11,
       };
       const userPromptOptions: UserPromptOptions = {
-        shouldHandleSelectionOnly: undefined,
+        ...DEFAULT_USER_PROMPT_OPTIONS,
         contextSizeBefore: 100,
         contextSizeAfter: 100,
       };
@@ -427,7 +408,7 @@ describe("prepareUserContent", () => {
         endIdx: 11,
       };
       const userPromptOptions: UserPromptOptions = {
-        shouldHandleSelectionOnly: undefined,
+        ...DEFAULT_USER_PROMPT_OPTIONS,
         contextSizeBefore: 0,
         contextSizeAfter: 0,
       };
@@ -449,7 +430,7 @@ describe("prepareUserContent", () => {
         endIdx: 8,
       };
       const userPromptOptions: UserPromptOptions = {
-        shouldHandleSelectionOnly: undefined,
+        ...DEFAULT_USER_PROMPT_OPTIONS,
         contextSizeBefore: 3,
         contextSizeAfter: 3,
       };
@@ -471,9 +452,7 @@ describe("prepareUserContent", () => {
         endIdx: 13,
       };
       const userPromptOptions: UserPromptOptions = {
-        shouldHandleSelectionOnly: undefined,
-        contextSizeBefore: undefined,
-        contextSizeAfter: undefined,
+        ...DEFAULT_USER_PROMPT_OPTIONS,
       };
 
       const result = prepareUserContent({
@@ -497,9 +476,7 @@ describe("prepareUserContent", () => {
         endIdx: 13,
       };
       const userPromptOptions: UserPromptOptions = {
-        shouldHandleSelectionOnly: undefined,
-        contextSizeBefore: undefined,
-        contextSizeAfter: undefined,
+        ...DEFAULT_USER_PROMPT_OPTIONS,
       };
 
       const result = prepareUserContent({
@@ -523,7 +500,7 @@ describe("prepareUserContent", () => {
         endIdx: 3,
       };
       const userPromptOptions: UserPromptOptions = {
-        shouldHandleSelectionOnly: undefined,
+        ...DEFAULT_USER_PROMPT_OPTIONS,
         contextSizeBefore: 1000000,
         contextSizeAfter: 1000000,
       };

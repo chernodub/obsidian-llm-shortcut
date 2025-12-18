@@ -1,6 +1,8 @@
 import { FrontMatterCache } from "obsidian";
 import {
+  ALL_PROMPT_RESPONSE_PROCESSING_MODES,
   DEFAULT_USER_PROMPT_OPTIONS,
+  PromptResponseProcessingMode,
   UserPromptOptions,
 } from "../user-prompt-options";
 
@@ -9,6 +11,9 @@ export const SELECTION_ONLY_PROP_VALUE = "selection-only";
 
 export const CONTEXT_SIZE_BEFORE_PROP_NAME = "llm-shortcut-context-size-before";
 export const CONTEXT_SIZE_AFTER_PROP_NAME = "llm-shortcut-context-size-after";
+
+export const PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME =
+  "llm-shortcut-prompt-response-processing-mode";
 
 function parseNumericFileProperty(
   fileProperties: FrontMatterCache,
@@ -59,6 +64,24 @@ export function parseUserPromptOptionsFromFileProperties(
     );
   }
 
+  let promptResponseProcessingMode: PromptResponseProcessingMode | undefined;
+  const promptResponseProcessingModeValue =
+    fileProperties[PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME];
+  if (promptResponseProcessingModeValue === undefined) {
+    promptResponseProcessingMode =
+      DEFAULT_USER_PROMPT_OPTIONS.promptResponseProcessingMode;
+  } else if (
+    ALL_PROMPT_RESPONSE_PROCESSING_MODES.includes(
+      promptResponseProcessingModeValue,
+    )
+  ) {
+    promptResponseProcessingMode = promptResponseProcessingModeValue;
+  } else {
+    throw new Error(
+      `Invalid prompt file property=[${PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME}] value should be one of the values [${[...ALL_PROMPT_RESPONSE_PROCESSING_MODES.values()]}], but got [${promptResponseProcessingModeValue}]`,
+    );
+  }
+
   return {
     shouldHandleSelectionOnly,
     contextSizeBefore: parseNumericFileProperty(
@@ -69,5 +92,6 @@ export function parseUserPromptOptionsFromFileProperties(
       fileProperties,
       CONTEXT_SIZE_AFTER_PROP_NAME,
     ),
+    promptResponseProcessingMode,
   };
 }
