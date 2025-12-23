@@ -269,8 +269,11 @@ export default class LlmShortcutPlugin extends Plugin {
     const { userPromptName, userPromptString, userPromptOptions } =
       userPromptParams;
 
-    const initialSelection = this.getSelection(editor);
-    const selection = trimSelection(editor.getValue(), initialSelection);
+    const selection = trimSelection(
+      editor.getValue(),
+      this.getSelection(editor),
+    );
+    this.applySelection(editor, selection);
 
     const hasSelection = selection.startIdx !== selection.endIdx;
 
@@ -298,7 +301,6 @@ export default class LlmShortcutPlugin extends Plugin {
         await this.updateEditorContentWithResponse({
           editor,
           responseStream,
-          selection,
         });
       }
     } catch (error) {
@@ -312,13 +314,10 @@ export default class LlmShortcutPlugin extends Plugin {
   private async updateEditorContentWithResponse({
     editor,
     responseStream,
-    selection,
   }: {
     editor: Editor;
     responseStream: AsyncGenerator<string, void, unknown>;
-    selection: UserContentSelectionParams;
   }) {
-    this.applySelection(editor, selection);
     const fromCursor = editor.getCursor("from");
 
     let text = "";
