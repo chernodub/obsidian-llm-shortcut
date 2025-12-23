@@ -24,7 +24,10 @@ import { CustomPromptModal } from "./ui/prompt-modal/prompt-modal";
 import { showErrorNotification } from "./ui/user-notifications";
 import { assertExists } from "./utils/assertions/assert-exists";
 import { PLUGIN_NAME } from "./utils/constants";
-import { mapCursorPositionToIdx } from "./utils/obsidian/map-position-to-idx";
+import {
+  mapCursorPositionToIdx,
+  mapIdxToCursorPosition,
+} from "./utils/obsidian/map-position-to-idx";
 import { obsidianFetchAdapter } from "./utils/obsidian/obsidian-fetch-adapter";
 
 interface PluginSettings {
@@ -44,6 +47,35 @@ const DEFAULT_SETTINGS: PluginSettings = {
   project: "",
   customPromptCommandLabel: "Custom prompt",
 };
+
+function trimSelection(
+  text: string,
+  { startIdx, endIdx }: UserContentSelectionParams,
+): UserContentSelectionParams {
+  const isWhitespace = (idx: number) => {
+    return /\s/.test(text[idx]!);
+  };
+
+  while (startIdx < endIdx && isWhitespace(startIdx)) {
+    startIdx++;
+  }
+
+  while (startIdx < endIdx && isWhitespace(endIdx - 1)) {
+    endIdx--;
+  }
+
+  return {
+    startIdx,
+    endIdx,
+  };
+}
+
+function applySelection(editor: Editor, selection: UserContentSelectionParams) {
+  const text = editor.getValue();
+  const start = mapIdxToCursorPosition(text, selection.startIdx);
+  const end = mapIdxToCursorPosition(text, selection.endIdx);
+  editor.setSelection(start, end);
+}
 
 export default class LlmShortcutPlugin extends Plugin {
   public settings: PluginSettings = DEFAULT_SETTINGS;
@@ -255,7 +287,9 @@ export default class LlmShortcutPlugin extends Plugin {
     const { userPromptName, userPromptString, userPromptOptions } =
       userPromptParams;
 
-    const selection = this.getSelection(editor);
+    const initialSelection = this.getSelection(editor);
+    const selection = trimSelection(editor.getValue(), initialSelection);
+
     const hasSelection = selection.startIdx !== selection.endIdx;
 
     if (userPromptOptions.shouldHandleSelectionOnly && !hasSelection) {
@@ -279,7 +313,11 @@ export default class LlmShortcutPlugin extends Plugin {
       if (userPromptOptions.promptResponseProcessingMode === "info") {
         await this.showPopUpWithResponse({ userPromptName, responseStream });
       } else {
-        await this.updateEditorContentWithResponse({ editor, responseStream });
+        await this.updateEditorContentWithResponse({
+          editor,
+          responseStream,
+          selection,
+        });
       }
     } catch (error) {
       showErrorNotification(mapLlmErrorToReadable(error));
@@ -292,17 +330,24 @@ export default class LlmShortcutPlugin extends Plugin {
   private async updateEditorContentWithResponse({
     editor,
     responseStream,
+    selection,
   }: {
     editor: Editor;
     responseStream: AsyncGenerator<string, void, unknown>;
+    selection: UserContentSelectionParams;
   }) {
-    const currentCursor = editor.getCursor("from");
+    let fromCursor: EditorPosition | undefined;
 
     let text = "";
     for await (const chunk of responseStream) {
+      if (!fromCursor) {
+        applySelection(editor, selection);
+        fromCursor = editor.getCursor("from");
+      }
+
       text += chunk;
 
-      this.updateSelectedText(editor, text, currentCursor);
+      this.updateSelectedText(editor, text, fromCursor);
 
       // To trigger the UI update
       await nextFrame();
@@ -312,9 +357,13 @@ export default class LlmShortcutPlugin extends Plugin {
       editor.undo();
     }
 
-    this.updateSelectedText(editor, text, currentCursor);
+    if (!fromCursor) {
+      throw new Error("LLM Shortcut: response stream seems to be empty");
+    }
 
-    editor.setSelection(currentCursor, incChar(currentCursor, text.length));
+    this.updateSelectedText(editor, text, fromCursor);
+
+    editor.setSelection(fromCursor, incChar(fromCursor, text.length));
   }
 
   private async showPopUpWithResponse({
