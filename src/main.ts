@@ -48,35 +48,6 @@ const DEFAULT_SETTINGS: PluginSettings = {
   customPromptCommandLabel: "Custom prompt",
 };
 
-function trimSelection(
-  text: string,
-  { startIdx, endIdx }: UserContentSelectionParams,
-): UserContentSelectionParams {
-  const isWhitespace = (idx: number) => {
-    return /\s/.test(text[idx]!);
-  };
-
-  while (startIdx < endIdx && isWhitespace(startIdx)) {
-    startIdx++;
-  }
-
-  while (startIdx < endIdx && isWhitespace(endIdx - 1)) {
-    endIdx--;
-  }
-
-  return {
-    startIdx,
-    endIdx,
-  };
-}
-
-function applySelection(editor: Editor, selection: UserContentSelectionParams) {
-  const text = editor.getValue();
-  const start = mapIdxToCursorPosition(text, selection.startIdx);
-  const end = mapIdxToCursorPosition(text, selection.endIdx);
-  editor.setSelection(start, end);
-}
-
 export default class LlmShortcutPlugin extends Plugin {
   public settings: PluginSettings = DEFAULT_SETTINGS;
   private llmClient?: LLMClient;
@@ -260,6 +231,38 @@ export default class LlmShortcutPlugin extends Plugin {
     };
   }
 
+  private trimSelection(
+    text: string,
+    { startIdx, endIdx }: UserContentSelectionParams,
+  ): UserContentSelectionParams {
+    const isWhitespace = (idx: number) => {
+      return /\s/.test(text[idx]!);
+    };
+
+    while (startIdx < endIdx && isWhitespace(startIdx)) {
+      startIdx++;
+    }
+
+    while (startIdx < endIdx && isWhitespace(endIdx - 1)) {
+      endIdx--;
+    }
+
+    return {
+      startIdx,
+      endIdx,
+    };
+  }
+
+  private applySelection(
+    editor: Editor,
+    selection: UserContentSelectionParams,
+  ) {
+    const text = editor.getValue();
+    const start = mapIdxToCursorPosition(text, selection.startIdx);
+    const end = mapIdxToCursorPosition(text, selection.endIdx);
+    editor.setSelection(start, end);
+  }
+
   private async handleRespond(promptFilePath: string, editor: Editor) {
     const file = this.app.vault.getFileByPath(promptFilePath);
 
@@ -288,7 +291,7 @@ export default class LlmShortcutPlugin extends Plugin {
       userPromptParams;
 
     const initialSelection = this.getSelection(editor);
-    const selection = trimSelection(editor.getValue(), initialSelection);
+    const selection = this.trimSelection(editor.getValue(), initialSelection);
 
     const hasSelection = selection.startIdx !== selection.endIdx;
 
@@ -336,15 +339,11 @@ export default class LlmShortcutPlugin extends Plugin {
     responseStream: AsyncGenerator<string, void, unknown>;
     selection: UserContentSelectionParams;
   }) {
-    let fromCursor: EditorPosition | undefined;
+    this.applySelection(editor, selection);
+    const fromCursor = editor.getCursor("from");
 
     let text = "";
     for await (const chunk of responseStream) {
-      if (!fromCursor) {
-        applySelection(editor, selection);
-        fromCursor = editor.getCursor("from");
-      }
-
       text += chunk;
 
       this.updateSelectedText(editor, text, fromCursor);
@@ -355,10 +354,6 @@ export default class LlmShortcutPlugin extends Plugin {
       // This is a workaround to prevent the diff from being added to the undo history,
       // so we're not polluting the history with every single chunk.
       editor.undo();
-    }
-
-    if (!fromCursor) {
-      throw new Error("LLM Shortcut: response stream seems to be empty");
     }
 
     this.updateSelectedText(editor, text, fromCursor);
