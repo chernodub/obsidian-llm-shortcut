@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mapCursorPositionToIdx } from "./map-position-to-idx.js";
+import { mapCursorPositionToIdx } from "./map-cursor-position-to-idx";
 
 describe("mapCursorPositionToIdx", () => {
   it("should map cursor position to index for multi-line text", () => {

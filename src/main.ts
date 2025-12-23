@@ -27,7 +27,7 @@ import { PLUGIN_NAME } from "./utils/constants";
 import {
   mapCursorPositionToIdx,
   mapIdxToCursorPosition,
-} from "./utils/obsidian/map-position-to-idx";
+} from "./utils/obsidian/map-cursor-position-to-idx/map-cursor-position-to-idx";
 import { obsidianFetchAdapter } from "./utils/obsidian/obsidian-fetch-adapter";
 
 interface PluginSettings {
