@@ -219,16 +219,17 @@ export default class LlmShortcutPlugin extends Plugin {
     this.addCommand(command);
   }
 
-  private async handleRespond(promptFilePath: string, editor: Editor) {
-    const startIdx = mapCursorPositionToIdx(
-      editor.getValue(),
-      editor.getCursor("from"),
-    );
-    const endIdx = mapCursorPositionToIdx(
-      editor.getValue(),
-      editor.getCursor("to"),
-    );
+  private getSelection(editor: Editor): UserContentSelectionParams {
+    return {
+      startIdx: mapCursorPositionToIdx(
+        editor.getValue(),
+        editor.getCursor("from"),
+      ),
+      endIdx: mapCursorPositionToIdx(editor.getValue(), editor.getCursor("to")),
+    };
+  }
 
+  private async handleRespond(promptFilePath: string, editor: Editor) {
     const file = this.app.vault.getFileByPath(promptFilePath);
 
     if (!file) {
@@ -240,10 +241,7 @@ export default class LlmShortcutPlugin extends Plugin {
     await this.processLlmRequest({
       userPromptParams,
       editor,
-      selection: {
-        startIdx,
-        endIdx,
-      },
+      selection: this.getSelection(editor),
     });
   }
 
@@ -434,15 +432,6 @@ export default class LlmShortcutPlugin extends Plugin {
     userPromptString: string;
     editor: Editor;
   }) {
-    const startIdx = mapCursorPositionToIdx(
-      editor.getValue(),
-      editor.getCursor("from"),
-    );
-    const endIdx = mapCursorPositionToIdx(
-      editor.getValue(),
-      editor.getCursor("to"),
-    );
-
     await this.processLlmRequest({
       userPromptParams: {
         userPromptName,
@@ -450,10 +439,7 @@ export default class LlmShortcutPlugin extends Plugin {
         userPromptOptions: DEFAULT_USER_PROMPT_OPTIONS,
       },
       editor,
-      selection: {
-        startIdx,
-        endIdx,
-      },
+      selection: this.getSelection(editor),
     });
   }
 }
