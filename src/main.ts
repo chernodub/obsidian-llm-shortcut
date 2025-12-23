@@ -27,6 +27,7 @@ import { PLUGIN_NAME } from "./utils/constants";
 import { mapCursorPositionToIdx } from "./utils/obsidian/map-cursor-position-to-idx/map-cursor-position-to-idx";
 import { mapIdxToCursorPosition } from "./utils/obsidian/map-idx-to-cursor-position/map-idx-to-cursor-position";
 import { obsidianFetchAdapter } from "./utils/obsidian/obsidian-fetch-adapter";
+import { trimSelection } from "./utils/obsidian/trim-selection/trim-selection";
 
 interface PluginSettings {
   apiKey: string;
@@ -229,28 +230,6 @@ export default class LlmShortcutPlugin extends Plugin {
     };
   }
 
-  private trimSelection(
-    text: string,
-    { startIdx, endIdx }: UserContentSelectionParams,
-  ): UserContentSelectionParams {
-    const isWhitespace = (idx: number) => {
-      return /\s/.test(text[idx]!);
-    };
-
-    while (startIdx < endIdx && isWhitespace(startIdx)) {
-      startIdx++;
-    }
-
-    while (startIdx < endIdx && isWhitespace(endIdx - 1)) {
-      endIdx--;
-    }
-
-    return {
-      startIdx,
-      endIdx,
-    };
-  }
-
   private applySelection(
     editor: Editor,
     selection: UserContentSelectionParams,
@@ -291,7 +270,7 @@ export default class LlmShortcutPlugin extends Plugin {
       userPromptParams;
 
     const initialSelection = this.getSelection(editor);
-    const selection = this.trimSelection(editor.getValue(), initialSelection);
+    const selection = trimSelection(editor.getValue(), initialSelection);
 
     const hasSelection = selection.startIdx !== selection.endIdx;
 
