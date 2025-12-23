@@ -220,12 +220,11 @@ export default class LlmShortcutPlugin extends Plugin {
   }
 
   private getSelection(editor: Editor): UserContentSelectionParams {
+    const text = editor.getValue();
+
     return {
-      startIdx: mapCursorPositionToIdx(
-        editor.getValue(),
-        editor.getCursor("from"),
-      ),
-      endIdx: mapCursorPositionToIdx(editor.getValue(), editor.getCursor("to")),
+      startIdx: mapCursorPositionToIdx(text, editor.getCursor("from")),
+      endIdx: mapCursorPositionToIdx(text, editor.getCursor("to")),
     };
   }
 
@@ -241,24 +240,22 @@ export default class LlmShortcutPlugin extends Plugin {
     await this.processLlmRequest({
       userPromptParams,
       editor,
-      selection: this.getSelection(editor),
     });
   }
 
   private async processLlmRequest({
     userPromptParams,
     editor,
-    selection,
   }: {
     readonly userPromptParams: UserPromptParams;
     readonly editor: Editor;
-    readonly selection: UserContentSelectionParams;
   }): Promise<void> {
     assertExists(this.llmClient, "LLM client is not initialized");
 
     const { userPromptName, userPromptString, userPromptOptions } =
       userPromptParams;
 
+    const selection = this.getSelection(editor);
     const hasSelection = selection.startIdx !== selection.endIdx;
 
     if (userPromptOptions.shouldHandleSelectionOnly && !hasSelection) {
@@ -439,7 +436,6 @@ export default class LlmShortcutPlugin extends Plugin {
         userPromptOptions: DEFAULT_USER_PROMPT_OPTIONS,
       },
       editor,
-      selection: this.getSelection(editor),
     });
   }
 }
