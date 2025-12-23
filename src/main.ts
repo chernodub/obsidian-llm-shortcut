@@ -24,10 +24,8 @@ import { CustomPromptModal } from "./ui/prompt-modal/prompt-modal";
 import { showErrorNotification } from "./ui/user-notifications";
 import { assertExists } from "./utils/assertions/assert-exists";
 import { PLUGIN_NAME } from "./utils/constants";
-import {
-  mapCursorPositionToIdx,
-  mapIdxToCursorPosition,
-} from "./utils/obsidian/map-cursor-position-to-idx/map-cursor-position-to-idx";
+import { mapCursorPositionToIdx } from "./utils/obsidian/map-cursor-position-to-idx/map-cursor-position-to-idx";
+import { mapIdxToCursorPosition } from "./utils/obsidian/map-idx-to-cursor-position/map-idx-to-cursor-position";
 import { obsidianFetchAdapter } from "./utils/obsidian/obsidian-fetch-adapter";
 
 interface PluginSettings {
@@ -258,8 +256,10 @@ export default class LlmShortcutPlugin extends Plugin {
     selection: UserContentSelectionParams,
   ) {
     const text = editor.getValue();
+
     const start = mapIdxToCursorPosition(text, selection.startIdx);
     const end = mapIdxToCursorPosition(text, selection.endIdx);
+
     editor.setSelection(start, end);
   }
 
