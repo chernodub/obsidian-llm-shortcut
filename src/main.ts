@@ -24,8 +24,10 @@ import { CustomPromptModal } from "./ui/prompt-modal/prompt-modal";
 import { showErrorNotification } from "./ui/user-notifications";
 import { assertExists } from "./utils/assertions/assert-exists";
 import { PLUGIN_NAME } from "./utils/constants";
-import { mapCursorPositionToIdx } from "./utils/obsidian/map-position-to-idx";
+import { mapCursorPositionToIdx } from "./utils/obsidian/map-cursor-position-to-idx/map-cursor-position-to-idx";
+import { mapIdxToCursorPosition } from "./utils/obsidian/map-idx-to-cursor-position/map-idx-to-cursor-position";
 import { obsidianFetchAdapter } from "./utils/obsidian/obsidian-fetch-adapter";
+import { trimSelection } from "./utils/obsidian/trim-selection/trim-selection";
 
 interface PluginSettings {
   apiKey: string;
@@ -219,16 +221,28 @@ export default class LlmShortcutPlugin extends Plugin {
     this.addCommand(command);
   }
 
-  private async handleRespond(promptFilePath: string, editor: Editor) {
-    const startIdx = mapCursorPositionToIdx(
-      editor.getValue(),
-      editor.getCursor("from"),
-    );
-    const endIdx = mapCursorPositionToIdx(
-      editor.getValue(),
-      editor.getCursor("to"),
-    );
+  private getSelection(editor: Editor): UserContentSelectionParams {
+    const text = editor.getValue();
 
+    return {
+      startIdx: mapCursorPositionToIdx(text, editor.getCursor("from")),
+      endIdx: mapCursorPositionToIdx(text, editor.getCursor("to")),
+    };
+  }
+
+  private applySelection(
+    editor: Editor,
+    selection: UserContentSelectionParams,
+  ) {
+    const text = editor.getValue();
+
+    const start = mapIdxToCursorPosition(text, selection.startIdx);
+    const end = mapIdxToCursorPosition(text, selection.endIdx);
+
+    editor.setSelection(start, end);
+  }
+
+  private async handleRespond(promptFilePath: string, editor: Editor) {
     const file = this.app.vault.getFileByPath(promptFilePath);
 
     if (!file) {
@@ -240,26 +254,26 @@ export default class LlmShortcutPlugin extends Plugin {
     await this.processLlmRequest({
       userPromptParams,
       editor,
-      selection: {
-        startIdx,
-        endIdx,
-      },
     });
   }
 
   private async processLlmRequest({
     userPromptParams,
     editor,
-    selection,
   }: {
     readonly userPromptParams: UserPromptParams;
     readonly editor: Editor;
-    readonly selection: UserContentSelectionParams;
   }): Promise<void> {
     assertExists(this.llmClient, "LLM client is not initialized");
 
     const { userPromptName, userPromptString, userPromptOptions } =
       userPromptParams;
+
+    const selection = trimSelection(
+      editor.getValue(),
+      this.getSelection(editor),
+    );
+    this.applySelection(editor, selection);
 
     const hasSelection = selection.startIdx !== selection.endIdx;
 
@@ -284,7 +298,10 @@ export default class LlmShortcutPlugin extends Plugin {
       if (userPromptOptions.promptResponseProcessingMode === "info") {
         await this.showPopUpWithResponse({ userPromptName, responseStream });
       } else {
-        await this.updateEditorContentWithResponse({ editor, responseStream });
+        await this.updateEditorContentWithResponse({
+          editor,
+          responseStream,
+        });
       }
     } catch (error) {
       showErrorNotification(mapLlmErrorToReadable(error));
@@ -301,13 +318,13 @@ export default class LlmShortcutPlugin extends Plugin {
     editor: Editor;
     responseStream: AsyncGenerator<string, void, unknown>;
   }) {
-    const currentCursor = editor.getCursor("from");
+    const fromCursor = editor.getCursor("from");
 
     let text = "";
     for await (const chunk of responseStream) {
       text += chunk;
 
-      this.updateSelectedText(editor, text, currentCursor);
+      this.updateSelectedText(editor, text, fromCursor);
 
       // To trigger the UI update
       await nextFrame();
@@ -317,9 +334,9 @@ export default class LlmShortcutPlugin extends Plugin {
       editor.undo();
     }
 
-    this.updateSelectedText(editor, text, currentCursor);
+    this.updateSelectedText(editor, text, fromCursor);
 
-    editor.setSelection(currentCursor, incChar(currentCursor, text.length));
+    editor.setSelection(fromCursor, incChar(fromCursor, text.length));
   }
 
   private async showPopUpWithResponse({
@@ -434,15 +451,6 @@ export default class LlmShortcutPlugin extends Plugin {
     userPromptString: string;
     editor: Editor;
   }) {
-    const startIdx = mapCursorPositionToIdx(
-      editor.getValue(),
-      editor.getCursor("from"),
-    );
-    const endIdx = mapCursorPositionToIdx(
-      editor.getValue(),
-      editor.getCursor("to"),
-    );
-
     await this.processLlmRequest({
       userPromptParams: {
         userPromptName,
@@ -450,10 +458,6 @@ export default class LlmShortcutPlugin extends Plugin {
         userPromptOptions: DEFAULT_USER_PROMPT_OPTIONS,
       },
       editor,
-      selection: {
-        startIdx,
-        endIdx,
-      },
     });
   }
 }
