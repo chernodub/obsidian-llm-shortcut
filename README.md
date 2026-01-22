@@ -73,11 +73,15 @@ Your prompt content here...
 - `llm-shortcut-context-size-before`: Number of characters to include before the selection (default: entire file)
 - `llm-shortcut-context-size-after`: Number of characters to include after the selection (default: entire file)
 
-## Example
+## Examples
 
 Probably the best way to explain the workflow is via this little vid I made:
 
 <https://github.com/user-attachments/assets/be6f8c74-a086-4392-9ed9-09dc6e7f2af2>
+
+You can find more examples that show use cases in [prompt-examples](./prompt-examples) folder.
+
+## Integration examples
 
 [OpenRouter AI integration example](./openrouter.ai.md)
 
