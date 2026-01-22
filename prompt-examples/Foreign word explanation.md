@@ -7,7 +7,7 @@ llm-shortcut-prompt-response-processing-mode: info
 I want to learn the selected word in a foreign language, provide me with all the necessary information according to the template below. Treat <text in angle brackets> together with the brackets as macros. The description should be in English and contain a maximum of 128 words.
 ## Template
 
-**<The word itself>** (<Base form of the word>, <language>) [<Pronunciation of the word, with syllable and stress indication>] <Description of the current form of the word>
+**<The word itself>** (<Base form of the word>, <language>) (<Pronunciation of the word, with syllable and stress indication>) <Description of the current form of the word>
 
 Meaning: <Very brief. Description of what the word means by itself, and what meaning it has in the sentence.>
 
