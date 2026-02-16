@@ -1,37 +1,64 @@
-# LLM Shortcut Plugin
+# LLM Shortcut
 
 [![downloads shield](https://img.shields.io/badge/dynamic/json?logo=obsidian&color=%23483699&label=downloads&query=%24%5B%22llm-shortcut%22%5D.downloads&url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json)](https://www.obsidianstats.com/plugins/llm-shortcut)
 
-A plugin for [Obsidian](https://obsidian.md) that provides a way to create shortcuts for commands powered by LLM capabilities.
+Turn Markdown prompt files into Obsidian commands.
 
-## Why
+`LLM Shortcut` maps your prompt library folder to command palette entries, then runs the selected prompt against the active note using any OpenAI-compatible provider.
 
-The idea behind this plugin is very simple. I needed a way to manage prompts conveniently, without copy-pasting my stuff here and there.
+## Why this plugin
 
-The plugin allows you to create a directory of prompts that would automatically be mapped to Obsidian "commands" (tree-like structure would become an easily accessible list). The plugin will use the current open document as context for the selected prompt to an LLM provider of your choice.
+If you keep reusing prompts ("improve writing", "translate", "make this a bullet-list"), copy-paste gets tedious quickly.
 
-So, this file-tree:
+This plugin lets you:
 
-<img width="350" alt="Screenshot 2025-06-29 at 09 44 06" src="https://github.com/user-attachments/assets/e63282b5-86ee-41e3-a771-d4ed8c36255f" />
+- keep prompts as plain `.md` files in your vault;
+- organize them in folders;
+- run them like native Obsidian commands.
 
-Becomes a list of commands:
+<img width="100%" alt="Commands from prompts showcase" src="https://github.com/user-attachments/assets/514f8aed-5dc7-4ea1-a845-a0066a8ce09d" />
 
-<img width="350" alt="Screenshot 2025-06-29 at 09 44 16" src="https://github.com/user-attachments/assets/63296207-b950-4692-bb08-afddff9e7247" />
+![ezgif-32aca9bfa7fd2b4a-2](https://github.com/user-attachments/assets/200dd7db-3093-4950-9e36-9170a6cf257a)
+
+> I used OpenRouter's `google/gemini-3-flash-preview` for demo
+
+## Prerequisites
+
+You have to use your own LLM provider and keys :)
 
 ## Features
 
-- 🤖 Multi-Provider Support: Works with any OpenAI-compatible API provider
-- 🔒 Privacy respected, nothing is stored or logged outside of your machine
-- 📚 Prompt Library: Organize prompts in a folder structure
-- 🔥 Instant Commands: Your prompts transform into Obsidian commands
+- Use your own OpenAI-compatible providers (OpenAI, OpenRouter, and others with compatible endpoints)
+- Prompt files become commands automatically (including nested folders)
+- Streaming output directly into the editor selection/cursor
+- Custom prompt command for one-off prompts without creating a file
+- Local-first behavior: your prompt files stay in your vault
 
-## Extra Features
+## 2-minute quick start
 
-### Custom Prompt Command
+1. Install `LLM Shortcut` from Community Plugins.
+2. Open plugin settings and fill:
+   - `🔑 API key`
+   - `🌐 Base URL` (example: `https://api.openai.com/v1`)
+   - `🤖 Model name` (example: `gpt-4.1-mini`)
+3. Create a prompt folder (default: `_prompts`).
+4. Add a prompt file, for example `_prompts/Writing/Improve.md`:
 
-The plugin includes a customizable command that allows you to enter a prompt directly without creating a prompt file. By default, this command appears as "Custom prompt" in the command palette. You can customize the label for this command in plugin settings.
+```md
+Improve the selected text.
+Keep the original meaning, but make it clearer and more concise.
+```
 
-## Customization
+5. Open any note, select text (or place cursor), then run command:
+   - `LLM Shortcut: Writing / Improve`
+
+> The better you are with the prompting, the better results you get, it's mostly on you :)
+
+## Advanced prompt features
+
+### `info-mode` popup
+
+This allows
 
 ### Selection-Only Commands
 
@@ -73,17 +100,25 @@ Your prompt content here...
 - `llm-shortcut-context-size-before`: Number of characters to include before the selection (default: entire file)
 - `llm-shortcut-context-size-after`: Number of characters to include after the selection (default: entire file)
 
-## Examples
+## Built-in command: custom prompt
 
-Probably the best way to explain the workflow is via this little vid I made:
+The plugin also adds a command for ad-hoc prompting (default label: `Custom prompt`).
 
-<https://github.com/user-attachments/assets/be6f8c74-a086-4392-9ed9-09dc6e7f2af2>
+You can rename this in settings via `📝 Command label`.
 
-You can find more examples that show use cases in [prompt-examples](./prompt-examples) folder.
+## Our use cases
 
-## Integration examples
+- Improve clarity and grammar in selected paragraphs
+- Translate selected text while preserving formatting
+- Convert free text into a table
+- Explain unfamiliar words in context
+- Generate concise summaries/checklists from meeting notes
 
-[OpenRouter AI integration example](./openrouter.ai.md)
+Ready-made examples are available in [`prompt-examples`](./prompt-examples).
+
+## Integrations
+
+- [OpenRouter setup example](./openrouter.ai.md)
 
 ## License
 
