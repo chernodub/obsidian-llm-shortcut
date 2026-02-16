@@ -259,6 +259,14 @@ export default class LlmShortcutPlugin extends Plugin {
   }): Promise<void> {
     assertExists(this.llmClient, "LLM client is not initialized");
 
+    if (this.abortController != null) {
+      showErrorNotification({
+        title:
+          "A request is already in progress. Wait for it to finish or cancel it.",
+      });
+      return;
+    }
+
     const { userPromptName, userPromptString, userPromptOptions } =
       userPromptParams;
 
