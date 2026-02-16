@@ -24,6 +24,7 @@ import { InfoModal } from "./ui/info-modal/info-modal";
 import { LoaderStrategy, LoaderStrategyFactory } from "./ui/loader-strategy";
 import { CustomPromptModal } from "./ui/prompt-modal/prompt-modal";
 import { showErrorNotification } from "./ui/user-notifications";
+import { AbortError } from "./utils/abort-error";
 import { assertExists } from "./utils/assertions/assert-exists";
 import { PLUGIN_NAME } from "./utils/constants";
 import { obsidianFetchAdapter } from "./utils/obsidian/obsidian-fetch-adapter";
@@ -54,6 +55,7 @@ export default class LlmShortcutPlugin extends Plugin {
   private readonly loaderStrategy: LoaderStrategy;
   private commands: Command[] = [];
   private eventRefs: EventRef[] = [];
+  private abortController: AbortController | undefined;
 
   constructor(app: App, manifest: PluginManifest) {
     super(app, manifest);
@@ -261,7 +263,6 @@ export default class LlmShortcutPlugin extends Plugin {
       userPromptParams;
 
     const text = editor.getValue();
-
     const rawSelection = new UserContentSelection(text, {
       anchor: editor.getCursor("anchor"),
       head: editor.getCursor("head"),
@@ -279,12 +280,17 @@ export default class LlmShortcutPlugin extends Plugin {
       return;
     }
 
-    this.loaderStrategy.start();
+    const abortController = new AbortController();
+    this.abortController = abortController;
+
+    this.loaderStrategy.start(() => abortController.abort());
+
     try {
       const responseStream = this.llmClient.getResponse({
         userContentSelection,
         userPromptString,
         userPromptOptions,
+        signal: abortController.signal,
       });
 
       if (userPromptOptions.promptResponseProcessingMode === "info") {
@@ -296,9 +302,15 @@ export default class LlmShortcutPlugin extends Plugin {
         });
       }
     } catch (error) {
-      showErrorNotification(mapLlmErrorToReadable(error));
-      logger.error("Error while updating editor content", error);
+      if (error instanceof AbortError) {
+        editor.setValue(text);
+        this.applySelection(editor, rawSelection);
+      } else {
+        showErrorNotification(mapLlmErrorToReadable(error));
+        logger.error("Error while updating editor content", error);
+      }
     } finally {
+      this.abortController = undefined;
       this.loaderStrategy.stop();
     }
   }
@@ -387,6 +399,8 @@ export default class LlmShortcutPlugin extends Plugin {
   }
 
   override onunload() {
+    this.abortController?.abort();
+    this.loaderStrategy.stop();
     this.eventRefs.forEach((eventRef) => this.app.vault.offref(eventRef));
     this.destroyCommands();
   }

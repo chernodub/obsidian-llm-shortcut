@@ -1,18 +1,3 @@
-@media (prefers-reduced-motion: reduce) {
-  .spinner {
-    display: none;
-  }
-}
-
-.spinner {
-  width: 16px;
-  height: 16px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  animation: spin 1s linear infinite;
-}
-
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -20,4 +5,27 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.spinner {
+  width: 16px;
+  min-width: 16px;
+  height: 16px;
+  min-height: 16px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  animation: spin 1s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    visibility: hidden;
+    animation: none;
+  }
+}
+
+.cancel {
+  animation: none;
 }
