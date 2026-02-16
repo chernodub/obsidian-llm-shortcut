@@ -59,7 +59,17 @@ Keep the original meaning, but make it clearer and more concise.
 
 ### `info-mode` popup
 
-This allows
+This feature is a “show result, don’t edit my note” mode. Normally, this plugin writes the AI response directly into your note (at cursor/selection).
+
+If you set this in your prompt file frontmatter: `llm-shortcut-prompt-response-processing-mode: info` the response is shown in a popup window instead.
+
+The popup opens with your prompt name as the title, shows a loading state, then streams in the AI answer live.
+
+The answer is rendered as Markdown (so headings/lists/tables display nicely).
+
+Your note content is not replaced in this mode.
+
+Good use case: dictionary/explanation prompts (like prompt-examples/Foreign word explanation.md) where you want to read info quickly without changing the document.
 
 ### Selection-Only Commands
 
