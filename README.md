@@ -16,9 +16,10 @@ This plugin lets you:
 - organize them in folders;
 - run them like native Obsidian commands.
 
-<img width="100%" alt="Commands from prompts showcase" src="https://github.com/user-attachments/assets/514f8aed-5dc7-4ea1-a845-a0066a8ce09d" />
+<img width="100%" alt="Commands from prompts showcase" alt="image" src="https://github.com/user-attachments/assets/06297261-dce1-493b-a117-5ac6103487af" />
 
-![ezgif-32aca9bfa7fd2b4a-2](https://github.com/user-attachments/assets/200dd7db-3093-4950-9e36-9170a6cf257a)
+![ezgif-376a9b52f4d3e831](https://github.com/user-attachments/assets/841b9192-7f40-4039-85eb-1ceef12d1366)
+
 
 > I used OpenRouter's `google/gemini-3-flash-preview` for demo
 
