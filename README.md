@@ -16,7 +16,7 @@ This plugin lets you:
 - organize them in folders;
 - run them like native Obsidian commands.
 
-<img width="100%" alt="Commands from prompts showcase" alt="image" src="https://github.com/user-attachments/assets/06297261-dce1-493b-a117-5ac6103487af" />
+<img width="100%" alt="Commands from prompts showcase" src="https://github.com/user-attachments/assets/06297261-dce1-493b-a117-5ac6103487af" />
 
 ![ezgif-376a9b52f4d3e831](https://github.com/user-attachments/assets/841b9192-7f40-4039-85eb-1ceef12d1366)
 
