@@ -8,6 +8,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "check": "tsc",
+    "check:all": "npm run check && npm run lint && npm run test -- --run",
     "build": "node esbuild.ts",
     "build:clean": "rm -f main.js styles.css",
     "build:dev": "NODE_ENV=development node esbuild.ts",

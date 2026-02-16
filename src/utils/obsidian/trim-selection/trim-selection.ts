@@ -2,22 +2,18 @@ import { UserContentSelectionParams } from "../../../prompt/user-content-params"
 
 export function trimSelection(
   text: string,
-  { startIdx, endIdx }: UserContentSelectionParams,
+  { anchorIdx, headIdx }: UserContentSelectionParams,
 ): UserContentSelectionParams {
-  const isSpaceCharacter = (idx: number) => {
-    return /\s/.test(text[idx]!);
-  };
+  let from = Math.min(anchorIdx, headIdx);
+  let to = Math.max(anchorIdx, headIdx);
+  const isSpace = (i: number) => /\s/.test(text[i]!);
 
-  while (startIdx < endIdx && isSpaceCharacter(startIdx)) {
-    startIdx++;
-  }
+  while (from < to && isSpace(from)) from++;
+  while (from < to && isSpace(to - 1)) to--;
 
-  while (startIdx < endIdx && isSpaceCharacter(endIdx - 1)) {
-    endIdx--;
-  }
-
+  const backward = anchorIdx > headIdx;
   return {
-    startIdx,
-    endIdx,
+    anchorIdx: backward ? to : from,
+    headIdx: backward ? from : to,
   };
 }

@@ -6,11 +6,18 @@ import {
 import { UserContentParams } from "../user-content-params";
 import { UserPromptOptions } from "../user-prompt-options";
 
+export type SelectionRange = {
+  from: number;
+  to: number;
+};
+
 export function getContextAroundSelection({
-  userContentParams: { fileContent, selection },
+  fileContent,
+  selectionRange: { from, to },
   userPromptOptions: { contextSizeBefore, contextSizeAfter },
 }: {
-  userContentParams: UserContentParams;
+  fileContent: string;
+  selectionRange: SelectionRange;
   userPromptOptions: UserPromptOptions;
 }): {
   contentBefore: string;
@@ -18,14 +25,14 @@ export function getContextAroundSelection({
 } {
   let ignoredSizeBeforeContext = 0;
   if (contextSizeBefore !== undefined) {
-    if (selection.startIdx > contextSizeBefore) {
-      ignoredSizeBeforeContext = selection.startIdx - contextSizeBefore;
+    if (from > contextSizeBefore) {
+      ignoredSizeBeforeContext = from - contextSizeBefore;
     }
   }
 
   let ignoredSizeAfterContext = 0;
   if (contextSizeAfter !== undefined) {
-    const contentLengthAfter = fileContent.length - selection.endIdx;
+    const contentLengthAfter = fileContent.length - to;
     if (contentLengthAfter > contextSizeAfter) {
       ignoredSizeAfterContext = contentLengthAfter - contextSizeAfter;
     }
@@ -33,10 +40,10 @@ export function getContextAroundSelection({
 
   const contentBefore = fileContent.slice(
     ignoredSizeBeforeContext,
-    selection.startIdx,
+    from,
   );
   const contentAfter = fileContent.slice(
-    selection.endIdx,
+    to,
     fileContent.length - ignoredSizeAfterContext,
   );
 
@@ -48,12 +55,15 @@ export function getContextAroundSelection({
 
 export function getSelectedContentWithMacros({
   fileContent,
-  selection,
-}: UserContentParams) {
-  return selection.startIdx === selection.endIdx
+  selectionRange: { from, to },
+}: {
+  fileContent: string;
+  selectionRange: SelectionRange;
+}): string {
+  return from === to
     ? CARET_MACROS
     : SELECTION_START_MACROS +
-        fileContent.slice(selection.startIdx, selection.endIdx) +
+        fileContent.slice(from, to) +
         SELECTION_END_MACROS;
 }
 
@@ -64,12 +74,21 @@ export function prepareUserContent({
   userContentParams: UserContentParams;
   userPromptOptions: UserPromptOptions;
 }): string {
+  const { anchorIdx, headIdx } = userContentParams.selection;
+  const from = Math.min(anchorIdx, headIdx);
+  const to = Math.max(anchorIdx, headIdx);
+  const selectionRange = { from, to };
+
   const { contentBefore, contentAfter } = getContextAroundSelection({
     userPromptOptions,
-    userContentParams,
+    fileContent: userContentParams.fileContent,
+    selectionRange,
   });
 
-  const contentWithMacros = getSelectedContentWithMacros(userContentParams);
+  const contentWithMacros = getSelectedContentWithMacros({
+    fileContent: userContentParams.fileContent,
+    selectionRange,
+  });
 
   return contentBefore + contentWithMacros + contentAfter;
 }

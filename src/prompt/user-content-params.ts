@@ -1,6 +1,6 @@
 export type UserContentSelectionParams = {
-  readonly startIdx: number;
-  readonly endIdx: number;
+  readonly anchorIdx: number;
+  readonly headIdx: number;
 };
 
 export type UserContentParams = {

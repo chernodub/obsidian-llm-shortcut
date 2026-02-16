@@ -225,8 +225,8 @@ export default class LlmShortcutPlugin extends Plugin {
     const text = editor.getValue();
 
     return {
-      startIdx: mapCursorPositionToIdx(text, editor.getCursor("from")),
-      endIdx: mapCursorPositionToIdx(text, editor.getCursor("to")),
+      anchorIdx: mapCursorPositionToIdx(text, editor.getCursor("anchor")),
+      headIdx: mapCursorPositionToIdx(text, editor.getCursor("head")),
     };
   }
 
@@ -236,10 +236,10 @@ export default class LlmShortcutPlugin extends Plugin {
   ) {
     const text = editor.getValue();
 
-    const start = mapIdxToCursorPosition(text, selection.startIdx);
-    const end = mapIdxToCursorPosition(text, selection.endIdx);
+    const anchor = mapIdxToCursorPosition(text, selection.anchorIdx);
+    const head = mapIdxToCursorPosition(text, selection.headIdx);
 
-    editor.setSelection(start, end);
+    editor.setSelection(anchor, head);
   }
 
   private async handleRespond(promptFilePath: string, editor: Editor) {
@@ -275,7 +275,7 @@ export default class LlmShortcutPlugin extends Plugin {
     );
     this.applySelection(editor, selection);
 
-    const hasSelection = selection.startIdx !== selection.endIdx;
+    const hasSelection = selection.anchorIdx !== selection.headIdx;
 
     if (userPromptOptions.shouldHandleSelectionOnly && !hasSelection) {
       showErrorNotification({

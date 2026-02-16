@@ -76,7 +76,7 @@ export type GetInternalSystemPromptParams = {
 export function getInternalSystemPrompt({
   userContentParams: { selection },
 }: GetInternalSystemPromptParams): string {
-  const hasSelection = selection.startIdx !== selection.endIdx;
+  const hasSelection = selection.anchorIdx !== selection.headIdx;
 
   return hasSelection
     ? INTERNAL_SYSTEM_PROMPT_SELECTION
