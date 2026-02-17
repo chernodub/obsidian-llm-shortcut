@@ -592,8 +592,8 @@ describe("prepareUserContent", () => {
     it("should produce same result as forward selection (full content with markers)", () => {
       const fileContent = "Hello world, this is a test";
       const selectionRange: TextSelection = {
-        anchor: { line: 0, ch: 6 },
-        head: { line: 0, ch: 11 },
+        anchor: { line: 0, ch: 11 },
+        head: { line: 0, ch: 6 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
@@ -619,8 +619,8 @@ describe("prepareUserContent", () => {
     it("should produce same result for selection at start of file", () => {
       const fileContent = "Hello world";
       const selectionRange: TextSelection = {
-        anchor: { line: 0, ch: 0 },
-        head: { line: 0, ch: 5 },
+        anchor: { line: 0, ch: 5 },
+        head: { line: 0, ch: 0 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
@@ -642,8 +642,8 @@ describe("prepareUserContent", () => {
     it("should produce same result for selection at end of file", () => {
       const fileContent = "Hello world";
       const selectionRange: TextSelection = {
-        anchor: { line: 0, ch: 6 },
-        head: { line: 0, ch: 11 },
+        anchor: { line: 0, ch: 11 },
+        head: { line: 0, ch: 6 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
