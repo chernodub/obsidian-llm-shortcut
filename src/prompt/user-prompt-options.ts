@@ -13,7 +13,7 @@ export const ALL_PROMPT_RESPONSE_PROCESSING_MODES = [
 export type PromptResponseProcessingMode =
   (typeof ALL_PROMPT_RESPONSE_PROCESSING_MODES)[number];
 
-export interface UserPromptOptions {
+export interface PromptOptions {
   readonly shouldHandleSelectionOnly: true | undefined;
   readonly contextSizeBefore: number | undefined;
   readonly contextSizeAfter: number | undefined;
@@ -22,7 +22,7 @@ export interface UserPromptOptions {
     | undefined;
 }
 
-export const DEFAULT_USER_PROMPT_OPTIONS: UserPromptOptions = {
+export const DEFAULT_PROMPT_OPTIONS: PromptOptions = {
   shouldHandleSelectionOnly: undefined,
   contextSizeBefore: undefined,
   contextSizeAfter: undefined,

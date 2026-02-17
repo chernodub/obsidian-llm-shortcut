@@ -13,9 +13,11 @@ import {
 import { mapLlmErrorToReadable } from "./llm/error-handler";
 import { LLMClient } from "./llm/llm-client";
 import { logger } from "./logger";
-import { parseUserPromptOptionsFromFileProperties } from "./prompt/parse-user-prompt-options-from-file-properties/parse-user-prompt-options-from-file-properties";
+import { parsePromptOptionsFromFileProperties } from "./prompt/parse-prompt-options-from-file-properties/parse-prompt-options-from-file-properties";
+import { mergePromptOptions } from "./prompt/prompt-option-registry";
 import { UserContentSelection } from "./prompt/user-content-selection/user-content-selection";
-import { DEFAULT_USER_PROMPT_OPTIONS } from "./prompt/user-prompt-options";
+import type { PromptOptions } from "./prompt/user-prompt-options";
+import { DEFAULT_PROMPT_OPTIONS } from "./prompt/user-prompt-options";
 import { UserPromptParams } from "./prompt/user-prompt-params";
 import { SettingTab } from "./setting-tab";
 import { InfoModal } from "./ui/info-modal/info-modal";
@@ -33,6 +35,7 @@ interface PluginSettings {
   promptLibraryDirectory: string;
   project: string;
   customPromptCommandLabel: string;
+  globalPromptOptions: PromptOptions;
 }
 
 const DEFAULT_SETTINGS: PluginSettings = {
@@ -42,6 +45,7 @@ const DEFAULT_SETTINGS: PluginSettings = {
   promptLibraryDirectory: "_prompts",
   project: "",
   customPromptCommandLabel: "Custom prompt",
+  globalPromptOptions: DEFAULT_PROMPT_OPTIONS,
 };
 
 export default class LlmShortcutPlugin extends Plugin {
@@ -166,13 +170,15 @@ export default class LlmShortcutPlugin extends Plugin {
 
     const userPromptName = file.basename;
 
+    const globalDefaults = this.settings.globalPromptOptions;
+
     // Use Obsidian's parsed frontmatter if available
     if (!metadata?.frontmatter || !metadata.frontmatterPosition) {
       logger.debug(`LLM Shortcut: No frontmatter found for file: ${file.path}`);
       return {
         userPromptName,
         userPromptString: fileContent,
-        userPromptOptions: DEFAULT_USER_PROMPT_OPTIONS,
+        userPromptOptions: globalDefaults,
       };
     }
 
@@ -180,14 +186,14 @@ export default class LlmShortcutPlugin extends Plugin {
       .slice(metadata.frontmatterPosition.end.offset)
       .trimStart();
 
-    const userPromptOptions = parseUserPromptOptionsFromFileProperties(
+    const fileOverrides = parsePromptOptionsFromFileProperties(
       metadata.frontmatter,
     );
 
     return {
       userPromptName,
       userPromptString,
-      userPromptOptions,
+      userPromptOptions: mergePromptOptions(globalDefaults, fileOverrides),
     };
   }
 
@@ -386,7 +392,15 @@ export default class LlmShortcutPlugin extends Plugin {
   }
 
   async loadSettings() {
-    this.settings = { ...DEFAULT_SETTINGS, ...(await this.loadData()) };
+    const data = await this.loadData();
+    this.settings = {
+      ...DEFAULT_SETTINGS,
+      ...data,
+      globalPromptOptions: {
+        ...DEFAULT_SETTINGS.globalPromptOptions,
+        ...data?.globalPromptOptions,
+      },
+    };
   }
 
   async saveSettings() {
@@ -441,7 +455,7 @@ export default class LlmShortcutPlugin extends Plugin {
       userPromptParams: {
         userPromptName,
         userPromptString,
-        userPromptOptions: DEFAULT_USER_PROMPT_OPTIONS,
+        userPromptOptions: this.settings.globalPromptOptions,
       },
       editor,
     });

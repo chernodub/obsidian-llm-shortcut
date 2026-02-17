@@ -7,7 +7,7 @@ import {
   TextSelectionRange,
   UserContentSelection,
 } from "../user-content-selection/user-content-selection";
-import { UserPromptOptions } from "../user-prompt-options";
+import type { PromptOptions } from "../user-prompt-options";
 
 function getContextAroundSelection({
   text,
@@ -16,7 +16,7 @@ function getContextAroundSelection({
 }: {
   text: string;
   selectionRange: TextSelectionRange;
-  userPromptOptions: UserPromptOptions;
+  userPromptOptions: PromptOptions;
 }): {
   contentBefore: string;
   contentAfter: string;
@@ -62,7 +62,7 @@ export function prepareUserContent({
   userPromptOptions,
 }: {
   userContentSelection: UserContentSelection;
-  userPromptOptions: UserPromptOptions;
+  userPromptOptions: PromptOptions;
 }): string {
   const text = userContentSelection.getText();
   const selectionRange = userContentSelection.getRange();

@@ -9,8 +9,8 @@ import {
   UserContentSelection,
 } from "../user-content-selection/user-content-selection";
 import {
-  DEFAULT_USER_PROMPT_OPTIONS,
-  UserPromptOptions,
+  DEFAULT_PROMPT_OPTIONS,
+  PromptOptions,
 } from "../user-prompt-options";
 import { prepareUserContent } from "./prepare-user-content";
 
@@ -22,8 +22,8 @@ describe("prepareUserContent", () => {
         anchor: { line: 0, ch: 6 },
         head: { line: 0, ch: 11 },
       };
-      const userPromptOptions: UserPromptOptions = {
-        ...DEFAULT_USER_PROMPT_OPTIONS,
+      const userPromptOptions: PromptOptions = {
+        ...DEFAULT_PROMPT_OPTIONS,
       };
 
       const result = prepareUserContent({
@@ -49,8 +49,8 @@ describe("prepareUserContent", () => {
         anchor: { line: 0, ch: 5 },
         head: { line: 0, ch: 5 },
       };
-      const userPromptOptions: UserPromptOptions = {
-        ...DEFAULT_USER_PROMPT_OPTIONS,
+      const userPromptOptions: PromptOptions = {
+        ...DEFAULT_PROMPT_OPTIONS,
       };
 
       const result = prepareUserContent({
@@ -70,8 +70,8 @@ describe("prepareUserContent", () => {
         anchor: { line: 0, ch: 0 },
         head: { line: 0, ch: 0 },
       };
-      const userPromptOptions: UserPromptOptions = {
-        ...DEFAULT_USER_PROMPT_OPTIONS,
+      const userPromptOptions: PromptOptions = {
+        ...DEFAULT_PROMPT_OPTIONS,
       };
 
       const result = prepareUserContent({
@@ -91,8 +91,8 @@ describe("prepareUserContent", () => {
         anchor: { line: 0, ch: 0 },
         head: { line: 0, ch: 5 },
       };
-      const userPromptOptions: UserPromptOptions = {
-        ...DEFAULT_USER_PROMPT_OPTIONS,
+      const userPromptOptions: PromptOptions = {
+        ...DEFAULT_PROMPT_OPTIONS,
       };
 
       const result = prepareUserContent({
@@ -114,8 +114,8 @@ describe("prepareUserContent", () => {
         anchor: { line: 0, ch: 6 },
         head: { line: 0, ch: 11 },
       };
-      const userPromptOptions: UserPromptOptions = {
-        ...DEFAULT_USER_PROMPT_OPTIONS,
+      const userPromptOptions: PromptOptions = {
+        ...DEFAULT_PROMPT_OPTIONS,
       };
 
       const result = prepareUserContent({
@@ -137,8 +137,8 @@ describe("prepareUserContent", () => {
         anchor: { line: 0, ch: 0 },
         head: { line: 0, ch: 5 },
       };
-      const userPromptOptions: UserPromptOptions = {
-        ...DEFAULT_USER_PROMPT_OPTIONS,
+      const userPromptOptions: PromptOptions = {
+        ...DEFAULT_PROMPT_OPTIONS,
       };
 
       const result = prepareUserContent({
@@ -162,8 +162,8 @@ describe("prepareUserContent", () => {
         anchor: { line: 0, ch: 6 },
         head: { line: 0, ch: 11 },
       };
-      const userPromptOptions: UserPromptOptions = {
-        ...DEFAULT_USER_PROMPT_OPTIONS,
+      const userPromptOptions: PromptOptions = {
+        ...DEFAULT_PROMPT_OPTIONS,
         contextSizeBefore: 100,
       };
 
@@ -186,8 +186,8 @@ describe("prepareUserContent", () => {
         anchor: { line: 0, ch: 20 },
         head: { line: 0, ch: 24 },
       };
-      const userPromptOptions: UserPromptOptions = {
-        ...DEFAULT_USER_PROMPT_OPTIONS,
+      const userPromptOptions: PromptOptions = {
+        ...DEFAULT_PROMPT_OPTIONS,
         contextSizeBefore: 5,
       };
 
@@ -214,8 +214,8 @@ describe("prepareUserContent", () => {
         anchor: { line: 0, ch: 6 },
         head: { line: 0, ch: 11 },
       };
-      const userPromptOptions: UserPromptOptions = {
-        ...DEFAULT_USER_PROMPT_OPTIONS,
+      const userPromptOptions: PromptOptions = {
+        ...DEFAULT_PROMPT_OPTIONS,
         contextSizeBefore: 6,
       };
 
@@ -238,8 +238,8 @@ describe("prepareUserContent", () => {
         anchor: { line: 0, ch: 6 },
         head: { line: 0, ch: 11 },
       };
-      const userPromptOptions: UserPromptOptions = {
-        ...DEFAULT_USER_PROMPT_OPTIONS,
+      const userPromptOptions: PromptOptions = {
+        ...DEFAULT_PROMPT_OPTIONS,
         contextSizeBefore: 0,
       };
 
@@ -262,8 +262,8 @@ describe("prepareUserContent", () => {
         anchor: { line: 0, ch: 0 },
         head: { line: 0, ch: 5 },
       };
-      const userPromptOptions: UserPromptOptions = {
-        ...DEFAULT_USER_PROMPT_OPTIONS,
+      const userPromptOptions: PromptOptions = {
+        ...DEFAULT_PROMPT_OPTIONS,
         contextSizeBefore: 5,
       };
 
@@ -288,8 +288,8 @@ describe("prepareUserContent", () => {
         anchor: { line: 0, ch: 0 },
         head: { line: 0, ch: 5 },
       };
-      const userPromptOptions: UserPromptOptions = {
-        ...DEFAULT_USER_PROMPT_OPTIONS,
+      const userPromptOptions: PromptOptions = {
+        ...DEFAULT_PROMPT_OPTIONS,
         contextSizeAfter: 100,
       };
 
@@ -312,8 +312,8 @@ describe("prepareUserContent", () => {
         anchor: { line: 0, ch: 0 },
         head: { line: 0, ch: 4 },
       };
-      const userPromptOptions: UserPromptOptions = {
-        ...DEFAULT_USER_PROMPT_OPTIONS,
+      const userPromptOptions: PromptOptions = {
+        ...DEFAULT_PROMPT_OPTIONS,
         contextSizeAfter: 5,
       };
 
@@ -336,8 +336,8 @@ describe("prepareUserContent", () => {
         anchor: { line: 0, ch: 0 },
         head: { line: 0, ch: 5 },
       };
-      const userPromptOptions: UserPromptOptions = {
-        ...DEFAULT_USER_PROMPT_OPTIONS,
+      const userPromptOptions: PromptOptions = {
+        ...DEFAULT_PROMPT_OPTIONS,
         contextSizeAfter: 6,
       };
 
@@ -360,8 +360,8 @@ describe("prepareUserContent", () => {
         anchor: { line: 0, ch: 0 },
         head: { line: 0, ch: 5 },
       };
-      const userPromptOptions: UserPromptOptions = {
-        ...DEFAULT_USER_PROMPT_OPTIONS,
+      const userPromptOptions: PromptOptions = {
+        ...DEFAULT_PROMPT_OPTIONS,
         contextSizeAfter: 0,
       };
 
@@ -384,8 +384,8 @@ describe("prepareUserContent", () => {
         anchor: { line: 0, ch: 6 },
         head: { line: 0, ch: 11 },
       };
-      const userPromptOptions: UserPromptOptions = {
-        ...DEFAULT_USER_PROMPT_OPTIONS,
+      const userPromptOptions: PromptOptions = {
+        ...DEFAULT_PROMPT_OPTIONS,
         contextSizeAfter: 5,
       };
 
@@ -410,8 +410,8 @@ describe("prepareUserContent", () => {
         anchor: { line: 0, ch: 15 },
         head: { line: 0, ch: 19 },
       };
-      const userPromptOptions: UserPromptOptions = {
-        ...DEFAULT_USER_PROMPT_OPTIONS,
+      const userPromptOptions: PromptOptions = {
+        ...DEFAULT_PROMPT_OPTIONS,
         contextSizeBefore: 5,
         contextSizeAfter: 5,
       };
@@ -439,8 +439,8 @@ describe("prepareUserContent", () => {
         anchor: { line: 0, ch: 6 },
         head: { line: 0, ch: 11 },
       };
-      const userPromptOptions: UserPromptOptions = {
-        ...DEFAULT_USER_PROMPT_OPTIONS,
+      const userPromptOptions: PromptOptions = {
+        ...DEFAULT_PROMPT_OPTIONS,
         contextSizeBefore: 100,
         contextSizeAfter: 100,
       };
@@ -464,8 +464,8 @@ describe("prepareUserContent", () => {
         anchor: { line: 0, ch: 6 },
         head: { line: 0, ch: 11 },
       };
-      const userPromptOptions: UserPromptOptions = {
-        ...DEFAULT_USER_PROMPT_OPTIONS,
+      const userPromptOptions: PromptOptions = {
+        ...DEFAULT_PROMPT_OPTIONS,
         contextSizeBefore: 0,
         contextSizeAfter: 0,
       };
@@ -489,8 +489,8 @@ describe("prepareUserContent", () => {
         anchor: { line: 0, ch: 8 },
         head: { line: 0, ch: 8 },
       };
-      const userPromptOptions: UserPromptOptions = {
-        ...DEFAULT_USER_PROMPT_OPTIONS,
+      const userPromptOptions: PromptOptions = {
+        ...DEFAULT_PROMPT_OPTIONS,
         contextSizeBefore: 3,
         contextSizeAfter: 3,
       };
@@ -514,8 +514,8 @@ describe("prepareUserContent", () => {
         anchor: { line: 1, ch: 0 },
         head: { line: 1, ch: 6 },
       };
-      const userPromptOptions: UserPromptOptions = {
-        ...DEFAULT_USER_PROMPT_OPTIONS,
+      const userPromptOptions: PromptOptions = {
+        ...DEFAULT_PROMPT_OPTIONS,
       };
 
       const result = prepareUserContent({
@@ -541,8 +541,8 @@ describe("prepareUserContent", () => {
         anchor: { line: 0, ch: 6 },
         head: { line: 0, ch: 13 },
       };
-      const userPromptOptions: UserPromptOptions = {
-        ...DEFAULT_USER_PROMPT_OPTIONS,
+      const userPromptOptions: PromptOptions = {
+        ...DEFAULT_PROMPT_OPTIONS,
       };
 
       const result = prepareUserContent({
@@ -568,8 +568,8 @@ describe("prepareUserContent", () => {
         anchor: { line: 0, ch: 2 },
         head: { line: 0, ch: 3 },
       };
-      const userPromptOptions: UserPromptOptions = {
-        ...DEFAULT_USER_PROMPT_OPTIONS,
+      const userPromptOptions: PromptOptions = {
+        ...DEFAULT_PROMPT_OPTIONS,
         contextSizeBefore: 1000000,
         contextSizeAfter: 1000000,
       };
@@ -595,8 +595,8 @@ describe("prepareUserContent", () => {
         anchor: { line: 0, ch: 11 },
         head: { line: 0, ch: 6 },
       };
-      const userPromptOptions: UserPromptOptions = {
-        ...DEFAULT_USER_PROMPT_OPTIONS,
+      const userPromptOptions: PromptOptions = {
+        ...DEFAULT_PROMPT_OPTIONS,
       };
 
       const result = prepareUserContent({
@@ -622,8 +622,8 @@ describe("prepareUserContent", () => {
         anchor: { line: 0, ch: 5 },
         head: { line: 0, ch: 0 },
       };
-      const userPromptOptions: UserPromptOptions = {
-        ...DEFAULT_USER_PROMPT_OPTIONS,
+      const userPromptOptions: PromptOptions = {
+        ...DEFAULT_PROMPT_OPTIONS,
       };
 
       const result = prepareUserContent({
@@ -645,8 +645,8 @@ describe("prepareUserContent", () => {
         anchor: { line: 0, ch: 11 },
         head: { line: 0, ch: 6 },
       };
-      const userPromptOptions: UserPromptOptions = {
-        ...DEFAULT_USER_PROMPT_OPTIONS,
+      const userPromptOptions: PromptOptions = {
+        ...DEFAULT_PROMPT_OPTIONS,
       };
 
       const result = prepareUserContent({
@@ -668,8 +668,8 @@ describe("prepareUserContent", () => {
         anchor: { line: 0, ch: 24 },
         head: { line: 0, ch: 20 },
       };
-      const userPromptOptions: UserPromptOptions = {
-        ...DEFAULT_USER_PROMPT_OPTIONS,
+      const userPromptOptions: PromptOptions = {
+        ...DEFAULT_PROMPT_OPTIONS,
         contextSizeBefore: 5,
       };
 
@@ -696,8 +696,8 @@ describe("prepareUserContent", () => {
         anchor: { line: 0, ch: 4 },
         head: { line: 0, ch: 0 },
       };
-      const userPromptOptions: UserPromptOptions = {
-        ...DEFAULT_USER_PROMPT_OPTIONS,
+      const userPromptOptions: PromptOptions = {
+        ...DEFAULT_PROMPT_OPTIONS,
         contextSizeAfter: 5,
       };
 
@@ -720,8 +720,8 @@ describe("prepareUserContent", () => {
         anchor: { line: 0, ch: 19 },
         head: { line: 0, ch: 15 },
       };
-      const userPromptOptions: UserPromptOptions = {
-        ...DEFAULT_USER_PROMPT_OPTIONS,
+      const userPromptOptions: PromptOptions = {
+        ...DEFAULT_PROMPT_OPTIONS,
         contextSizeBefore: 5,
         contextSizeAfter: 5,
       };

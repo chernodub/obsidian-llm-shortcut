@@ -1,5 +1,6 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import LlmShortcutPlugin from "./main";
+import { PROMPT_OPTION_DEFINITIONS } from "./prompt/prompt-option-registry";
 
 export class SettingTab extends PluginSettingTab {
   private plugin: LlmShortcutPlugin;
@@ -109,5 +110,29 @@ export class SettingTab extends PluginSettingTab {
           })
           .setPlaceholder("Custom prompt"),
       );
+
+    new Setting(containerEl)
+      .setName("Global prompt options (advanced)")
+      .setHeading();
+
+    containerEl.createEl("p", {
+      text: "These defaults apply to all prompts. To override a specific prompt, add the corresponding file property to its frontmatter (e.g. llm-shortcut-selection-mode: selection-only).",
+      cls: "setting-item-description",
+    });
+
+    for (const definition of PROMPT_OPTION_DEFINITIONS) {
+      const setting = new Setting(containerEl)
+        .setName(definition.settingName)
+        .setDesc(definition.settingDesc);
+
+      definition.renderForSettings(
+        setting,
+        () => this.plugin.settings.globalPromptOptions,
+        async (options) => {
+          this.plugin.settings.globalPromptOptions = options;
+          await this.plugin.saveSettings();
+        },
+      );
+    }
   }
 }
