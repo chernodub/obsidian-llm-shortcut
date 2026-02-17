@@ -1,9 +1,9 @@
 import { FrontMatterCache } from "obsidian";
 import {
   ALL_PROMPT_RESPONSE_PROCESSING_MODES,
-  DEFAULT_USER_PROMPT_OPTIONS,
+  DEFAULT_PROMPT_OPTIONS,
   PromptResponseProcessingMode,
-  UserPromptOptions,
+  PromptOptions,
 } from "../user-prompt-options";
 
 export const SELECTION_MODE_PROP_NAME = "llm-shortcut-selection-mode";
@@ -47,15 +47,15 @@ function parseNumericFileProperty(
   return int;
 }
 
-export function parseUserPromptOptionsFromFileProperties(
+export function parsePromptOptionsFromFileProperties(
   fileProperties: FrontMatterCache,
-): UserPromptOptions {
+): PromptOptions {
   let shouldHandleSelectionOnly: true | undefined;
   const shouldHandleSelectionOnlyValue =
     fileProperties[SELECTION_MODE_PROP_NAME];
   if (shouldHandleSelectionOnlyValue === undefined) {
     shouldHandleSelectionOnly =
-      DEFAULT_USER_PROMPT_OPTIONS.shouldHandleSelectionOnly;
+      DEFAULT_PROMPT_OPTIONS.shouldHandleSelectionOnly;
   } else if (shouldHandleSelectionOnlyValue === SELECTION_ONLY_PROP_VALUE) {
     shouldHandleSelectionOnly = true;
   } else {
@@ -69,7 +69,7 @@ export function parseUserPromptOptionsFromFileProperties(
     fileProperties[PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME];
   if (promptResponseProcessingModeValue === undefined) {
     promptResponseProcessingMode =
-      DEFAULT_USER_PROMPT_OPTIONS.promptResponseProcessingMode;
+      DEFAULT_PROMPT_OPTIONS.promptResponseProcessingMode;
   } else if (
     ALL_PROMPT_RESPONSE_PROCESSING_MODES.includes(
       promptResponseProcessingModeValue,

@@ -1,22 +1,22 @@
 import { FrontMatterCache } from "obsidian";
 import { describe, expect, it } from "vitest";
-import { DEFAULT_USER_PROMPT_OPTIONS } from "../user-prompt-options.js";
+import { DEFAULT_PROMPT_OPTIONS } from "../user-prompt-options.js";
 import {
   CONTEXT_SIZE_AFTER_PROP_NAME,
   CONTEXT_SIZE_BEFORE_PROP_NAME,
-  parseUserPromptOptionsFromFileProperties,
+  parsePromptOptionsFromFileProperties,
   PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME,
   SELECTION_MODE_PROP_NAME,
   SELECTION_ONLY_PROP_VALUE,
-} from "./parse-user-prompt-options-from-file-properties.js";
+} from "./parse-prompt-options-from-file-properties.js";
 
-describe("parseUserPromptOptionsFromFileProperties", () => {
+describe("parsePromptOptionsFromFileProperties", () => {
   describe("default values", () => {
     it("should return default values when all properties are missing", () => {
       const fileProperties: FrontMatterCache = {};
-      const result = parseUserPromptOptionsFromFileProperties(fileProperties);
+      const result = parsePromptOptionsFromFileProperties(fileProperties);
 
-      expect(result).toEqual(DEFAULT_USER_PROMPT_OPTIONS);
+      expect(result).toEqual(DEFAULT_PROMPT_OPTIONS);
     });
 
     it("should return default selection mode when selection mode property is missing", () => {
@@ -24,10 +24,10 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
         [CONTEXT_SIZE_BEFORE_PROP_NAME]: "10",
         [CONTEXT_SIZE_AFTER_PROP_NAME]: "20",
       };
-      const result = parseUserPromptOptionsFromFileProperties(fileProperties);
+      const result = parsePromptOptionsFromFileProperties(fileProperties);
 
       expect(result.shouldHandleSelectionOnly).toBe(
-        DEFAULT_USER_PROMPT_OPTIONS.shouldHandleSelectionOnly,
+        DEFAULT_PROMPT_OPTIONS.shouldHandleSelectionOnly,
       );
     });
 
@@ -36,10 +36,10 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
         [CONTEXT_SIZE_BEFORE_PROP_NAME]: "10",
         [CONTEXT_SIZE_AFTER_PROP_NAME]: "20",
       };
-      const result = parseUserPromptOptionsFromFileProperties(fileProperties);
+      const result = parsePromptOptionsFromFileProperties(fileProperties);
 
       expect(result.promptResponseProcessingMode).toBe(
-        DEFAULT_USER_PROMPT_OPTIONS.promptResponseProcessingMode,
+        DEFAULT_PROMPT_OPTIONS.promptResponseProcessingMode,
       );
     });
   });
@@ -49,7 +49,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
       const fileProperties: FrontMatterCache = {
         [SELECTION_MODE_PROP_NAME]: SELECTION_ONLY_PROP_VALUE,
       };
-      const result = parseUserPromptOptionsFromFileProperties(fileProperties);
+      const result = parsePromptOptionsFromFileProperties(fileProperties);
 
       expect(result.shouldHandleSelectionOnly).toBe(true);
     });
@@ -60,7 +60,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
       };
 
       expect(() =>
-        parseUserPromptOptionsFromFileProperties(fileProperties),
+        parsePromptOptionsFromFileProperties(fileProperties),
       ).toThrow(
         `Invalid prompt file property=[${SELECTION_MODE_PROP_NAME}] value should be [${SELECTION_ONLY_PROP_VALUE}], but got [invalid-value]`,
       );
@@ -72,7 +72,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
       };
 
       expect(() =>
-        parseUserPromptOptionsFromFileProperties(fileProperties),
+        parsePromptOptionsFromFileProperties(fileProperties),
       ).toThrow(
         `Invalid prompt file property=[${SELECTION_MODE_PROP_NAME}] value should be [${SELECTION_ONLY_PROP_VALUE}], but got [123]`,
       );
@@ -84,7 +84,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
       };
 
       expect(() =>
-        parseUserPromptOptionsFromFileProperties(fileProperties),
+        parsePromptOptionsFromFileProperties(fileProperties),
       ).toThrow(
         `Invalid prompt file property=[${SELECTION_MODE_PROP_NAME}] value should be [${SELECTION_ONLY_PROP_VALUE}], but got [true]`,
       );
@@ -96,7 +96,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
       const fileProperties: FrontMatterCache = {
         [CONTEXT_SIZE_BEFORE_PROP_NAME]: "10",
       };
-      const result = parseUserPromptOptionsFromFileProperties(fileProperties);
+      const result = parsePromptOptionsFromFileProperties(fileProperties);
 
       expect(result.contextSizeBefore).toBe(10);
     });
@@ -105,14 +105,14 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
       const fileProperties: FrontMatterCache = {
         [CONTEXT_SIZE_BEFORE_PROP_NAME]: "0",
       };
-      const result = parseUserPromptOptionsFromFileProperties(fileProperties);
+      const result = parsePromptOptionsFromFileProperties(fileProperties);
 
       expect(result.contextSizeBefore).toBe(0);
     });
 
     it("should return undefined when property is missing", () => {
       const fileProperties: FrontMatterCache = {};
-      const result = parseUserPromptOptionsFromFileProperties(fileProperties);
+      const result = parsePromptOptionsFromFileProperties(fileProperties);
 
       expect(result.contextSizeBefore).toBeUndefined();
     });
@@ -123,7 +123,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
       };
 
       expect(() =>
-        parseUserPromptOptionsFromFileProperties(fileProperties),
+        parsePromptOptionsFromFileProperties(fileProperties),
       ).toThrow(
         `Invalid prompt file property=[${CONTEXT_SIZE_BEFORE_PROP_NAME}] value should be positive, but got [-5]`,
       );
@@ -135,7 +135,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
       };
 
       expect(() =>
-        parseUserPromptOptionsFromFileProperties(fileProperties),
+        parsePromptOptionsFromFileProperties(fileProperties),
       ).toThrow(
         `Invalid prompt file property=[${CONTEXT_SIZE_BEFORE_PROP_NAME}] value should be an integer, but got [10.5]`,
       );
@@ -147,7 +147,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
       };
 
       expect(() =>
-        parseUserPromptOptionsFromFileProperties(fileProperties),
+        parsePromptOptionsFromFileProperties(fileProperties),
       ).toThrow(
         `Invalid prompt file property=[${CONTEXT_SIZE_BEFORE_PROP_NAME}] value should be an integer, but got [abc]`,
       );
@@ -159,7 +159,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
       };
 
       expect(() =>
-        parseUserPromptOptionsFromFileProperties(fileProperties),
+        parsePromptOptionsFromFileProperties(fileProperties),
       ).toThrow(
         `Invalid prompt file property=[${CONTEXT_SIZE_BEFORE_PROP_NAME}] unknown value type [123]`,
       );
@@ -171,7 +171,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
       };
 
       expect(() =>
-        parseUserPromptOptionsFromFileProperties(fileProperties),
+        parsePromptOptionsFromFileProperties(fileProperties),
       ).toThrow(
         `Invalid prompt file property=[${CONTEXT_SIZE_BEFORE_PROP_NAME}] unknown value type [true]`,
       );
@@ -183,7 +183,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
       };
 
       expect(() =>
-        parseUserPromptOptionsFromFileProperties(fileProperties),
+        parsePromptOptionsFromFileProperties(fileProperties),
       ).toThrow(
         `Invalid prompt file property=[${CONTEXT_SIZE_BEFORE_PROP_NAME}] value should be an integer, but got []`,
       );
@@ -195,7 +195,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
       };
 
       expect(() =>
-        parseUserPromptOptionsFromFileProperties(fileProperties),
+        parsePromptOptionsFromFileProperties(fileProperties),
       ).toThrow(
         `Invalid prompt file property=[${CONTEXT_SIZE_BEFORE_PROP_NAME}] value should be an integer, but got [010]`,
       );
@@ -207,7 +207,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
       const fileProperties: FrontMatterCache = {
         [PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME]: "default",
       };
-      const result = parseUserPromptOptionsFromFileProperties(fileProperties);
+      const result = parsePromptOptionsFromFileProperties(fileProperties);
 
       expect(result.promptResponseProcessingMode).toBe("default");
     });
@@ -216,14 +216,14 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
       const fileProperties: FrontMatterCache = {
         [PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME]: "info",
       };
-      const result = parseUserPromptOptionsFromFileProperties(fileProperties);
+      const result = parsePromptOptionsFromFileProperties(fileProperties);
 
       expect(result.promptResponseProcessingMode).toBe("info");
     });
 
     it("should return undefined when property is missing", () => {
       const fileProperties: FrontMatterCache = {};
-      const result = parseUserPromptOptionsFromFileProperties(fileProperties);
+      const result = parsePromptOptionsFromFileProperties(fileProperties);
 
       expect(result.promptResponseProcessingMode).toBeUndefined();
     });
@@ -234,7 +234,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
       };
 
       expect(() =>
-        parseUserPromptOptionsFromFileProperties(fileProperties),
+        parsePromptOptionsFromFileProperties(fileProperties),
       ).toThrow(
         `Invalid prompt file property=[${PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME}] value should be one of the values [default,info], but got [invalid-mode]`,
       );
@@ -246,7 +246,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
       };
 
       expect(() =>
-        parseUserPromptOptionsFromFileProperties(fileProperties),
+        parsePromptOptionsFromFileProperties(fileProperties),
       ).toThrow(
         `Invalid prompt file property=[${PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME}] value should be one of the values [default,info], but got [123]`,
       );
@@ -258,7 +258,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
       };
 
       expect(() =>
-        parseUserPromptOptionsFromFileProperties(fileProperties),
+        parsePromptOptionsFromFileProperties(fileProperties),
       ).toThrow(
         `Invalid prompt file property=[${PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME}] value should be one of the values [default,info], but got [true]`,
       );
@@ -270,7 +270,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
       };
 
       expect(() =>
-        parseUserPromptOptionsFromFileProperties(fileProperties),
+        parsePromptOptionsFromFileProperties(fileProperties),
       ).toThrow(
         `Invalid prompt file property=[${PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME}] value should be one of the values [default,info], but got []`,
       );
@@ -282,7 +282,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
       const fileProperties: FrontMatterCache = {
         [CONTEXT_SIZE_AFTER_PROP_NAME]: "15",
       };
-      const result = parseUserPromptOptionsFromFileProperties(fileProperties);
+      const result = parsePromptOptionsFromFileProperties(fileProperties);
 
       expect(result.contextSizeAfter).toBe(15);
     });
@@ -291,14 +291,14 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
       const fileProperties: FrontMatterCache = {
         [CONTEXT_SIZE_AFTER_PROP_NAME]: "0",
       };
-      const result = parseUserPromptOptionsFromFileProperties(fileProperties);
+      const result = parsePromptOptionsFromFileProperties(fileProperties);
 
       expect(result.contextSizeAfter).toBe(0);
     });
 
     it("should return undefined when property is missing", () => {
       const fileProperties: FrontMatterCache = {};
-      const result = parseUserPromptOptionsFromFileProperties(fileProperties);
+      const result = parsePromptOptionsFromFileProperties(fileProperties);
 
       expect(result.contextSizeAfter).toBeUndefined();
     });
@@ -309,7 +309,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
       };
 
       expect(() =>
-        parseUserPromptOptionsFromFileProperties(fileProperties),
+        parsePromptOptionsFromFileProperties(fileProperties),
       ).toThrow(
         `Invalid prompt file property=[${CONTEXT_SIZE_AFTER_PROP_NAME}] value should be positive, but got [-3]`,
       );
@@ -321,7 +321,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
       };
 
       expect(() =>
-        parseUserPromptOptionsFromFileProperties(fileProperties),
+        parsePromptOptionsFromFileProperties(fileProperties),
       ).toThrow(
         `Invalid prompt file property=[${CONTEXT_SIZE_AFTER_PROP_NAME}] value should be an integer, but got [7.8]`,
       );
@@ -333,7 +333,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
       };
 
       expect(() =>
-        parseUserPromptOptionsFromFileProperties(fileProperties),
+        parsePromptOptionsFromFileProperties(fileProperties),
       ).toThrow(
         `Invalid prompt file property=[${CONTEXT_SIZE_AFTER_PROP_NAME}] value should be an integer, but got [xyz]`,
       );
@@ -345,7 +345,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
       };
 
       expect(() =>
-        parseUserPromptOptionsFromFileProperties(fileProperties),
+        parsePromptOptionsFromFileProperties(fileProperties),
       ).toThrow(
         `Invalid prompt file property=[${CONTEXT_SIZE_AFTER_PROP_NAME}] unknown value type [456]`,
       );
@@ -360,7 +360,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
         [CONTEXT_SIZE_AFTER_PROP_NAME]: "10",
         [PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME]: "info",
       };
-      const result = parseUserPromptOptionsFromFileProperties(fileProperties);
+      const result = parsePromptOptionsFromFileProperties(fileProperties);
 
       expect(result).toEqual({
         shouldHandleSelectionOnly: true,
@@ -375,7 +375,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
         [SELECTION_MODE_PROP_NAME]: SELECTION_ONLY_PROP_VALUE,
         [CONTEXT_SIZE_BEFORE_PROP_NAME]: "3",
       };
-      const result = parseUserPromptOptionsFromFileProperties(fileProperties);
+      const result = parsePromptOptionsFromFileProperties(fileProperties);
 
       expect(result).toEqual({
         shouldHandleSelectionOnly: true,
@@ -390,7 +390,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
         [CONTEXT_SIZE_BEFORE_PROP_NAME]: "7",
         [CONTEXT_SIZE_AFTER_PROP_NAME]: "14",
       };
-      const result = parseUserPromptOptionsFromFileProperties(fileProperties);
+      const result = parsePromptOptionsFromFileProperties(fileProperties);
 
       expect(result).toEqual({
         shouldHandleSelectionOnly: undefined,
@@ -405,7 +405,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
         [PROMPT_RESPONSE_PROCESSING_MODE_PROP_NAME]: "default",
         [CONTEXT_SIZE_BEFORE_PROP_NAME]: "5",
       };
-      const result = parseUserPromptOptionsFromFileProperties(fileProperties);
+      const result = parsePromptOptionsFromFileProperties(fileProperties);
 
       expect(result).toEqual({
         shouldHandleSelectionOnly: undefined,
@@ -420,7 +420,7 @@ describe("parseUserPromptOptionsFromFileProperties", () => {
         [CONTEXT_SIZE_BEFORE_PROP_NAME]: "1000",
         [CONTEXT_SIZE_AFTER_PROP_NAME]: "2000",
       };
-      const result = parseUserPromptOptionsFromFileProperties(fileProperties);
+      const result = parsePromptOptionsFromFileProperties(fileProperties);
 
       expect(result.contextSizeBefore).toBe(1000);
       expect(result.contextSizeAfter).toBe(2000);
