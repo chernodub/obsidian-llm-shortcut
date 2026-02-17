@@ -3,14 +3,19 @@ import {
   SELECTION_END_MACROS,
   SELECTION_START_MACROS,
 } from "../constants";
-import { UserContentParams } from "../user-content-params";
+import {
+  TextSelectionRange,
+  UserContentSelection,
+} from "../user-content-selection/user-content-selection";
 import { UserPromptOptions } from "../user-prompt-options";
 
-export function getContextAroundSelection({
-  userContentParams: { fileContent, selection },
+function getContextAroundSelection({
+  text,
+  selectionRange: { from, to },
   userPromptOptions: { contextSizeBefore, contextSizeAfter },
 }: {
-  userContentParams: UserContentParams;
+  text: string;
+  selectionRange: TextSelectionRange;
   userPromptOptions: UserPromptOptions;
 }): {
   contentBefore: string;
@@ -18,27 +23,21 @@ export function getContextAroundSelection({
 } {
   let ignoredSizeBeforeContext = 0;
   if (contextSizeBefore !== undefined) {
-    if (selection.startIdx > contextSizeBefore) {
-      ignoredSizeBeforeContext = selection.startIdx - contextSizeBefore;
+    if (from > contextSizeBefore) {
+      ignoredSizeBeforeContext = from - contextSizeBefore;
     }
   }
 
   let ignoredSizeAfterContext = 0;
   if (contextSizeAfter !== undefined) {
-    const contentLengthAfter = fileContent.length - selection.endIdx;
+    const contentLengthAfter = text.length - to;
     if (contentLengthAfter > contextSizeAfter) {
       ignoredSizeAfterContext = contentLengthAfter - contextSizeAfter;
     }
   }
 
-  const contentBefore = fileContent.slice(
-    ignoredSizeBeforeContext,
-    selection.startIdx,
-  );
-  const contentAfter = fileContent.slice(
-    selection.endIdx,
-    fileContent.length - ignoredSizeAfterContext,
-  );
+  const contentBefore = text.slice(ignoredSizeBeforeContext, from);
+  const contentAfter = text.slice(to, text.length - ignoredSizeAfterContext);
 
   return {
     contentBefore,
@@ -46,30 +45,38 @@ export function getContextAroundSelection({
   };
 }
 
-export function getSelectedContentWithMacros({
-  fileContent,
-  selection,
-}: UserContentParams) {
-  return selection.startIdx === selection.endIdx
+function getSelectedContentWithMacros({
+  text,
+  selectionRange: { from, to },
+}: {
+  text: string;
+  selectionRange: TextSelectionRange;
+}): string {
+  return from === to
     ? CARET_MACROS
-    : SELECTION_START_MACROS +
-        fileContent.slice(selection.startIdx, selection.endIdx) +
-        SELECTION_END_MACROS;
+    : SELECTION_START_MACROS + text.slice(from, to) + SELECTION_END_MACROS;
 }
 
 export function prepareUserContent({
-  userContentParams,
+  userContentSelection,
   userPromptOptions,
 }: {
-  userContentParams: UserContentParams;
+  userContentSelection: UserContentSelection;
   userPromptOptions: UserPromptOptions;
 }): string {
+  const text = userContentSelection.getText();
+  const selectionRange = userContentSelection.getRange();
+
   const { contentBefore, contentAfter } = getContextAroundSelection({
+    text,
+    selectionRange,
     userPromptOptions,
-    userContentParams,
   });
 
-  const contentWithMacros = getSelectedContentWithMacros(userContentParams);
+  const contentWithMacros = getSelectedContentWithMacros({
+    text,
+    selectionRange,
+  });
 
   return contentBefore + contentWithMacros + contentAfter;
 }

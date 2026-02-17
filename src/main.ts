@@ -14,7 +14,7 @@ import { mapLlmErrorToReadable } from "./llm/error-handler";
 import { LLMClient } from "./llm/llm-client";
 import { logger } from "./logger";
 import { parseUserPromptOptionsFromFileProperties } from "./prompt/parse-user-prompt-options-from-file-properties/parse-user-prompt-options-from-file-properties";
-import { UserContentSelectionParams } from "./prompt/user-content-params";
+import { UserContentSelection } from "./prompt/user-content-selection/user-content-selection";
 import { DEFAULT_USER_PROMPT_OPTIONS } from "./prompt/user-prompt-options";
 import { UserPromptParams } from "./prompt/user-prompt-params";
 import { SettingTab } from "./setting-tab";
@@ -24,10 +24,7 @@ import { CustomPromptModal } from "./ui/prompt-modal/prompt-modal";
 import { showErrorNotification } from "./ui/user-notifications";
 import { assertExists } from "./utils/assertions/assert-exists";
 import { PLUGIN_NAME } from "./utils/constants";
-import { mapCursorPositionToIdx } from "./utils/obsidian/map-cursor-position-to-idx/map-cursor-position-to-idx";
-import { mapIdxToCursorPosition } from "./utils/obsidian/map-idx-to-cursor-position/map-idx-to-cursor-position";
 import { obsidianFetchAdapter } from "./utils/obsidian/obsidian-fetch-adapter";
-import { trimSelection } from "./utils/obsidian/trim-selection/trim-selection";
 
 interface PluginSettings {
   apiKey: string;
@@ -221,25 +218,13 @@ export default class LlmShortcutPlugin extends Plugin {
     this.addCommand(command);
   }
 
-  private getSelection(editor: Editor): UserContentSelectionParams {
-    const text = editor.getValue();
-
-    return {
-      startIdx: mapCursorPositionToIdx(text, editor.getCursor("from")),
-      endIdx: mapCursorPositionToIdx(text, editor.getCursor("to")),
-    };
-  }
-
   private applySelection(
     editor: Editor,
-    selection: UserContentSelectionParams,
+    userContentSelection: UserContentSelection,
   ) {
-    const text = editor.getValue();
+    const { anchor, head } = userContentSelection.getSelection();
 
-    const start = mapIdxToCursorPosition(text, selection.startIdx);
-    const end = mapIdxToCursorPosition(text, selection.endIdx);
-
-    editor.setSelection(start, end);
+    editor.setSelection(anchor, head);
   }
 
   private async handleRespond(promptFilePath: string, editor: Editor) {
@@ -269,15 +254,19 @@ export default class LlmShortcutPlugin extends Plugin {
     const { userPromptName, userPromptString, userPromptOptions } =
       userPromptParams;
 
-    const selection = trimSelection(
-      editor.getValue(),
-      this.getSelection(editor),
-    );
-    this.applySelection(editor, selection);
+    const text = editor.getValue();
 
-    const hasSelection = selection.startIdx !== selection.endIdx;
+    const rawSelection = new UserContentSelection(text, {
+      anchor: editor.getCursor("anchor"),
+      head: editor.getCursor("head"),
+    });
 
-    if (userPromptOptions.shouldHandleSelectionOnly && !hasSelection) {
+    const userContentSelection = rawSelection.trim();
+    this.applySelection(editor, userContentSelection);
+
+    const emptySelection = userContentSelection.isEmpty();
+
+    if (userPromptOptions.shouldHandleSelectionOnly && emptySelection) {
       showErrorNotification({
         title: "This command requires text to be selected",
       });
@@ -287,10 +276,7 @@ export default class LlmShortcutPlugin extends Plugin {
     this.loaderStrategy.start();
     try {
       const responseStream = this.llmClient.getResponse({
-        userContentParams: {
-          fileContent: editor.getValue(),
-          selection,
-        },
+        userContentSelection,
         userPromptString,
         userPromptOptions,
       });

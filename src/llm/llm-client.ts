@@ -1,13 +1,13 @@
 import { OpenAI, ClientOptions as OpenAIOptions } from "openai";
 import { getInternalSystemPrompt } from "../prompt/get-internal-system-prompt";
 import { prepareUserContent } from "../prompt/prepare-user-content/prepare-user-content";
-import { UserContentParams } from "../prompt/user-content-params";
+import { UserContentSelection } from "../prompt/user-content-selection/user-content-selection";
 import { UserPromptOptions } from "../prompt/user-prompt-options";
 import { createOpenAiRequestMessages } from "./create-open-ai-request-messages";
 
 type GetResponseParams = {
   readonly userPromptString: string;
-  readonly userContentParams: UserContentParams;
+  readonly userContentSelection: UserContentSelection;
   readonly userPromptOptions: UserPromptOptions;
 };
 
@@ -26,17 +26,17 @@ export class LLMClient {
   }
 
   async *getResponse({
-    userContentParams,
+    userContentSelection,
     userPromptString,
     userPromptOptions,
   }: GetResponseParams) {
     const userContentString = prepareUserContent({
-      userContentParams,
+      userContentSelection,
       userPromptOptions,
     });
 
     const internalSystemPrompt = getInternalSystemPrompt({
-      userContentParams,
+      userContentSelection,
     });
 
     const messages = createOpenAiRequestMessages({

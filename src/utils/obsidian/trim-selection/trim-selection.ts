@@ -1,23 +1,16 @@
-import { UserContentSelectionParams } from "../../../prompt/user-content-params";
+import { TextSelectionRange } from "../../../prompt/user-content-selection/user-content-selection";
 
 export function trimSelection(
   text: string,
-  { startIdx, endIdx }: UserContentSelectionParams,
-): UserContentSelectionParams {
-  const isSpaceCharacter = (idx: number) => {
-    return /\s/.test(text[idx]!);
-  };
+  { from, to }: TextSelectionRange,
+): TextSelectionRange {
+  const isSpace = (i: number) => /\s/.test(text[i]!);
 
-  while (startIdx < endIdx && isSpaceCharacter(startIdx)) {
-    startIdx++;
-  }
-
-  while (startIdx < endIdx && isSpaceCharacter(endIdx - 1)) {
-    endIdx--;
-  }
+  while (from < to && isSpace(from)) from++;
+  while (from < to && isSpace(to - 1)) to--;
 
   return {
-    startIdx,
-    endIdx,
+    from,
+    to,
   };
 }

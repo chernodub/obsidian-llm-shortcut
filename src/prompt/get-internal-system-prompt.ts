@@ -3,7 +3,7 @@ import {
   SELECTION_END_MACROS,
   SELECTION_START_MACROS,
 } from "./constants";
-import { UserContentParams } from "./user-content-params";
+import { UserContentSelection } from "./user-content-selection/user-content-selection";
 
 const INTERNAL_SYSTEM_PROMPT_CARET = `
 You are the internal editor for Obsidian operating under a two-layer prompt (system + user). Your sole job is to insert content at the locus indicated by special markers. Follow these rules strictly and silently:
@@ -69,16 +69,12 @@ SAFETY AND PRIVACY
 Your response must always be exactly and only what should replace at the indicated locus.
 `;
 
-export type GetInternalSystemPromptParams = {
-  readonly userContentParams: UserContentParams;
-};
-
 export function getInternalSystemPrompt({
-  userContentParams: { selection },
-}: GetInternalSystemPromptParams): string {
-  const hasSelection = selection.startIdx !== selection.endIdx;
-
-  return hasSelection
-    ? INTERNAL_SYSTEM_PROMPT_SELECTION
-    : INTERNAL_SYSTEM_PROMPT_CARET;
+  userContentSelection,
+}: {
+  userContentSelection: UserContentSelection;
+}): string {
+  return userContentSelection.isEmpty()
+    ? INTERNAL_SYSTEM_PROMPT_CARET
+    : INTERNAL_SYSTEM_PROMPT_SELECTION;
 }
