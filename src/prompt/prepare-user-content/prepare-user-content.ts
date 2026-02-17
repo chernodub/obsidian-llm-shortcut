@@ -3,21 +3,19 @@ import {
   SELECTION_END_MACROS,
   SELECTION_START_MACROS,
 } from "../constants";
-import { UserContentParams } from "../user-content-params";
+import {
+  TextSelectionRange,
+  UserContentSelection,
+} from "../user-content-selection";
 import { UserPromptOptions } from "../user-prompt-options";
 
-type SelectionRange = {
-  from: number;
-  to: number;
-};
-
 function getContextAroundSelection({
-  fileContent,
+  text,
   selectionRange: { from, to },
   userPromptOptions: { contextSizeBefore, contextSizeAfter },
 }: {
-  fileContent: string;
-  selectionRange: SelectionRange;
+  text: string;
+  selectionRange: TextSelectionRange;
   userPromptOptions: UserPromptOptions;
 }): {
   contentBefore: string;
@@ -32,20 +30,14 @@ function getContextAroundSelection({
 
   let ignoredSizeAfterContext = 0;
   if (contextSizeAfter !== undefined) {
-    const contentLengthAfter = fileContent.length - to;
+    const contentLengthAfter = text.length - to;
     if (contentLengthAfter > contextSizeAfter) {
       ignoredSizeAfterContext = contentLengthAfter - contextSizeAfter;
     }
   }
 
-  const contentBefore = fileContent.slice(
-    ignoredSizeBeforeContext,
-    from,
-  );
-  const contentAfter = fileContent.slice(
-    to,
-    fileContent.length - ignoredSizeAfterContext,
-  );
+  const contentBefore = text.slice(ignoredSizeBeforeContext, from);
+  const contentAfter = text.slice(to, text.length - ignoredSizeAfterContext);
 
   return {
     contentBefore,
@@ -54,39 +46,35 @@ function getContextAroundSelection({
 }
 
 function getSelectedContentWithMacros({
-  fileContent,
+  text,
   selectionRange: { from, to },
 }: {
-  fileContent: string;
-  selectionRange: SelectionRange;
+  text: string;
+  selectionRange: TextSelectionRange;
 }): string {
   return from === to
     ? CARET_MACROS
-    : SELECTION_START_MACROS +
-        fileContent.slice(from, to) +
-        SELECTION_END_MACROS;
+    : SELECTION_START_MACROS + text.slice(from, to) + SELECTION_END_MACROS;
 }
 
 export function prepareUserContent({
-  userContentParams,
+  userContentSelection,
   userPromptOptions,
 }: {
-  userContentParams: UserContentParams;
+  userContentSelection: UserContentSelection;
   userPromptOptions: UserPromptOptions;
 }): string {
-  const { anchorIdx, headIdx } = userContentParams.selection;
-  const from = Math.min(anchorIdx, headIdx);
-  const to = Math.max(anchorIdx, headIdx);
-  const selectionRange = { from, to };
+  const selectionRange = userContentSelection.getRange();
+  const text = userContentSelection.getText();
 
   const { contentBefore, contentAfter } = getContextAroundSelection({
-    userPromptOptions,
-    fileContent: userContentParams.fileContent,
+    text,
     selectionRange,
+    userPromptOptions,
   });
 
   const contentWithMacros = getSelectedContentWithMacros({
-    fileContent: userContentParams.fileContent,
+    text,
     selectionRange,
   });
 

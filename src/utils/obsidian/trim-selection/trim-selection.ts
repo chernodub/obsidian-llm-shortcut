@@ -1,9 +1,9 @@
-import { UserContentSelectionParams } from "../../../prompt/user-content-params";
+import { TextSelectionIdxs } from "../../../prompt/user-content-selection";
 
 export function trimSelection(
   text: string,
-  { anchorIdx, headIdx }: UserContentSelectionParams,
-): UserContentSelectionParams {
+  { anchorIdx, headIdx }: TextSelectionIdxs,
+): TextSelectionIdxs {
   let from = Math.min(anchorIdx, headIdx);
   let to = Math.max(anchorIdx, headIdx);
   const isSpace = (i: number) => /\s/.test(text[i]!);

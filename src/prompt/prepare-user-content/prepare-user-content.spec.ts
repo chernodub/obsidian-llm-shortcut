@@ -4,7 +4,7 @@ import {
   SELECTION_END_MACROS,
   SELECTION_START_MACROS,
 } from "../constants";
-import { UserContentParams } from "../user-content-params";
+import { TextSelection, UserContentSelection } from "../user-content-selection";
 import {
   DEFAULT_USER_PROMPT_OPTIONS,
   UserPromptOptions,
@@ -15,16 +15,19 @@ describe("prepareUserContent", () => {
   describe("basic functionality", () => {
     it("should return full content with selection markers when no context sizes are provided", () => {
       const fileContent = "Hello world, this is a test";
-      const selection: UserContentParams["selection"] = {
-        anchorIdx: 6,
-        headIdx: 11,
+      const selectionRange: TextSelection = {
+        anchor: { line: 0, ch: 6 },
+        head: { line: 0, ch: 11 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
       };
 
       const result = prepareUserContent({
-        userContentParams: { fileContent, selection },
+        userContentSelection: new UserContentSelection(
+          fileContent,
+          selectionRange,
+        ),
         userPromptOptions,
       });
 
@@ -39,16 +42,19 @@ describe("prepareUserContent", () => {
 
     it("should use caret macro when startIdx equals endIdx", () => {
       const fileContent = "Hello world";
-      const selection: UserContentParams["selection"] = {
-        anchorIdx: 5,
-        headIdx: 5,
+      const selectionRange: TextSelection = {
+        anchor: { line: 0, ch: 5 },
+        head: { line: 0, ch: 5 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
       };
 
       const result = prepareUserContent({
-        userContentParams: { fileContent, selection },
+        userContentSelection: new UserContentSelection(
+          fileContent,
+          selectionRange,
+        ),
         userPromptOptions,
       });
 
@@ -57,16 +63,19 @@ describe("prepareUserContent", () => {
 
     it("should handle empty file content", () => {
       const fileContent = "";
-      const selection: UserContentParams["selection"] = {
-        anchorIdx: 0,
-        headIdx: 0,
+      const selectionRange: TextSelection = {
+        anchor: { line: 0, ch: 0 },
+        head: { line: 0, ch: 0 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
       };
 
       const result = prepareUserContent({
-        userContentParams: { fileContent, selection },
+        userContentSelection: new UserContentSelection(
+          fileContent,
+          selectionRange,
+        ),
         userPromptOptions,
       });
 
@@ -75,16 +84,19 @@ describe("prepareUserContent", () => {
 
     it("should handle selection at the start of file", () => {
       const fileContent = "Hello world";
-      const selection: UserContentParams["selection"] = {
-        anchorIdx: 0,
-        headIdx: 5,
+      const selectionRange: TextSelection = {
+        anchor: { line: 0, ch: 0 },
+        head: { line: 0, ch: 5 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
       };
 
       const result = prepareUserContent({
-        userContentParams: { fileContent, selection },
+        userContentSelection: new UserContentSelection(
+          fileContent,
+          selectionRange,
+        ),
         userPromptOptions,
       });
 
@@ -95,16 +107,19 @@ describe("prepareUserContent", () => {
 
     it("should handle selection at the end of file", () => {
       const fileContent = "Hello world";
-      const selection: UserContentParams["selection"] = {
-        anchorIdx: 6,
-        headIdx: 11,
+      const selectionRange: TextSelection = {
+        anchor: { line: 0, ch: 6 },
+        head: { line: 0, ch: 11 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
       };
 
       const result = prepareUserContent({
-        userContentParams: { fileContent, selection },
+        userContentSelection: new UserContentSelection(
+          fileContent,
+          selectionRange,
+        ),
         userPromptOptions,
       });
 
@@ -115,16 +130,19 @@ describe("prepareUserContent", () => {
 
     it("should handle selection covering entire file", () => {
       const fileContent = "Hello";
-      const selection: UserContentParams["selection"] = {
-        anchorIdx: 0,
-        headIdx: 5,
+      const selectionRange: TextSelection = {
+        anchor: { line: 0, ch: 0 },
+        head: { line: 0, ch: 5 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
       };
 
       const result = prepareUserContent({
-        userContentParams: { fileContent, selection },
+        userContentSelection: new UserContentSelection(
+          fileContent,
+          selectionRange,
+        ),
         userPromptOptions,
       });
 
@@ -137,9 +155,9 @@ describe("prepareUserContent", () => {
   describe("context size before selection", () => {
     it("should include full context when context size is larger than available content", () => {
       const fileContent = "Hello world";
-      const selection: UserContentParams["selection"] = {
-        anchorIdx: 6,
-        headIdx: 11,
+      const selectionRange: TextSelection = {
+        anchor: { line: 0, ch: 6 },
+        head: { line: 0, ch: 11 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
@@ -147,7 +165,10 @@ describe("prepareUserContent", () => {
       };
 
       const result = prepareUserContent({
-        userContentParams: { fileContent, selection },
+        userContentSelection: new UserContentSelection(
+          fileContent,
+          selectionRange,
+        ),
         userPromptOptions,
       });
 
@@ -158,9 +179,9 @@ describe("prepareUserContent", () => {
 
     it("should limit context when context size is smaller than available content", () => {
       const fileContent = "This is a very long text with many words";
-      const selection: UserContentParams["selection"] = {
-        anchorIdx: 20,
-        headIdx: 24,
+      const selectionRange: TextSelection = {
+        anchor: { line: 0, ch: 20 },
+        head: { line: 0, ch: 24 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
@@ -168,7 +189,10 @@ describe("prepareUserContent", () => {
       };
 
       const result = prepareUserContent({
-        userContentParams: { fileContent, selection },
+        userContentSelection: new UserContentSelection(
+          fileContent,
+          selectionRange,
+        ),
         userPromptOptions,
       });
 
@@ -183,9 +207,9 @@ describe("prepareUserContent", () => {
 
     it("should handle context size equal to available content before selection", () => {
       const fileContent = "Hello world";
-      const selection: UserContentParams["selection"] = {
-        anchorIdx: 6,
-        headIdx: 11,
+      const selectionRange: TextSelection = {
+        anchor: { line: 0, ch: 6 },
+        head: { line: 0, ch: 11 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
@@ -193,7 +217,10 @@ describe("prepareUserContent", () => {
       };
 
       const result = prepareUserContent({
-        userContentParams: { fileContent, selection },
+        userContentSelection: new UserContentSelection(
+          fileContent,
+          selectionRange,
+        ),
         userPromptOptions,
       });
 
@@ -204,9 +231,9 @@ describe("prepareUserContent", () => {
 
     it("should handle zero context size before selection", () => {
       const fileContent = "Hello world";
-      const selection: UserContentParams["selection"] = {
-        anchorIdx: 6,
-        headIdx: 11,
+      const selectionRange: TextSelection = {
+        anchor: { line: 0, ch: 6 },
+        head: { line: 0, ch: 11 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
@@ -214,7 +241,10 @@ describe("prepareUserContent", () => {
       };
 
       const result = prepareUserContent({
-        userContentParams: { fileContent, selection },
+        userContentSelection: new UserContentSelection(
+          fileContent,
+          selectionRange,
+        ),
         userPromptOptions,
       });
 
@@ -225,9 +255,9 @@ describe("prepareUserContent", () => {
 
     it("should handle selection at start with context size", () => {
       const fileContent = "Hello world";
-      const selection: UserContentParams["selection"] = {
-        anchorIdx: 0,
-        headIdx: 5,
+      const selectionRange: TextSelection = {
+        anchor: { line: 0, ch: 0 },
+        head: { line: 0, ch: 5 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
@@ -235,7 +265,10 @@ describe("prepareUserContent", () => {
       };
 
       const result = prepareUserContent({
-        userContentParams: { fileContent, selection },
+        userContentSelection: new UserContentSelection(
+          fileContent,
+          selectionRange,
+        ),
         userPromptOptions,
       });
 
@@ -248,9 +281,9 @@ describe("prepareUserContent", () => {
   describe("context size after selection", () => {
     it("should include full context when context size is larger than available content", () => {
       const fileContent = "Hello world";
-      const selection: UserContentParams["selection"] = {
-        anchorIdx: 0,
-        headIdx: 5,
+      const selectionRange: TextSelection = {
+        anchor: { line: 0, ch: 0 },
+        head: { line: 0, ch: 5 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
@@ -258,7 +291,10 @@ describe("prepareUserContent", () => {
       };
 
       const result = prepareUserContent({
-        userContentParams: { fileContent, selection },
+        userContentSelection: new UserContentSelection(
+          fileContent,
+          selectionRange,
+        ),
         userPromptOptions,
       });
 
@@ -269,9 +305,9 @@ describe("prepareUserContent", () => {
 
     it("should limit context when context size is smaller than available content", () => {
       const fileContent = "This is a very long text with many words";
-      const selection: UserContentParams["selection"] = {
-        anchorIdx: 0,
-        headIdx: 4,
+      const selectionRange: TextSelection = {
+        anchor: { line: 0, ch: 0 },
+        head: { line: 0, ch: 4 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
@@ -279,7 +315,10 @@ describe("prepareUserContent", () => {
       };
 
       const result = prepareUserContent({
-        userContentParams: { fileContent, selection },
+        userContentSelection: new UserContentSelection(
+          fileContent,
+          selectionRange,
+        ),
         userPromptOptions,
       });
 
@@ -290,9 +329,9 @@ describe("prepareUserContent", () => {
 
     it("should handle context size equal to available content after selection", () => {
       const fileContent = "Hello world";
-      const selection: UserContentParams["selection"] = {
-        anchorIdx: 0,
-        headIdx: 5,
+      const selectionRange: TextSelection = {
+        anchor: { line: 0, ch: 0 },
+        head: { line: 0, ch: 5 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
@@ -300,7 +339,10 @@ describe("prepareUserContent", () => {
       };
 
       const result = prepareUserContent({
-        userContentParams: { fileContent, selection },
+        userContentSelection: new UserContentSelection(
+          fileContent,
+          selectionRange,
+        ),
         userPromptOptions,
       });
 
@@ -311,9 +353,9 @@ describe("prepareUserContent", () => {
 
     it("should handle zero context size after selection", () => {
       const fileContent = "Hello world";
-      const selection: UserContentParams["selection"] = {
-        anchorIdx: 0,
-        headIdx: 5,
+      const selectionRange: TextSelection = {
+        anchor: { line: 0, ch: 0 },
+        head: { line: 0, ch: 5 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
@@ -321,7 +363,10 @@ describe("prepareUserContent", () => {
       };
 
       const result = prepareUserContent({
-        userContentParams: { fileContent, selection },
+        userContentSelection: new UserContentSelection(
+          fileContent,
+          selectionRange,
+        ),
         userPromptOptions,
       });
 
@@ -332,9 +377,9 @@ describe("prepareUserContent", () => {
 
     it("should handle selection at end with context size", () => {
       const fileContent = "Hello world";
-      const selection: UserContentParams["selection"] = {
-        anchorIdx: 6,
-        headIdx: 11,
+      const selectionRange: TextSelection = {
+        anchor: { line: 0, ch: 6 },
+        head: { line: 0, ch: 11 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
@@ -342,7 +387,10 @@ describe("prepareUserContent", () => {
       };
 
       const result = prepareUserContent({
-        userContentParams: { fileContent, selection },
+        userContentSelection: new UserContentSelection(
+          fileContent,
+          selectionRange,
+        ),
         userPromptOptions,
       });
 
@@ -355,9 +403,9 @@ describe("prepareUserContent", () => {
   describe("combined context sizes", () => {
     it("should handle both context sizes together", () => {
       const fileContent = "This is a very long text with many words in it";
-      const selection: UserContentParams["selection"] = {
-        anchorIdx: 15,
-        headIdx: 19,
+      const selectionRange: TextSelection = {
+        anchor: { line: 0, ch: 15 },
+        head: { line: 0, ch: 19 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
@@ -366,7 +414,10 @@ describe("prepareUserContent", () => {
       };
 
       const result = prepareUserContent({
-        userContentParams: { fileContent, selection },
+        userContentSelection: new UserContentSelection(
+          fileContent,
+          selectionRange,
+        ),
         userPromptOptions,
       });
 
@@ -381,9 +432,9 @@ describe("prepareUserContent", () => {
 
     it("should handle both context sizes when content is smaller than context sizes", () => {
       const fileContent = "Hello world";
-      const selection: UserContentParams["selection"] = {
-        anchorIdx: 6,
-        headIdx: 11,
+      const selectionRange: TextSelection = {
+        anchor: { line: 0, ch: 6 },
+        head: { line: 0, ch: 11 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
@@ -392,7 +443,10 @@ describe("prepareUserContent", () => {
       };
 
       const result = prepareUserContent({
-        userContentParams: { fileContent, selection },
+        userContentSelection: new UserContentSelection(
+          fileContent,
+          selectionRange,
+        ),
         userPromptOptions,
       });
 
@@ -403,9 +457,9 @@ describe("prepareUserContent", () => {
 
     it("should handle both context sizes with zero values", () => {
       const fileContent = "Hello world";
-      const selection: UserContentParams["selection"] = {
-        anchorIdx: 6,
-        headIdx: 11,
+      const selectionRange: TextSelection = {
+        anchor: { line: 0, ch: 6 },
+        head: { line: 0, ch: 11 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
@@ -414,7 +468,10 @@ describe("prepareUserContent", () => {
       };
 
       const result = prepareUserContent({
-        userContentParams: { fileContent, selection },
+        userContentSelection: new UserContentSelection(
+          fileContent,
+          selectionRange,
+        ),
         userPromptOptions,
       });
 
@@ -425,9 +482,9 @@ describe("prepareUserContent", () => {
 
     it("should handle caret with both context sizes", () => {
       const fileContent = "This is a test";
-      const selection: UserContentParams["selection"] = {
-        anchorIdx: 8,
-        headIdx: 8,
+      const selectionRange: TextSelection = {
+        anchor: { line: 0, ch: 8 },
+        head: { line: 0, ch: 8 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
@@ -436,7 +493,10 @@ describe("prepareUserContent", () => {
       };
 
       const result = prepareUserContent({
-        userContentParams: { fileContent, selection },
+        userContentSelection: new UserContentSelection(
+          fileContent,
+          selectionRange,
+        ),
         userPromptOptions,
       });
 
@@ -447,16 +507,19 @@ describe("prepareUserContent", () => {
   describe("edge cases", () => {
     it("should handle multiline content", () => {
       const fileContent = "Line 1\nLine 2\nLine 3";
-      const selection: UserContentParams["selection"] = {
-        anchorIdx: 7,
-        headIdx: 13,
+      const selectionRange: TextSelection = {
+        anchor: { line: 0, ch: 7 },
+        head: { line: 0, ch: 13 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
       };
 
       const result = prepareUserContent({
-        userContentParams: { fileContent, selection },
+        userContentSelection: new UserContentSelection(
+          fileContent,
+          selectionRange,
+        ),
         userPromptOptions,
       });
 
@@ -471,16 +534,19 @@ describe("prepareUserContent", () => {
 
     it("should handle content with special characters", () => {
       const fileContent = "Hello $world$ {test} [example]";
-      const selection: UserContentParams["selection"] = {
-        anchorIdx: 6,
-        headIdx: 13,
+      const selectionRange: TextSelection = {
+        anchor: { line: 0, ch: 6 },
+        head: { line: 0, ch: 13 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
       };
 
       const result = prepareUserContent({
-        userContentParams: { fileContent, selection },
+        userContentSelection: new UserContentSelection(
+          fileContent,
+          selectionRange,
+        ),
         userPromptOptions,
       });
 
@@ -495,9 +561,9 @@ describe("prepareUserContent", () => {
 
     it("should handle very large context sizes", () => {
       const fileContent = "Short";
-      const selection: UserContentParams["selection"] = {
-        anchorIdx: 2,
-        headIdx: 3,
+      const selectionRange: TextSelection = {
+        anchor: { line: 0, ch: 2 },
+        head: { line: 0, ch: 3 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
@@ -506,7 +572,10 @@ describe("prepareUserContent", () => {
       };
 
       const result = prepareUserContent({
-        userContentParams: { fileContent, selection },
+        userContentSelection: new UserContentSelection(
+          fileContent,
+          selectionRange,
+        ),
         userPromptOptions,
       });
 
@@ -519,16 +588,19 @@ describe("prepareUserContent", () => {
   describe("when anchorIdx > headIdx (backward selection)", () => {
     it("should produce same result as forward selection (full content with markers)", () => {
       const fileContent = "Hello world, this is a test";
-      const selection: UserContentParams["selection"] = {
-        anchorIdx: 11,
-        headIdx: 6,
+      const selectionRange: TextSelection = {
+        anchor: { line: 0, ch: 6 },
+        head: { line: 0, ch: 11 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
       };
 
       const result = prepareUserContent({
-        userContentParams: { fileContent, selection },
+        userContentSelection: new UserContentSelection(
+          fileContent,
+          selectionRange,
+        ),
         userPromptOptions,
       });
 
@@ -543,16 +615,19 @@ describe("prepareUserContent", () => {
 
     it("should produce same result for selection at start of file", () => {
       const fileContent = "Hello world";
-      const selection: UserContentParams["selection"] = {
-        anchorIdx: 5,
-        headIdx: 0,
+      const selectionRange: TextSelection = {
+        anchor: { line: 0, ch: 0 },
+        head: { line: 0, ch: 5 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
       };
 
       const result = prepareUserContent({
-        userContentParams: { fileContent, selection },
+        userContentSelection: new UserContentSelection(
+          fileContent,
+          selectionRange,
+        ),
         userPromptOptions,
       });
 
@@ -563,16 +638,19 @@ describe("prepareUserContent", () => {
 
     it("should produce same result for selection at end of file", () => {
       const fileContent = "Hello world";
-      const selection: UserContentParams["selection"] = {
-        anchorIdx: 11,
-        headIdx: 6,
+      const selectionRange: TextSelection = {
+        anchor: { line: 0, ch: 6 },
+        head: { line: 0, ch: 11 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
       };
 
       const result = prepareUserContent({
-        userContentParams: { fileContent, selection },
+        userContentSelection: new UserContentSelection(
+          fileContent,
+          selectionRange,
+        ),
         userPromptOptions,
       });
 
@@ -583,9 +661,9 @@ describe("prepareUserContent", () => {
 
     it("should produce same result with context size before selection", () => {
       const fileContent = "This is a very long text with many words";
-      const selection: UserContentParams["selection"] = {
-        anchorIdx: 24,
-        headIdx: 20,
+      const selectionRange: TextSelection = {
+        anchor: { line: 0, ch: 24 },
+        head: { line: 0, ch: 20 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
@@ -593,7 +671,10 @@ describe("prepareUserContent", () => {
       };
 
       const result = prepareUserContent({
-        userContentParams: { fileContent, selection },
+        userContentSelection: new UserContentSelection(
+          fileContent,
+          selectionRange,
+        ),
         userPromptOptions,
       });
 
@@ -608,9 +689,9 @@ describe("prepareUserContent", () => {
 
     it("should produce same result with context size after selection", () => {
       const fileContent = "This is a very long text with many words";
-      const selection: UserContentParams["selection"] = {
-        anchorIdx: 4,
-        headIdx: 0,
+      const selectionRange: TextSelection = {
+        anchor: { line: 0, ch: 4 },
+        head: { line: 0, ch: 0 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
@@ -618,7 +699,10 @@ describe("prepareUserContent", () => {
       };
 
       const result = prepareUserContent({
-        userContentParams: { fileContent, selection },
+        userContentSelection: new UserContentSelection(
+          fileContent,
+          selectionRange,
+        ),
         userPromptOptions,
       });
 
@@ -629,9 +713,9 @@ describe("prepareUserContent", () => {
 
     it("should produce same result with combined context sizes", () => {
       const fileContent = "This is a very long text with many words in it";
-      const selection: UserContentParams["selection"] = {
-        anchorIdx: 19,
-        headIdx: 15,
+      const selectionRange: TextSelection = {
+        anchor: { line: 0, ch: 19 },
+        head: { line: 0, ch: 15 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
@@ -640,7 +724,10 @@ describe("prepareUserContent", () => {
       };
 
       const result = prepareUserContent({
-        userContentParams: { fileContent, selection },
+        userContentSelection: new UserContentSelection(
+          fileContent,
+          selectionRange,
+        ),
         userPromptOptions,
       });
 
