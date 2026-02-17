@@ -23,6 +23,7 @@ export function renderSpinnerIcon(element: HTMLElement): void {
 
 export function renderCancelIcon(element: HTMLElement): void {
   setIcon(element, CANCEL_ICON);
+  element.classList.remove(clsx(styles.spinner));
   element.classList.add(clsx(styles.cancel));
 }
 
