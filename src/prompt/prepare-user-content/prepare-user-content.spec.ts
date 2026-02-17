@@ -511,8 +511,8 @@ describe("prepareUserContent", () => {
     it("should handle multiline content", () => {
       const fileContent = "Line 1\nLine 2\nLine 3";
       const selectionRange: TextSelection = {
-        anchor: { line: 0, ch: 7 },
-        head: { line: 0, ch: 13 },
+        anchor: { line: 1, ch: 0 },
+        head: { line: 1, ch: 6 },
       };
       const userPromptOptions: UserPromptOptions = {
         ...DEFAULT_USER_PROMPT_OPTIONS,
