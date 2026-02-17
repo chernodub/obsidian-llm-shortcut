@@ -7,7 +7,8 @@
   }
 }
 
-.spinner {
+.spinner,
+.cancel {
   width: 16px;
   min-width: 16px;
   height: 16px;
@@ -16,16 +17,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+.spinner {
   animation: spin 1s linear infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .spinner {
-    visibility: hidden;
     animation: none;
   }
-}
-
-.cancel {
-  animation: none;
 }
