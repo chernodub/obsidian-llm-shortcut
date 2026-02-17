@@ -218,8 +218,11 @@ export default class LlmShortcutPlugin extends Plugin {
     this.addCommand(command);
   }
 
-  private applySelection(editor: Editor, selection: UserContentSelection) {
-    const { anchor, head } = selection.getSelection();
+  private applySelection(
+    editor: Editor,
+    userContentSelection: UserContentSelection,
+  ) {
+    const { anchor, head } = userContentSelection.getSelection();
 
     editor.setSelection(anchor, head);
   }
