@@ -21,7 +21,7 @@ export type TextSelectionRange = {
 export class UserContentSelection {
   constructor(
     private readonly text: string,
-    private readonly range: TextSelection,
+    private readonly selection: TextSelection,
   ) {}
 
   public getText(): string {
@@ -29,20 +29,17 @@ export class UserContentSelection {
   }
 
   public getSelection(): TextSelection {
-    return {
-      anchor: this.range.anchor,
-      head: this.range.head,
-    };
+    return this.selection;
   }
 
   public isEmpty(): boolean {
-    const { anchor, head } = this.range;
+    const { anchor, head } = this.selection;
 
     return anchor.line === head.line && anchor.ch === head.ch;
   }
 
   public isBackward(): boolean {
-    const { anchor, head } = this.range;
+    const { anchor, head } = this.selection;
 
     if (anchor.line < head.line) return false;
     if (anchor.line > head.line) return true;
@@ -51,7 +48,8 @@ export class UserContentSelection {
   }
 
   public getSelectionIdxs(): TextSelectionIdxs {
-    const { anchor, head } = this.range;
+    const { anchor, head } = this.selection;
+
     return {
       anchorIdx: mapCursorPositionToIdx(this.text, anchor),
       headIdx: mapCursorPositionToIdx(this.text, head),
@@ -67,19 +65,22 @@ export class UserContentSelection {
     };
   }
 
+  /**
+   * @returns a NEW UserContentSelection instance with the trimmed range
+   */
   public trim(): UserContentSelection {
     const range = this.getRange();
 
-    const nextRange = trimSelection(this.text, range);
+    const { from, to } = trimSelection(this.text, range);
 
     const nextSelectionIdxs = this.isBackward()
       ? {
-          anchorIdx: nextRange.to,
-          headIdx: nextRange.from,
+          anchorIdx: to,
+          headIdx: from,
         }
       : {
-          anchorIdx: nextRange.from,
-          headIdx: nextRange.to,
+          anchorIdx: from,
+          headIdx: to,
         };
 
     return new UserContentSelection(this.text, {

@@ -64,8 +64,8 @@ export function prepareUserContent({
   userContentSelection: UserContentSelection;
   userPromptOptions: UserPromptOptions;
 }): string {
-  const selectionRange = userContentSelection.getRange();
   const text = userContentSelection.getText();
+  const selectionRange = userContentSelection.getRange();
 
   const { contentBefore, contentAfter } = getContextAroundSelection({
     text,
