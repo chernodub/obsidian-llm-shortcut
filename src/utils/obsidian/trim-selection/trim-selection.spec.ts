@@ -38,7 +38,7 @@ describe("trimSelection", () => {
     expect(result).toEqual({ from: 6, to: 6 });
   });
 
-  it("should handle empty selection (startIdx === endIdx)", () => {
+  it("should handle empty selection (from === to)", () => {
     const text = "hello world";
     const result = trimSelection(text, { from: 5, to: 5 });
     expect(result).toEqual({ from: 5, to: 5 });
