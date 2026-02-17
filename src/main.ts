@@ -302,7 +302,11 @@ export default class LlmShortcutPlugin extends Plugin {
       });
 
       if (userPromptOptions.promptResponseProcessingMode === "info") {
-        await this.showPopUpWithResponse({ userPromptName, responseStream });
+        await this.showPopUpWithResponse({
+          userPromptName,
+          responseStream,
+          onCancel: () => abortController.abort(),
+        });
       } else {
         await this.updateEditorContentWithResponse({
           editor,
@@ -354,11 +358,13 @@ export default class LlmShortcutPlugin extends Plugin {
   private async showPopUpWithResponse({
     userPromptName,
     responseStream,
+    onCancel,
   }: {
     userPromptName: string;
     responseStream: AsyncGenerator<string, void, unknown>;
+    onCancel: () => void;
   }) {
-    const infoModal = new InfoModal(this.app);
+    const infoModal = new InfoModal(this.app, onCancel);
     infoModal.setTitle(userPromptName);
     infoModal.open();
 
