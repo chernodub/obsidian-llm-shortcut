@@ -6,12 +6,12 @@ import {
 import { UserContentParams } from "../user-content-params";
 import { UserPromptOptions } from "../user-prompt-options";
 
-export type SelectionRange = {
+type SelectionRange = {
   from: number;
   to: number;
 };
 
-export function getContextAroundSelection({
+function getContextAroundSelection({
   fileContent,
   selectionRange: { from, to },
   userPromptOptions: { contextSizeBefore, contextSizeAfter },
@@ -53,7 +53,7 @@ export function getContextAroundSelection({
   };
 }
 
-export function getSelectedContentWithMacros({
+function getSelectedContentWithMacros({
   fileContent,
   selectionRange: { from, to },
 }: {
