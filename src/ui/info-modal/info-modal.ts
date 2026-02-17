@@ -5,10 +5,12 @@ import styles from "./info-modal.module.css";
 
 export class InfoModal extends Modal {
   private markdownComponent: Component;
+  private readonly onCloseCallback: () => void;
 
-  constructor(app: App) {
+  constructor(app: App, onCloseCallback: () => void) {
     super(app);
     this.markdownComponent = new Component();
+    this.onCloseCallback = onCloseCallback;
   }
 
   public async setInfo(str: string) {
@@ -37,6 +39,8 @@ export class InfoModal extends Modal {
   }
 
   override onClose() {
+    this.onCloseCallback?.();
+
     const { contentEl } = this;
 
     this.markdownComponent.unload();
