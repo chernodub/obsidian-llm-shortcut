@@ -4,7 +4,10 @@ import {
   SELECTION_END_MACROS,
   SELECTION_START_MACROS,
 } from "../constants";
-import { TextSelection, UserContentSelection } from "../user-content-selection";
+import {
+  TextSelection,
+  UserContentSelection,
+} from "../user-content-selection/user-content-selection";
 import {
   DEFAULT_USER_PROMPT_OPTIONS,
   UserPromptOptions,

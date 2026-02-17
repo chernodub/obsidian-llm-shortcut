@@ -1,6 +1,6 @@
 import { EditorPosition } from "obsidian";
-import { mapCursorPositionToIdx } from "../utils/obsidian/map-cursor-position-to-idx/map-cursor-position-to-idx";
-import { mapIdxToCursorPosition } from "../utils/obsidian/map-idx-to-cursor-position/map-idx-to-cursor-position";
+import { mapCursorPositionToIdx } from "../../utils/obsidian/map-cursor-position-to-idx/map-cursor-position-to-idx";
+import { mapIdxToCursorPosition } from "../../utils/obsidian/map-idx-to-cursor-position/map-idx-to-cursor-position";
 
 export type TextSelection = {
   readonly anchor: EditorPosition;

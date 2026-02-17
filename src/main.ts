@@ -14,7 +14,7 @@ import { mapLlmErrorToReadable } from "./llm/error-handler";
 import { LLMClient } from "./llm/llm-client";
 import { logger } from "./logger";
 import { parseUserPromptOptionsFromFileProperties } from "./prompt/parse-user-prompt-options-from-file-properties/parse-user-prompt-options-from-file-properties";
-import { UserContentSelection } from "./prompt/user-content-selection";
+import { UserContentSelection } from "./prompt/user-content-selection/user-content-selection";
 import { DEFAULT_USER_PROMPT_OPTIONS } from "./prompt/user-prompt-options";
 import { UserPromptParams } from "./prompt/user-prompt-params";
 import { SettingTab } from "./setting-tab";

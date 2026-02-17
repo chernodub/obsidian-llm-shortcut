@@ -1,4 +1,4 @@
-import { TextSelectionIdxs } from "../../../prompt/user-content-selection";
+import { TextSelectionIdxs } from "../../../prompt/user-content-selection/user-content-selection";
 
 export function trimSelection(
   text: string,

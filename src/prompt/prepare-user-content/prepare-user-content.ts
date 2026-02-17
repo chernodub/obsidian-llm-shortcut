@@ -6,7 +6,7 @@ import {
 import {
   TextSelectionRange,
   UserContentSelection,
-} from "../user-content-selection";
+} from "../user-content-selection/user-content-selection";
 import { UserPromptOptions } from "../user-prompt-options";
 
 function getContextAroundSelection({

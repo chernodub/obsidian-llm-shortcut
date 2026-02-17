@@ -1,7 +1,7 @@
 import { OpenAI, ClientOptions as OpenAIOptions } from "openai";
 import { getInternalSystemPrompt } from "../prompt/get-internal-system-prompt";
 import { prepareUserContent } from "../prompt/prepare-user-content/prepare-user-content";
-import { UserContentSelection } from "../prompt/user-content-selection";
+import { UserContentSelection } from "../prompt/user-content-selection/user-content-selection";
 import { UserPromptOptions } from "../prompt/user-prompt-options";
 import { createOpenAiRequestMessages } from "./create-open-ai-request-messages";
 
