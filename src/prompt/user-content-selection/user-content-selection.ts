@@ -1,6 +1,7 @@
 import { EditorPosition } from "obsidian";
 import { mapCursorPositionToIdx } from "../../utils/obsidian/map-cursor-position-to-idx/map-cursor-position-to-idx";
 import { mapIdxToCursorPosition } from "../../utils/obsidian/map-idx-to-cursor-position/map-idx-to-cursor-position";
+import { trimSelection } from "../../utils/obsidian/trim-selection/trim-selection";
 
 export type TextSelection = {
   readonly anchor: EditorPosition;
@@ -40,6 +41,15 @@ export class UserContentSelection {
     return anchor.line === head.line && anchor.ch === head.ch;
   }
 
+  public isBackward(): boolean {
+    const { anchor, head } = this.range;
+
+    if (anchor.line < head.line) return false;
+    if (anchor.line > head.line) return true;
+
+    return anchor.ch > head.ch;
+  }
+
   public getSelectionIdxs(): TextSelectionIdxs {
     const { anchor, head } = this.range;
     return {
@@ -58,13 +68,23 @@ export class UserContentSelection {
   }
 
   public trim(): UserContentSelection {
-    const rangeIdxs = this.getSelectionIdxs();
+    const range = this.getRange();
 
-    const range: TextSelection = {
-      anchor: mapIdxToCursorPosition(this.text, rangeIdxs.anchorIdx),
-      head: mapIdxToCursorPosition(this.text, rangeIdxs.headIdx),
-    };
+    const nextRange = trimSelection(this.text, range);
 
-    return new UserContentSelection(this.text, range);
+    const nextSelectionIdxs = this.isBackward()
+      ? {
+          anchorIdx: nextRange.to,
+          headIdx: nextRange.from,
+        }
+      : {
+          anchorIdx: nextRange.from,
+          headIdx: nextRange.to,
+        };
+
+    return new UserContentSelection(this.text, {
+      anchor: mapIdxToCursorPosition(this.text, nextSelectionIdxs.anchorIdx),
+      head: mapIdxToCursorPosition(this.text, nextSelectionIdxs.headIdx),
+    });
   }
 }
