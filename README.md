@@ -1,3 +1,5 @@
+
+
 # LLM Shortcut
 
 [![downloads shield](https://img.shields.io/badge/dynamic/json?logo=obsidian&color=%23483699&label=downloads&query=%24%5B%22llm-shortcut%22%5D.downloads&url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json)](https://www.obsidianstats.com/plugins/llm-shortcut)
@@ -102,8 +104,8 @@ To configure the context size, add these parameters to your prompt file's frontm
 
 ```yaml
 ---
-llm-shortcut-context-size-before: 256
-llm-shortcut-context-size-after: 0
+llm-shortcut-context-size-before: "256"
+llm-shortcut-context-size-after: "0"
 ---
 Your prompt content here...
 ```
