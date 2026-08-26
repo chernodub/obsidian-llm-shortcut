@@ -62,4 +62,21 @@ describe("LLMClient reasoning effort", () => {
     const request = createChatCompletion.mock.calls[0]?.[0];
     expect(request).not.toHaveProperty("reasoning_effort");
   });
+
+  it("tests the configured model and reasoning effort", async () => {
+    const client = new LLMClient({ apiKey: "key" }, "model", "max");
+    const abortController = new AbortController();
+
+    await client.testConnection(abortController.signal);
+
+    expect(createChatCompletion).toHaveBeenCalledWith(
+      {
+        model: "model",
+        messages: [{ role: "user", content: "Reply only with OK." }],
+        stream: true,
+        reasoning_effort: "max",
+      },
+      { signal: abortController.signal },
+    );
+  });
 });

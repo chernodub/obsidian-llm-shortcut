@@ -33,6 +33,31 @@ export class LLMClient {
     });
   }
 
+  async testConnection(signal?: AbortSignal): Promise<void> {
+    try {
+      const response = await this.client.chat.completions.create(
+        {
+          model: this.model,
+          messages: [{ role: "user", content: "Reply only with OK." }],
+          stream: true,
+          ...(this.reasoningEffort
+            ? { reasoning_effort: this.reasoningEffort }
+            : {}),
+        },
+        { signal },
+      );
+      for await (const _chunk of response) {
+        return;
+      }
+      throw new Error("Model returned an empty response stream");
+    } catch (error: unknown) {
+      if (error instanceof APIUserAbortError) {
+        throw new AbortError();
+      }
+      throw error;
+    }
+  }
+
   async *getResponse({
     userContentSelection,
     userPromptString,

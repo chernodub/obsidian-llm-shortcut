@@ -36,6 +36,7 @@ You have to use your own LLM provider and keys :)
 - Configurable reasoning effort for supported models
 - Provider capability checks that flag unsupported reasoning levels
 - Provider model autocomplete with support for custom model names
+- Multiple provider/model presets with a response test for the current preset
 - Local-first behavior: your prompt files stay in your vault
 
 ## 2-minute quick start
