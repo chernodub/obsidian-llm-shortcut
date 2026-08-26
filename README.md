@@ -35,6 +35,7 @@ You have to use your own LLM provider and keys :)
 - Custom prompt command for one-off prompts without creating a file
 - Configurable reasoning effort for supported models
 - Provider capability checks that flag unsupported reasoning levels
+- Provider model autocomplete with support for custom model names
 - Local-first behavior: your prompt files stay in your vault
 
 ## 2-minute quick start

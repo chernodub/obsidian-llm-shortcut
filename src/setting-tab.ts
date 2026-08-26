@@ -5,8 +5,10 @@ import {
   Setting,
 } from "obsidian";
 import {
-  getModelReasoningSupport,
+  getProviderModels,
+  parseModelReasoningSupportFromModels,
   type ModelReasoningSupport,
+  type ProviderModelsResult,
 } from "./llm/get-model-reasoning-support";
 import {
   isReasoningEffort,
@@ -35,53 +37,92 @@ export class SettingTab extends PluginSettingTab {
       setting?: Setting;
       dropdown?: DropdownComponent;
     } = {};
-    const refreshReasoningSupport = async () => {
+    const modelDatalist = containerEl.createEl("datalist");
+    modelDatalist.id = "llm-shortcut-model-suggestions";
+    const modelControl: { setting?: Setting } = {};
+    let providerModelsResult: ProviderModelsResult | undefined;
+
+    const applyProviderModels = async (
+      result: ProviderModelsResult,
+      clearUnsupportedEffort: boolean,
+    ) => {
       const { setting, dropdown } = reasoningControl;
-      if (!setting || !dropdown) return;
+      const modelSetting = modelControl.setting;
+      if (!modelSetting || !setting || !dropdown) return;
 
-      const currentLookupId = ++this.reasoningSupportLookupId;
-      const lookupConfig = {
-        apiKey: this.plugin.settings.apiKey,
-        baseUrl: this.plugin.settings.providerUrl,
-        model: this.plugin.settings.model,
-      };
-      this.showReasoningSupport(
-        setting,
-        dropdown,
-        undefined,
-      );
-      const support = await getModelReasoningSupport({
-        ...lookupConfig,
-        fetch: obsidianFetchAdapter,
-      });
-      if (
-        currentLookupId !== this.reasoningSupportLookupId ||
-        lookupConfig.apiKey !== this.plugin.settings.apiKey ||
-        lookupConfig.baseUrl !== this.plugin.settings.providerUrl ||
-        lookupConfig.model !== this.plugin.settings.model
-      ) {
-        return;
-      }
-
+      this.showModelCatalogStatus(modelSetting, result, this.plugin.settings.model);
+      const support: ModelReasoningSupport =
+        !this.plugin.settings.model
+          ? { status: "unknown", reason: "invalid-config" }
+          : result.status === "success"
+          ? parseModelReasoningSupportFromModels(
+              result.models,
+              this.plugin.settings.model,
+            )
+          : result;
       const shouldClearEffort = this.showReasoningSupport(
         setting,
         dropdown,
         support,
       );
-      if (shouldClearEffort) {
+      if (shouldClearEffort && clearUnsupportedEffort) {
         this.plugin.settings.reasoningEffort = undefined;
         dropdown.setValue("");
         await this.plugin.saveSettings();
       }
     };
 
-    const scheduleReasoningSupportRefresh = () => {
+    const refreshProviderModels = async () => {
+      const { setting, dropdown } = reasoningControl;
+      const modelSetting = modelControl.setting;
+      if (!modelSetting || !setting || !dropdown) return;
+
+      const currentLookupId = ++this.reasoningSupportLookupId;
+      const lookupConfig = {
+        apiKey: this.plugin.settings.apiKey,
+        baseUrl: this.plugin.settings.providerUrl,
+      };
+      this.showModelCatalogStatus(modelSetting, undefined);
+      this.showReasoningSupport(
+        setting,
+        dropdown,
+        undefined,
+      );
+      const result = await getProviderModels({
+        ...lookupConfig,
+        fetch: obsidianFetchAdapter,
+      });
+      if (
+        currentLookupId !== this.reasoningSupportLookupId ||
+        lookupConfig.apiKey !== this.plugin.settings.apiKey ||
+        lookupConfig.baseUrl !== this.plugin.settings.providerUrl
+      ) {
+        return;
+      }
+
+      providerModelsResult = result;
+      this.setModelSuggestions(
+        modelDatalist,
+        result.status === "success" ? result.models.map(({ id }) => id) : [],
+      );
+      await applyProviderModels(result, true);
+    };
+
+    const scheduleProviderModelsRefresh = () => {
       this.reasoningSupportLookupId += 1;
+      providerModelsResult = undefined;
+      this.setModelSuggestions(modelDatalist, []);
+      const modelSetting = modelControl.setting;
+      const { setting, dropdown } = reasoningControl;
+      if (modelSetting) this.showModelCatalogStatus(modelSetting, undefined);
+      if (setting && dropdown) {
+        this.showReasoningSupport(setting, dropdown, undefined);
+      }
       if (this.reasoningSupportRefreshTimer) {
         clearTimeout(this.reasoningSupportRefreshTimer);
       }
       this.reasoningSupportRefreshTimer = setTimeout(
-        () => void refreshReasoningSupport(),
+        () => void refreshProviderModels(),
         500,
       );
     };
@@ -98,7 +139,7 @@ export class SettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings?.apiKey || "")
           .onChange(async (value) => {
             this.plugin.settings.apiKey = value;
-            scheduleReasoningSupportRefresh();
+            scheduleProviderModelsRefresh();
             await this.plugin.saveSettings();
           });
         text.inputEl.type = "password";
@@ -115,27 +156,36 @@ export class SettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings?.providerUrl || "")
           .onChange(async (value) => {
             this.plugin.settings.providerUrl = value;
-            scheduleReasoningSupportRefresh();
+            scheduleProviderModelsRefresh();
             await this.plugin.saveSettings();
           })
           .setPlaceholder("https://api.openai.com/v1"),
       );
 
-    new Setting(containerEl)
+    modelControl.setting = new Setting(containerEl)
       .setName("🤖 Model name")
       .setDesc(
         "The specific AI model to use (e.g., gpt-4, claude-3-sonnet, gemini-pro). Check your provider's model list.",
       )
-      .addText((text) =>
+      .addText((text) => {
         text
           .setValue(this.plugin.settings?.model || "")
           .onChange(async (value) => {
             this.plugin.settings.model = value;
-            scheduleReasoningSupportRefresh();
+            if (providerModelsResult) {
+              await applyProviderModels(providerModelsResult, false);
+            }
             await this.plugin.saveSettings();
           })
-          .setPlaceholder("gpt-4 or your preferred model"),
-      );
+          .setPlaceholder("gpt-4 or your preferred model");
+        text.inputEl.setAttribute("list", modelDatalist.id);
+        text.inputEl.setAttribute("autocomplete", "off");
+        text.inputEl.addEventListener("change", () => {
+          if (providerModelsResult) {
+            void applyProviderModels(providerModelsResult, true);
+          }
+        });
+      });
 
     reasoningControl.setting = new Setting(containerEl)
       .setName("🧠 Reasoning effort")
@@ -157,11 +207,11 @@ export class SettingTab extends PluginSettingTab {
       .addExtraButton((button) =>
         button
           .setIcon("refresh-cw")
-          .setTooltip("Check model reasoning support")
-          .onClick(refreshReasoningSupport),
+          .setTooltip("Refresh provider models")
+          .onClick(refreshProviderModels),
       );
 
-    void refreshReasoningSupport();
+    void refreshProviderModels();
 
     new Setting(containerEl)
       .setName("📁 Project ID (optional)")
@@ -248,6 +298,55 @@ export class SettingTab extends PluginSettingTab {
       clearTimeout(this.reasoningSupportRefreshTimer);
       this.reasoningSupportRefreshTimer = undefined;
     }
+  }
+
+  private showModelCatalogStatus(
+    setting: Setting,
+    result: ProviderModelsResult | undefined,
+    model = "",
+  ): void {
+    setting.descEl.style.color = "";
+    if (!result) {
+      setting.setDesc("Loading models from provider...");
+      return;
+    }
+
+    if (result.status === "success") {
+      if (!model) {
+        setting.setDesc("Select a provider model or enter a custom model name.");
+      } else if (result.models.some(({ id }) => id === model)) {
+        setting.setDesc("Model found in provider catalog.");
+        setting.descEl.style.color = "var(--text-success)";
+      } else {
+        setting.setDesc(
+          "Model is not listed by the provider. Custom model names are still allowed.",
+        );
+        setting.descEl.style.color = "var(--text-warning)";
+      }
+      return;
+    }
+
+    const description =
+      result.reason === "invalid-config"
+        ? "Enter a valid Base URL to load model suggestions. Custom model names are allowed."
+        : result.reason === "lookup-failed"
+          ? "Could not load provider models. Custom model names are still allowed."
+          : "This provider does not return a model catalog. Custom model names are allowed.";
+    setting.setDesc(description);
+    setting.descEl.style.color = "var(--text-muted)";
+  }
+
+  private setModelSuggestions(
+    datalist: HTMLDataListElement,
+    modelIds: readonly string[],
+  ): void {
+    const fragment = document.createDocumentFragment();
+    for (const modelId of [...modelIds].sort()) {
+      const option = document.createElement("option");
+      option.value = modelId;
+      fragment.append(option);
+    }
+    datalist.replaceChildren(fragment);
   }
 
   private showReasoningSupport(

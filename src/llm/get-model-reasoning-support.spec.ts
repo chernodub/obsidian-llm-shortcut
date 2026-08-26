@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   getModelReasoningSupport,
   parseModelReasoningSupport,
+  parseProviderModels,
 } from "./get-model-reasoning-support";
 
 describe("getModelReasoningSupport", () => {
@@ -39,6 +40,34 @@ describe("getModelReasoningSupport", () => {
     expect(headers instanceof Headers ? headers.get("Authorization") : null).toBe(
       "Bearer secret",
     );
+  });
+});
+
+describe("parseProviderModels", () => {
+  it("returns model records with valid IDs for autocomplete", () => {
+    expect(
+      parseProviderModels({
+        data: [
+          { id: "provider/model-a", name: "Model A" },
+          { id: "provider/model-b" },
+          { name: "Missing ID" },
+          null,
+        ],
+      }),
+    ).toEqual({
+      status: "success",
+      models: [
+        { id: "provider/model-a", name: "Model A" },
+        { id: "provider/model-b" },
+      ],
+    });
+  });
+
+  it("rejects responses without a model data array", () => {
+    expect(parseProviderModels({ models: [] })).toEqual({
+      status: "unknown",
+      reason: "not-advertised",
+    });
   });
 });
 

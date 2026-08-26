@@ -15,10 +15,18 @@ export type ModelReasoningSupport =
       readonly reason: "invalid-config" | "lookup-failed" | "not-advertised";
     };
 
-type GetModelReasoningSupportParams = {
+export type ProviderModel = Record<string, unknown> & { readonly id: string };
+
+export type ProviderModelsResult =
+  | { readonly status: "success"; readonly models: readonly ProviderModel[] }
+  | {
+      readonly status: "unknown";
+      readonly reason: "invalid-config" | "lookup-failed" | "not-advertised";
+    };
+
+type GetProviderModelsParams = {
   readonly baseUrl: string;
   readonly apiKey: string;
-  readonly model: string;
   readonly fetch: typeof globalThis.fetch;
 };
 
@@ -27,8 +35,23 @@ export async function getModelReasoningSupport({
   apiKey,
   model,
   fetch,
-}: GetModelReasoningSupportParams): Promise<ModelReasoningSupport> {
-  if (!baseUrl || !model) {
+}: GetProviderModelsParams & { readonly model: string }): Promise<ModelReasoningSupport> {
+  if (!model) {
+    return { status: "unknown", reason: "invalid-config" };
+  }
+
+  const result = await getProviderModels({ baseUrl, apiKey, fetch });
+  return result.status === "success"
+    ? parseModelReasoningSupportFromModels(result.models, model)
+    : result;
+}
+
+export async function getProviderModels({
+  baseUrl,
+  apiKey,
+  fetch,
+}: GetProviderModelsParams): Promise<ProviderModelsResult> {
+  if (!baseUrl) {
     return { status: "unknown", reason: "invalid-config" };
   }
 
@@ -52,7 +75,7 @@ export async function getModelReasoningSupport({
       return { status: "unknown", reason: "lookup-failed" };
     }
 
-    return parseModelReasoningSupport(await response.json(), model);
+    return parseProviderModels(await response.json());
   } catch {
     return { status: "unknown", reason: "lookup-failed" };
   } finally {
@@ -64,11 +87,25 @@ export function parseModelReasoningSupport(
   response: unknown,
   modelId: string,
 ): ModelReasoningSupport {
+  const result = parseProviderModels(response);
+  return result.status === "success"
+    ? parseModelReasoningSupportFromModels(result.models, modelId)
+    : { status: "unknown", reason: "not-advertised" };
+}
+
+export function parseProviderModels(response: unknown): ProviderModelsResult {
   if (!isRecord(response) || !Array.isArray(response.data)) {
     return { status: "unknown", reason: "not-advertised" };
   }
 
-  const models = response.data.filter(isRecord);
+  const models = response.data.filter(isProviderModel);
+  return { status: "success", models };
+}
+
+export function parseModelReasoningSupportFromModels(
+  models: readonly ProviderModel[],
+  modelId: string,
+): ModelReasoningSupport {
   const model = models.find((candidate) => candidate.id === modelId);
   if (!model) {
     return { status: "unknown", reason: "not-advertised" };
@@ -106,4 +143,8 @@ export function parseModelReasoningSupport(
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
+}
+
+function isProviderModel(value: unknown): value is ProviderModel {
+  return isRecord(value) && typeof value.id === "string";
 }
