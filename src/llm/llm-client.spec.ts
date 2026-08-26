@@ -44,12 +44,12 @@ describe("LLMClient reasoning effort", () => {
   });
 
   it("sends the selected reasoning effort", async () => {
-    const client = new LLMClient({ apiKey: "key" }, "model", "high");
+    const client = new LLMClient({ apiKey: "key" }, "model", "xhigh");
 
     await requestResponse(client);
 
     expect(createChatCompletion).toHaveBeenCalledWith(
-      expect.objectContaining({ reasoning_effort: "high" }),
+      expect.objectContaining({ reasoning_effort: "xhigh" }),
       { signal: undefined },
     );
   });

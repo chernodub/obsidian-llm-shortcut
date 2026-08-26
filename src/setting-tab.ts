@@ -1,13 +1,25 @@
-import { App, PluginSettingTab, Setting } from "obsidian";
+import {
+  App,
+  DropdownComponent,
+  PluginSettingTab,
+  Setting,
+} from "obsidian";
+import {
+  getModelReasoningSupport,
+  type ModelReasoningSupport,
+} from "./llm/get-model-reasoning-support";
 import {
   isReasoningEffort,
   REASONING_EFFORTS,
 } from "./llm/reasoning-effort";
 import LlmShortcutPlugin from "./main";
 import { PROMPT_OPTION_DEFINITIONS } from "./prompt/prompt-option-registry";
+import { obsidianFetchAdapter } from "./utils/obsidian/obsidian-fetch-adapter";
 
 export class SettingTab extends PluginSettingTab {
   private plugin: LlmShortcutPlugin;
+  private reasoningSupportRefreshTimer: ReturnType<typeof setTimeout> | undefined;
+  private reasoningSupportLookupId = 0;
 
   constructor(app: App, plugin: LlmShortcutPlugin) {
     super(app, plugin);
@@ -17,6 +29,62 @@ export class SettingTab extends PluginSettingTab {
   override display(): void {
     const { containerEl } = this;
     containerEl.empty();
+    this.cancelReasoningSupportRefresh();
+
+    const reasoningControl: {
+      setting?: Setting;
+      dropdown?: DropdownComponent;
+    } = {};
+    const refreshReasoningSupport = async () => {
+      const { setting, dropdown } = reasoningControl;
+      if (!setting || !dropdown) return;
+
+      const currentLookupId = ++this.reasoningSupportLookupId;
+      const lookupConfig = {
+        apiKey: this.plugin.settings.apiKey,
+        baseUrl: this.plugin.settings.providerUrl,
+        model: this.plugin.settings.model,
+      };
+      this.showReasoningSupport(
+        setting,
+        dropdown,
+        undefined,
+      );
+      const support = await getModelReasoningSupport({
+        ...lookupConfig,
+        fetch: obsidianFetchAdapter,
+      });
+      if (
+        currentLookupId !== this.reasoningSupportLookupId ||
+        lookupConfig.apiKey !== this.plugin.settings.apiKey ||
+        lookupConfig.baseUrl !== this.plugin.settings.providerUrl ||
+        lookupConfig.model !== this.plugin.settings.model
+      ) {
+        return;
+      }
+
+      const shouldClearEffort = this.showReasoningSupport(
+        setting,
+        dropdown,
+        support,
+      );
+      if (shouldClearEffort) {
+        this.plugin.settings.reasoningEffort = undefined;
+        dropdown.setValue("");
+        await this.plugin.saveSettings();
+      }
+    };
+
+    const scheduleReasoningSupportRefresh = () => {
+      this.reasoningSupportLookupId += 1;
+      if (this.reasoningSupportRefreshTimer) {
+        clearTimeout(this.reasoningSupportRefreshTimer);
+      }
+      this.reasoningSupportRefreshTimer = setTimeout(
+        () => void refreshReasoningSupport(),
+        500,
+      );
+    };
 
     new Setting(containerEl).setName("LLM provider").setHeading();
 
@@ -30,6 +98,7 @@ export class SettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings?.apiKey || "")
           .onChange(async (value) => {
             this.plugin.settings.apiKey = value;
+            scheduleReasoningSupportRefresh();
             await this.plugin.saveSettings();
           });
         text.inputEl.type = "password";
@@ -46,6 +115,7 @@ export class SettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings?.providerUrl || "")
           .onChange(async (value) => {
             this.plugin.settings.providerUrl = value;
+            scheduleReasoningSupportRefresh();
             await this.plugin.saveSettings();
           })
           .setPlaceholder("https://api.openai.com/v1"),
@@ -61,17 +131,19 @@ export class SettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings?.model || "")
           .onChange(async (value) => {
             this.plugin.settings.model = value;
+            scheduleReasoningSupportRefresh();
             await this.plugin.saveSettings();
           })
           .setPlaceholder("gpt-4 or your preferred model"),
       );
 
-    new Setting(containerEl)
+    reasoningControl.setting = new Setting(containerEl)
       .setName("🧠 Reasoning effort")
       .setDesc(
         "The thinking level for reasoning models. Use provider default for models or providers that do not support this option.",
       )
       .addDropdown((dropdown) => {
+        reasoningControl.dropdown = dropdown;
         dropdown.addOption("", "Provider default");
         for (const effort of REASONING_EFFORTS) {
           dropdown.addOption(
@@ -87,7 +159,15 @@ export class SettingTab extends PluginSettingTab {
               isReasoningEffort(value) ? value : undefined;
             await this.plugin.saveSettings();
           });
-      });
+      })
+      .addExtraButton((button) =>
+        button
+          .setIcon("refresh-cw")
+          .setTooltip("Check model reasoning support")
+          .onClick(refreshReasoningSupport),
+      );
+
+    void refreshReasoningSupport();
 
     new Setting(containerEl)
       .setName("📁 Project ID (optional)")
@@ -162,4 +242,75 @@ export class SettingTab extends PluginSettingTab {
       );
     }
   }
+
+  override hide(): void {
+    this.cancelReasoningSupportRefresh();
+    super.hide();
+  }
+
+  private cancelReasoningSupportRefresh(): void {
+    this.reasoningSupportLookupId += 1;
+    if (this.reasoningSupportRefreshTimer) {
+      clearTimeout(this.reasoningSupportRefreshTimer);
+      this.reasoningSupportRefreshTimer = undefined;
+    }
+  }
+
+  private showReasoningSupport(
+    setting: Setting,
+    dropdown: DropdownComponent,
+    support: ModelReasoningSupport | undefined,
+  ): boolean {
+    setting.descEl.style.color = "";
+    for (const option of Array.from(dropdown.selectEl.options)) {
+      option.disabled = false;
+    }
+
+    if (!support) {
+      setting.setDesc("Checking model reasoning support...");
+      dropdown.setDisabled(false);
+      return false;
+    }
+
+    if (support.status === "supported") {
+      const supportedEfforts = new Set<string>(support.efforts);
+      for (const option of Array.from(dropdown.selectEl.options)) {
+        option.disabled = option.value !== "" && !supportedEfforts.has(option.value);
+      }
+      setting.setDesc(
+        `Supported efforts: ${support.efforts.map(capitalize).join(", ")}.`,
+      );
+      setting.descEl.style.color = "var(--text-success)";
+      dropdown.setDisabled(false);
+      return (
+        this.plugin.settings.reasoningEffort !== undefined &&
+        !supportedEfforts.has(this.plugin.settings.reasoningEffort)
+      );
+    }
+
+    if (support.status === "unsupported") {
+      setting.setDesc(
+        "This model does not advertise reasoning effort support. Provider default will be used.",
+      );
+      setting.descEl.style.color = "var(--text-warning)";
+      dropdown.setDisabled(true);
+      return this.plugin.settings.reasoningEffort !== undefined;
+    }
+
+    const description =
+      support.reason === "invalid-config"
+        ? "Enter a valid Base URL and model name to check reasoning support."
+        : support.reason === "lookup-failed"
+          ? "Could not check reasoning support. Verify the provider URL and API key, then retry."
+          : "This provider does not advertise reasoning capabilities. Check its model documentation before selecting an effort.";
+    setting.setDesc(description);
+    setting.descEl.style.color = "var(--text-muted)";
+    dropdown.setDisabled(false);
+    return false;
+  }
+}
+
+function capitalize(value: string): string {
+  if (value === "xhigh") return "XHigh";
+  return value.charAt(0).toUpperCase() + value.slice(1);
 }

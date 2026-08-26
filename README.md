@@ -34,6 +34,7 @@ You have to use your own LLM provider and keys :)
 - Streaming output directly into the editor selection/cursor
 - Custom prompt command for one-off prompts without creating a file
 - Configurable reasoning effort for supported models
+- Provider capability checks that flag unsupported reasoning levels
 - Local-first behavior: your prompt files stay in your vault
 
 ## 2-minute quick start
@@ -43,7 +44,7 @@ You have to use your own LLM provider and keys :)
    - `🔑 API key`
    - `🌐 Base URL` (example: `https://api.openai.com/v1`)
    - `🤖 Model name` (example: `gpt-4.1-mini`)
-   - `🧠 Reasoning effort` (optional; for supported reasoning models)
+   - `🧠 Reasoning effort` (optional; available levels are checked against the selected model)
 3. Create a prompt folder (default: `_prompts`).
 4. Add a prompt file, for example `_prompts/Writing/Improve.md`:
 
