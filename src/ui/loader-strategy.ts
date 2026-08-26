@@ -1,16 +1,14 @@
 import { Notice, Platform, Plugin } from "obsidian";
-import { PLUGIN_NAME } from "../utils/constants";
 import {
   createLoadingStatusFragment,
   makeLoadingStatusCancellable,
 } from "./loading-status/loading-status";
+import { getPresetLoadingMessage } from "./loading-status/get-preset-loading-message";
 
 export interface LoaderStrategy {
-  start(onCancel: () => void): void;
+  start(presetName: string, onCancel: () => void): void;
   stop(): void;
 }
-
-const LOADING_MESSAGE = `${PLUGIN_NAME}: Generating...`;
 
 abstract class BaseLoaderStrategy implements LoaderStrategy {
   protected cleanup: (() => void) | undefined;
@@ -19,9 +17,11 @@ abstract class BaseLoaderStrategy implements LoaderStrategy {
     this.cleanup = undefined;
   }
 
-  start(onCancel: () => void): void {
+  start(presetName: string, onCancel: () => void): void {
     this.stop();
-    const fragment = createLoadingStatusFragment(LOADING_MESSAGE);
+    const fragment = createLoadingStatusFragment(
+      getPresetLoadingMessage(presetName),
+    );
     const container = this.mount(fragment);
     if (container) {
       this.cleanup = makeLoadingStatusCancellable(container, onCancel);

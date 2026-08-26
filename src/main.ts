@@ -290,7 +290,9 @@ export default class LlmShortcutPlugin extends Plugin {
     const abortController = new AbortController();
     this.abortController = abortController;
 
-    this.loaderStrategy.start(() => abortController.abort());
+    this.loaderStrategy.start(this.currentPreset.name, () =>
+      abortController.abort(),
+    );
 
     try {
       const responseStream = this.llmClient.getResponse({
