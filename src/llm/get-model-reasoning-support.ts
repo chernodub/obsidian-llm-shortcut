@@ -112,13 +112,22 @@ export function parseModelReasoningSupportFromModels(
   }
 
   if (isRecord(model.reasoning)) {
+    const isMandatory = model.reasoning.mandatory === true;
     const supportedEfforts = model.reasoning.supported_efforts;
     if (supportedEfforts === null) {
-      return { status: "supported", efforts: REASONING_EFFORTS };
+      return {
+        status: "supported",
+        efforts: isMandatory
+          ? REASONING_EFFORTS.filter((effort) => effort !== "none")
+          : REASONING_EFFORTS,
+      };
     }
     if (Array.isArray(supportedEfforts)) {
-      const efforts = supportedEfforts.filter(isReasoningEffort);
-      if (efforts.length > 0) {
+      const recognizedEfforts = supportedEfforts.filter(isReasoningEffort);
+      const efforts = isMandatory
+        ? recognizedEfforts.filter((effort) => effort !== "none")
+        : recognizedEfforts;
+      if (recognizedEfforts.length > 0) {
         return { status: "supported", efforts };
       }
       return supportedEfforts.length === 0

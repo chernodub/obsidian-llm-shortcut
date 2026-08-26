@@ -19,6 +19,7 @@ import {
 import LlmShortcutPlugin from "./main";
 import { PROMPT_OPTION_DEFINITIONS } from "./prompt/prompt-option-registry";
 import { createProviderPreset } from "./settings";
+import styles from "./setting-tab.module.css";
 import { showErrorNotification } from "./ui/user-notifications";
 import { AbortError } from "./utils/abort-error";
 import { obsidianFetchAdapter } from "./utils/obsidian/obsidian-fetch-adapter";
@@ -417,7 +418,7 @@ export class SettingTab extends PluginSettingTab {
     result: ProviderModelsResult | undefined,
     model = "",
   ): void {
-    setting.descEl.style.color = "";
+    this.clearStatusClasses(setting);
     if (!result) {
       setting.setDesc("Loading models from provider...");
       return;
@@ -428,12 +429,12 @@ export class SettingTab extends PluginSettingTab {
         setting.setDesc("Select a provider model or enter a custom model name.");
       } else if (result.models.some(({ id }) => id === model)) {
         setting.setDesc("Model found in provider catalog.");
-        setting.descEl.style.color = "var(--text-success)";
+        setting.descEl.addClass(styles.statusSuccess!);
       } else {
         setting.setDesc(
           "Model is not listed by the provider. Custom model names are still allowed.",
         );
-        setting.descEl.style.color = "var(--text-warning)";
+        setting.descEl.addClass(styles.statusWarning!);
       }
       return;
     }
@@ -445,7 +446,7 @@ export class SettingTab extends PluginSettingTab {
           ? "Could not load provider models. Custom model names are still allowed."
           : "This provider does not return a model catalog. Custom model names are allowed.";
     setting.setDesc(description);
-    setting.descEl.style.color = "var(--text-muted)";
+    setting.descEl.addClass(styles.statusMuted!);
   }
 
   private setModelSuggestions(
@@ -466,7 +467,7 @@ export class SettingTab extends PluginSettingTab {
     dropdown: DropdownComponent,
     support: ModelReasoningSupport | undefined,
   ): boolean {
-    setting.descEl.style.color = "";
+    this.clearStatusClasses(setting);
 
     if (!support) {
       this.setReasoningOptions(dropdown, REASONING_EFFORTS);
@@ -479,7 +480,7 @@ export class SettingTab extends PluginSettingTab {
       const supportedEfforts = new Set<string>(support.efforts);
       this.setReasoningOptions(dropdown, support.efforts);
       setting.setDesc("This model supports reasoning effort.");
-      setting.descEl.style.color = "var(--text-success)";
+      setting.descEl.addClass(styles.statusSuccess!);
       dropdown.setDisabled(false);
       return (
         this.plugin.currentPreset.reasoningEffort !== undefined &&
@@ -492,7 +493,7 @@ export class SettingTab extends PluginSettingTab {
       setting.setDesc(
         "This model does not advertise reasoning effort support. Provider default will be used.",
       );
-      setting.descEl.style.color = "var(--text-warning)";
+      setting.descEl.addClass(styles.statusWarning!);
       dropdown.setDisabled(true);
       return this.plugin.currentPreset.reasoningEffort !== undefined;
     }
@@ -505,7 +506,7 @@ export class SettingTab extends PluginSettingTab {
           : "This provider does not advertise reasoning capabilities. Check its model documentation before selecting an effort.";
     this.setReasoningOptions(dropdown, REASONING_EFFORTS);
     setting.setDesc(description);
-    setting.descEl.style.color = "var(--text-muted)";
+    setting.descEl.addClass(styles.statusMuted!);
     dropdown.setDisabled(false);
     return false;
   }
@@ -521,6 +522,14 @@ export class SettingTab extends PluginSettingTab {
       dropdown.addOption(effort, capitalize(effort));
     }
     dropdown.setValue(selectedValue);
+  }
+
+  private clearStatusClasses(setting: Setting): void {
+    setting.descEl.removeClass(
+      styles.statusSuccess!,
+      styles.statusWarning!,
+      styles.statusMuted!,
+    );
   }
 }
 

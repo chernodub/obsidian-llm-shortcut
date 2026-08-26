@@ -1,5 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { getCurrentPreset, migratePluginSettings } from "./settings";
+import {
+  createDefaultSettings,
+  getCurrentPreset,
+  migratePluginSettings,
+} from "./settings";
+
+describe("createDefaultSettings", () => {
+  it("creates independent global prompt options", () => {
+    expect(createDefaultSettings().globalPromptOptions).not.toBe(
+      createDefaultSettings().globalPromptOptions,
+    );
+  });
+});
 
 describe("migratePluginSettings", () => {
   it("migrates legacy provider fields into the default preset", () => {
@@ -85,5 +97,41 @@ describe("migratePluginSettings", () => {
       "preset-3",
     ]);
     expect(getCurrentPreset(settings).name).toBe("First");
+  });
+
+  it("ignores invalid persisted global prompt options", () => {
+    const settings = migratePluginSettings({
+      globalPromptOptions: {
+        shouldHandleSelectionOnly: "false",
+        contextSizeBefore: -1,
+        contextSizeAfter: 1.5,
+        promptResponseProcessingMode: "invalid",
+      },
+    });
+
+    expect(settings.globalPromptOptions).toEqual({
+      shouldHandleSelectionOnly: undefined,
+      contextSizeBefore: undefined,
+      contextSizeAfter: undefined,
+      promptResponseProcessingMode: undefined,
+    });
+  });
+
+  it("preserves valid persisted global prompt options", () => {
+    const settings = migratePluginSettings({
+      globalPromptOptions: {
+        shouldHandleSelectionOnly: true,
+        contextSizeBefore: 0,
+        contextSizeAfter: 100,
+        promptResponseProcessingMode: "info",
+      },
+    });
+
+    expect(settings.globalPromptOptions).toEqual({
+      shouldHandleSelectionOnly: true,
+      contextSizeBefore: 0,
+      contextSizeAfter: 100,
+      promptResponseProcessingMode: "info",
+    });
   });
 });

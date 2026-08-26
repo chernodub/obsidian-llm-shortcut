@@ -1,5 +1,6 @@
 import { isReasoningEffort, type ReasoningEffort } from "./llm/reasoning-effort";
 import {
+  ALL_PROMPT_RESPONSE_PROCESSING_MODES,
   DEFAULT_PROMPT_OPTIONS,
   type PromptOptions,
 } from "./prompt/user-prompt-options";
@@ -44,7 +45,7 @@ export function createDefaultSettings(): PluginSettings {
     currentPresetId: preset.id,
     promptLibraryDirectory: "_prompts",
     customPromptCommandLabel: "Custom prompt",
-    globalPromptOptions: DEFAULT_PROMPT_OPTIONS,
+    globalPromptOptions: { ...DEFAULT_PROMPT_OPTIONS },
   };
 }
 
@@ -85,10 +86,7 @@ export function migratePluginSettings(data: unknown): PluginSettings {
       data.customPromptCommandLabel,
       defaults.customPromptCommandLabel,
     ),
-    globalPromptOptions: {
-      ...DEFAULT_PROMPT_OPTIONS,
-      ...(isRecord(data.globalPromptOptions) ? data.globalPromptOptions : {}),
-    },
+    globalPromptOptions: parsePromptOptions(data.globalPromptOptions),
   };
 }
 
@@ -130,6 +128,29 @@ function migrateLegacyPreset(data: Record<string, unknown>): ProviderPreset {
       : undefined,
     project: getString(data.project),
   };
+}
+
+function parsePromptOptions(value: unknown): PromptOptions {
+  const data = isRecord(value) ? value : {};
+  return {
+    shouldHandleSelectionOnly:
+      data.shouldHandleSelectionOnly === true ? true : undefined,
+    contextSizeBefore: parseContextSize(data.contextSizeBefore),
+    contextSizeAfter: parseContextSize(data.contextSizeAfter),
+    promptResponseProcessingMode:
+      typeof data.promptResponseProcessingMode === "string" &&
+      ALL_PROMPT_RESPONSE_PROCESSING_MODES.includes(
+        data.promptResponseProcessingMode as (typeof ALL_PROMPT_RESPONSE_PROCESSING_MODES)[number],
+      )
+        ? (data.promptResponseProcessingMode as (typeof ALL_PROMPT_RESPONSE_PROCESSING_MODES)[number])
+        : undefined,
+  };
+}
+
+function parseContextSize(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isInteger(value) && value >= 0
+    ? value
+    : undefined;
 }
 
 function getString(value: unknown, fallback = ""): string {

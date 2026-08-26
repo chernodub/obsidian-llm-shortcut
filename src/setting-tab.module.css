@@ -1,0 +1,11 @@
+.statusSuccess {
+  color: var(--text-success);
+}
+
+.statusWarning {
+  color: var(--text-warning);
+}
+
+.statusMuted {
+  color: var(--text-muted);
+}

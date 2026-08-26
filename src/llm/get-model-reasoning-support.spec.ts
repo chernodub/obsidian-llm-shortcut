@@ -150,6 +150,44 @@ describe("parseModelReasoningSupport", () => {
     });
   });
 
+  it("excludes none when null efforts are mandatory", () => {
+    expect(
+      parseModelReasoningSupport(
+        {
+          data: [
+            {
+              id: "provider/model",
+              reasoning: { mandatory: true, supported_efforts: null },
+            },
+          ],
+        },
+        "provider/model",
+      ),
+    ).toEqual({
+      status: "supported",
+      efforts: ["minimal", "low", "medium", "high", "xhigh", "max"],
+    });
+  });
+
+  it("excludes explicit none when reasoning is mandatory", () => {
+    expect(
+      parseModelReasoningSupport(
+        {
+          data: [
+            {
+              id: "provider/model",
+              reasoning: {
+                mandatory: true,
+                supported_efforts: ["high", "none"],
+              },
+            },
+          ],
+        },
+        "provider/model",
+      ),
+    ).toEqual({ status: "supported", efforts: ["high"] });
+  });
+
   it("does not guess levels from a reasoning parameter", () => {
     expect(
       parseModelReasoningSupport(
