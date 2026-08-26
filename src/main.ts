@@ -16,9 +16,15 @@ import { logger } from "./logger";
 import { parsePromptOptionsFromFileProperties } from "./prompt/parse-prompt-options-from-file-properties/parse-prompt-options-from-file-properties";
 import { mergePromptOptions } from "./prompt/prompt-option-registry";
 import { UserContentSelection } from "./prompt/user-content-selection/user-content-selection";
-import type { PromptOptions } from "./prompt/user-prompt-options";
-import { DEFAULT_PROMPT_OPTIONS } from "./prompt/user-prompt-options";
 import { UserPromptParams } from "./prompt/user-prompt-params";
+import {
+  clonePluginSettings,
+  createDefaultSettings,
+  getCurrentPreset,
+  migratePluginSettings,
+  type PluginSettings,
+  type ProviderPreset,
+} from "./settings";
 import { SettingTab } from "./setting-tab";
 import { InfoModal } from "./ui/info-modal/info-modal";
 import { LoaderStrategy, LoaderStrategyFactory } from "./ui/loader-strategy";
@@ -29,40 +35,33 @@ import { assertExists } from "./utils/assertions/assert-exists";
 import { PLUGIN_NAME } from "./utils/constants";
 import { obsidianFetchAdapter } from "./utils/obsidian/obsidian-fetch-adapter";
 
-interface PluginSettings {
-  apiKey: string;
-  providerUrl: string;
-  model: string;
-  promptLibraryDirectory: string;
-  project: string;
-  customPromptCommandLabel: string;
-  globalPromptOptions: PromptOptions;
-}
-
-const DEFAULT_SETTINGS: PluginSettings = {
-  apiKey: "",
-  providerUrl: "",
-  model: "",
-  promptLibraryDirectory: "_prompts",
-  project: "",
-  customPromptCommandLabel: "Custom prompt",
-  globalPromptOptions: DEFAULT_PROMPT_OPTIONS,
-};
-
 export default class LlmShortcutPlugin extends Plugin {
-  public settings: PluginSettings = DEFAULT_SETTINGS;
+  public settings: PluginSettings = createDefaultSettings();
   private llmClient?: LLMClient;
   private readonly loaderStrategy: LoaderStrategy;
   private commands: Command[] = [];
   private eventRefs: EventRef[] = [];
   private abortController: AbortController | undefined;
+  private pendingSettingsSnapshot: PluginSettings | undefined;
+  private settingsSavePromise: Promise<void> | undefined;
+  private isUnloaded = false;
 
   constructor(app: App, manifest: PluginManifest) {
     super(app, manifest);
     this.loaderStrategy = LoaderStrategyFactory.createStrategy(this);
   }
 
+  public get currentPreset(): ProviderPreset {
+    return getCurrentPreset(this.settings);
+  }
+
+  public async testCurrentPreset(signal?: AbortSignal): Promise<void> {
+    const preset = { ...this.currentPreset };
+    await this.createLlmClient(preset).testConnection(signal);
+  }
+
   override async onload() {
+    this.isUnloaded = false;
     logger.debug("Loading plugin");
     await this.loadSettings();
     this.initSettingsTab();
@@ -401,18 +400,25 @@ export default class LlmShortcutPlugin extends Plugin {
   }
 
   private loadAiClient() {
-    this.llmClient = new LLMClient(
+    this.llmClient = this.createLlmClient(this.currentPreset);
+  }
+
+  private createLlmClient(preset: ProviderPreset): LLMClient {
+    return new LLMClient(
       {
-        apiKey: this.settings.apiKey,
-        baseURL: this.settings.providerUrl,
+        apiKey: preset.apiKey,
+        baseURL: preset.providerUrl,
         fetch: obsidianFetchAdapter,
-        project: this.settings.project,
+        project: preset.project,
       },
-      this.settings.model,
+      preset.model,
+      preset.reasoningEffort,
     );
   }
 
   override onunload() {
+    this.isUnloaded = true;
+    this.pendingSettingsSnapshot = undefined;
     this.abortController?.abort();
     this.loaderStrategy.stop();
     this.eventRefs.forEach((eventRef) => this.app.vault.offref(eventRef));
@@ -420,23 +426,37 @@ export default class LlmShortcutPlugin extends Plugin {
   }
 
   async loadSettings() {
-    const data = await this.loadData();
-    this.settings = {
-      ...DEFAULT_SETTINGS,
-      ...data,
-      globalPromptOptions: {
-        ...DEFAULT_SETTINGS.globalPromptOptions,
-        ...data?.globalPromptOptions,
-      },
-    };
+    this.settings = migratePluginSettings(await this.loadData());
   }
 
   async saveSettings() {
-    await this.saveData(this.settings);
-    await this.loadSettings();
-
     this.loadAiClient();
-    await this.reinitializeCommands();
+    this.pendingSettingsSnapshot = clonePluginSettings(this.settings);
+
+    do {
+      await (this.settingsSavePromise ?? this.startSettingsSave());
+    } while (this.pendingSettingsSnapshot && !this.isUnloaded);
+  }
+
+  private startSettingsSave(): Promise<void> {
+    const save = this.flushSettings();
+    this.settingsSavePromise = save;
+    const clearSave = () => {
+      if (this.settingsSavePromise === save) {
+        this.settingsSavePromise = undefined;
+      }
+    };
+    void save.then(clearSave, clearSave);
+    return save;
+  }
+
+  private async flushSettings(): Promise<void> {
+    while (this.pendingSettingsSnapshot && !this.isUnloaded) {
+      const snapshot = this.pendingSettingsSnapshot;
+      this.pendingSettingsSnapshot = undefined;
+      await this.saveData(snapshot);
+    }
+    if (!this.isUnloaded) await this.reinitializeCommands();
   }
 
   private async reinitializeCommands() {

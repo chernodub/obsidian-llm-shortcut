@@ -1,9 +1,34 @@
-import { App, PluginSettingTab, Setting } from "obsidian";
+import {
+  App,
+  DropdownComponent,
+  Notice,
+  PluginSettingTab,
+  Setting,
+} from "obsidian";
+import { mapLlmErrorToReadable } from "./llm/error-handler";
+import {
+  getProviderModels,
+  parseModelReasoningSupportFromModels,
+  type ModelReasoningSupport,
+  type ProviderModelsResult,
+} from "./llm/get-model-reasoning-support";
+import {
+  isReasoningEffort,
+  REASONING_EFFORTS,
+} from "./llm/reasoning-effort";
 import LlmShortcutPlugin from "./main";
 import { PROMPT_OPTION_DEFINITIONS } from "./prompt/prompt-option-registry";
+import { createProviderPreset } from "./settings";
+import styles from "./setting-tab.module.css";
+import { showErrorNotification } from "./ui/user-notifications";
+import { AbortError } from "./utils/abort-error";
+import { obsidianFetchAdapter } from "./utils/obsidian/obsidian-fetch-adapter";
 
 export class SettingTab extends PluginSettingTab {
   private plugin: LlmShortcutPlugin;
+  private reasoningSupportRefreshTimer: ReturnType<typeof setTimeout> | undefined;
+  private reasoningSupportLookupId = 0;
+  private presetTestAbortController: AbortController | undefined;
 
   constructor(app: App, plugin: LlmShortcutPlugin) {
     super(app, plugin);
@@ -12,9 +37,182 @@ export class SettingTab extends PluginSettingTab {
 
   override display(): void {
     const { containerEl } = this;
+    this.presetTestAbortController?.abort();
+    this.presetTestAbortController = undefined;
     containerEl.empty();
+    this.cancelReasoningSupportRefresh();
 
-    new Setting(containerEl).setName("LLM provider").setHeading();
+    const reasoningControl: {
+      setting?: Setting;
+      dropdown?: DropdownComponent;
+    } = {};
+    const modelDatalist = containerEl.createEl("datalist");
+    modelDatalist.id = "llm-shortcut-model-suggestions";
+    const modelControl: { setting?: Setting } = {};
+    let providerModelsResult: ProviderModelsResult | undefined;
+
+    const applyProviderModels = async (
+      result: ProviderModelsResult,
+      clearUnsupportedEffort: boolean,
+    ) => {
+      const { setting, dropdown } = reasoningControl;
+      const modelSetting = modelControl.setting;
+      if (!modelSetting || !setting || !dropdown) return;
+
+      this.showModelCatalogStatus(modelSetting, result, this.plugin.currentPreset.model);
+      const support: ModelReasoningSupport =
+        !this.plugin.currentPreset.model
+          ? { status: "unknown", reason: "invalid-config" }
+          : result.status === "success"
+          ? parseModelReasoningSupportFromModels(
+              result.models,
+              this.plugin.currentPreset.model,
+            )
+          : result;
+      const shouldClearEffort = this.showReasoningSupport(
+        setting,
+        dropdown,
+        support,
+      );
+      if (shouldClearEffort && clearUnsupportedEffort) {
+        this.plugin.currentPreset.reasoningEffort = undefined;
+        dropdown.setValue("");
+        await this.plugin.saveSettings();
+      }
+    };
+
+    const refreshProviderModels = async () => {
+      const { setting, dropdown } = reasoningControl;
+      const modelSetting = modelControl.setting;
+      if (!modelSetting || !setting || !dropdown) return;
+
+      const currentLookupId = ++this.reasoningSupportLookupId;
+      const lookupConfig = {
+        apiKey: this.plugin.currentPreset.apiKey,
+        baseUrl: this.plugin.currentPreset.providerUrl,
+      };
+      this.showModelCatalogStatus(modelSetting, undefined);
+      this.showReasoningSupport(
+        setting,
+        dropdown,
+        undefined,
+      );
+      const result = await getProviderModels({
+        ...lookupConfig,
+        fetch: obsidianFetchAdapter,
+      });
+      if (
+        currentLookupId !== this.reasoningSupportLookupId ||
+        lookupConfig.apiKey !== this.plugin.currentPreset.apiKey ||
+        lookupConfig.baseUrl !== this.plugin.currentPreset.providerUrl
+      ) {
+        return;
+      }
+
+      providerModelsResult = result;
+      this.setModelSuggestions(
+        modelDatalist,
+        result.status === "success" ? result.models.map(({ id }) => id) : [],
+      );
+      await applyProviderModels(result, true);
+    };
+
+    const scheduleProviderModelsRefresh = () => {
+      this.reasoningSupportLookupId += 1;
+      providerModelsResult = undefined;
+      this.setModelSuggestions(modelDatalist, []);
+      const modelSetting = modelControl.setting;
+      const { setting, dropdown } = reasoningControl;
+      if (modelSetting) this.showModelCatalogStatus(modelSetting, undefined);
+      if (setting && dropdown) {
+        this.showReasoningSupport(setting, dropdown, undefined);
+      }
+      if (this.reasoningSupportRefreshTimer) {
+        clearTimeout(this.reasoningSupportRefreshTimer);
+      }
+      this.reasoningSupportRefreshTimer = setTimeout(
+        () => void refreshProviderModels(),
+        500,
+      );
+    };
+
+    new Setting(containerEl).setName("LLM presets").setHeading();
+
+    let presetDropdown: DropdownComponent | undefined;
+    new Setting(containerEl)
+      .setName("Current preset")
+      .setDesc("Select the provider and model configuration used by commands.")
+      .addDropdown((dropdown) => {
+        presetDropdown = dropdown;
+        for (const preset of this.plugin.settings.presets) {
+          dropdown.addOption(preset.id, preset.name);
+        }
+        dropdown
+          .setValue(this.plugin.settings.currentPresetId)
+          .onChange(async (value) => {
+            this.plugin.settings.currentPresetId = value;
+            this.display();
+            await this.plugin.saveSettings();
+          });
+      })
+      .addExtraButton((button) =>
+        button
+          .setIcon("plus")
+          .setTooltip("Add preset")
+          .onClick(async () => {
+            let presetNumber = 1;
+            while (
+              this.plugin.settings.presets.some(
+                ({ name }) => name === `Preset ${presetNumber}`,
+              )
+            ) {
+              presetNumber += 1;
+            }
+            const preset = createProviderPreset(`Preset ${presetNumber}`);
+            this.plugin.settings.presets.push(preset);
+            this.plugin.settings.currentPresetId = preset.id;
+            this.display();
+            await this.plugin.saveSettings();
+          }),
+      )
+      .addExtraButton((button) =>
+        button
+          .setIcon("trash-2")
+          .setTooltip("Delete current preset")
+          .setDisabled(this.plugin.settings.presets.length === 1)
+          .onClick(async () => {
+            const presetName = this.plugin.currentPreset.name;
+            if (!window.confirm(`Delete preset "${presetName}"?`)) return;
+
+            const currentPresetId = this.plugin.settings.currentPresetId;
+            this.plugin.settings.presets = this.plugin.settings.presets.filter(
+              ({ id }) => id !== currentPresetId,
+            );
+            this.plugin.settings.currentPresetId =
+              this.plugin.settings.presets[0]!.id;
+            this.display();
+            await this.plugin.saveSettings();
+          }),
+      );
+
+    new Setting(containerEl)
+      .setName("Preset name")
+      .setDesc("A label used only in this plugin's settings.")
+      .addText((text) =>
+        text
+          .setValue(this.plugin.currentPreset.name)
+          .onChange(async (value) => {
+            this.plugin.currentPreset.name = value || "Untitled preset";
+            const option = Array.from(
+              presetDropdown?.selectEl.options ?? [],
+            ).find(({ value }) => value === this.plugin.currentPreset.id);
+            if (option) option.text = this.plugin.currentPreset.name;
+            await this.plugin.saveSettings();
+          })
+          .setPlaceholder("Preset name"),
+      );
+
+    new Setting(containerEl).setName("Provider configuration").setHeading();
 
     new Setting(containerEl)
       .setName("🔑 API key")
@@ -23,9 +221,10 @@ export class SettingTab extends PluginSettingTab {
       )
       .addText((text) => {
         text
-          .setValue(this.plugin.settings?.apiKey || "")
+          .setValue(this.plugin.currentPreset.apiKey)
           .onChange(async (value) => {
-            this.plugin.settings.apiKey = value;
+            this.plugin.currentPreset.apiKey = value;
+            scheduleProviderModelsRefresh();
             await this.plugin.saveSettings();
           });
         text.inputEl.type = "password";
@@ -39,28 +238,65 @@ export class SettingTab extends PluginSettingTab {
       )
       .addText((text) =>
         text
-          .setValue(this.plugin.settings?.providerUrl || "")
+          .setValue(this.plugin.currentPreset.providerUrl)
           .onChange(async (value) => {
-            this.plugin.settings.providerUrl = value;
+            this.plugin.currentPreset.providerUrl = value;
+            scheduleProviderModelsRefresh();
             await this.plugin.saveSettings();
           })
           .setPlaceholder("https://api.openai.com/v1"),
       );
 
-    new Setting(containerEl)
+    modelControl.setting = new Setting(containerEl)
       .setName("🤖 Model name")
       .setDesc(
         "The specific AI model to use (e.g., gpt-4, claude-3-sonnet, gemini-pro). Check your provider's model list.",
       )
-      .addText((text) =>
+      .addText((text) => {
         text
-          .setValue(this.plugin.settings?.model || "")
+          .setValue(this.plugin.currentPreset.model)
           .onChange(async (value) => {
-            this.plugin.settings.model = value;
+            this.plugin.currentPreset.model = value;
+            if (providerModelsResult) {
+              await applyProviderModels(providerModelsResult, false);
+            }
             await this.plugin.saveSettings();
           })
-          .setPlaceholder("gpt-4 or your preferred model"),
+          .setPlaceholder("gpt-4 or your preferred model");
+        text.inputEl.setAttribute("list", modelDatalist.id);
+        text.inputEl.setAttribute("autocomplete", "off");
+        text.inputEl.addEventListener("change", () => {
+          if (providerModelsResult) {
+            void applyProviderModels(providerModelsResult, true);
+          }
+        });
+      });
+
+    reasoningControl.setting = new Setting(containerEl)
+      .setName("🧠 Reasoning effort")
+      .setDesc(
+        "The thinking level for reasoning models. Use provider default for models or providers that do not support this option.",
+      )
+      .addDropdown((dropdown) => {
+        reasoningControl.dropdown = dropdown;
+        this.setReasoningOptions(dropdown, REASONING_EFFORTS);
+
+        dropdown
+          .setValue(this.plugin.currentPreset.reasoningEffort ?? "")
+          .onChange(async (value) => {
+            this.plugin.currentPreset.reasoningEffort =
+              isReasoningEffort(value) ? value : undefined;
+            await this.plugin.saveSettings();
+          });
+      })
+      .addExtraButton((button) =>
+        button
+          .setIcon("refresh-cw")
+          .setTooltip("Refresh provider models")
+          .onClick(refreshProviderModels),
       );
+
+    void refreshProviderModels();
 
     new Setting(containerEl)
       .setName("📁 Project ID (optional)")
@@ -69,12 +305,38 @@ export class SettingTab extends PluginSettingTab {
       )
       .addText((text) =>
         text
-          .setValue(this.plugin.settings?.project || "")
+          .setValue(this.plugin.currentPreset.project)
           .onChange(async (value) => {
-            this.plugin.settings.project = value;
+            this.plugin.currentPreset.project = value;
             await this.plugin.saveSettings();
           })
           .setPlaceholder("project-id or leave empty"),
+      );
+
+    new Setting(containerEl)
+      .setName("Test current preset")
+      .setDesc("Send a minimal request to verify that the model responds.")
+      .addButton((button) =>
+        button.setButtonText("Test").onClick(async () => {
+          this.presetTestAbortController?.abort();
+          const abortController = new AbortController();
+          this.presetTestAbortController = abortController;
+          const presetName = this.plugin.currentPreset.name;
+          button.setDisabled(true).setButtonText("Testing...");
+          try {
+            await this.plugin.testCurrentPreset(abortController.signal);
+            new Notice(`Preset "${presetName}" responded successfully.`);
+          } catch (error) {
+            if (!(error instanceof AbortError)) {
+              showErrorNotification(mapLlmErrorToReadable(error));
+            }
+          } finally {
+            if (this.presetTestAbortController === abortController) {
+              this.presetTestAbortController = undefined;
+            }
+            button.setDisabled(false).setButtonText("Test");
+          }
+        }),
       );
 
     new Setting(containerEl).setName("Prompt library").setHeading();
@@ -135,4 +397,142 @@ export class SettingTab extends PluginSettingTab {
       );
     }
   }
+
+  override hide(): void {
+    this.presetTestAbortController?.abort();
+    this.presetTestAbortController = undefined;
+    this.cancelReasoningSupportRefresh();
+    super.hide();
+  }
+
+  private cancelReasoningSupportRefresh(): void {
+    this.reasoningSupportLookupId += 1;
+    if (this.reasoningSupportRefreshTimer) {
+      clearTimeout(this.reasoningSupportRefreshTimer);
+      this.reasoningSupportRefreshTimer = undefined;
+    }
+  }
+
+  private showModelCatalogStatus(
+    setting: Setting,
+    result: ProviderModelsResult | undefined,
+    model = "",
+  ): void {
+    this.clearStatusClasses(setting);
+    if (!result) {
+      setting.setDesc("Loading models from provider...");
+      return;
+    }
+
+    if (result.status === "success") {
+      if (!model) {
+        setting.setDesc("Select a provider model or enter a custom model name.");
+      } else if (result.models.some(({ id }) => id === model)) {
+        setting.setDesc("Model found in provider catalog.");
+        setting.descEl.addClass(styles.statusSuccess!);
+      } else {
+        setting.setDesc(
+          "Model is not listed by the provider. Custom model names are still allowed.",
+        );
+        setting.descEl.addClass(styles.statusWarning!);
+      }
+      return;
+    }
+
+    const description =
+      result.reason === "invalid-config"
+        ? "Enter a valid Base URL to load model suggestions. Custom model names are allowed."
+        : result.reason === "lookup-failed"
+          ? "Could not load provider models. Custom model names are still allowed."
+          : "This provider does not return a model catalog. Custom model names are allowed.";
+    setting.setDesc(description);
+    setting.descEl.addClass(styles.statusMuted!);
+  }
+
+  private setModelSuggestions(
+    datalist: HTMLDataListElement,
+    modelIds: readonly string[],
+  ): void {
+    const fragment = document.createDocumentFragment();
+    for (const modelId of [...modelIds].sort()) {
+      const option = document.createElement("option");
+      option.value = modelId;
+      fragment.append(option);
+    }
+    datalist.replaceChildren(fragment);
+  }
+
+  private showReasoningSupport(
+    setting: Setting,
+    dropdown: DropdownComponent,
+    support: ModelReasoningSupport | undefined,
+  ): boolean {
+    this.clearStatusClasses(setting);
+
+    if (!support) {
+      this.setReasoningOptions(dropdown, REASONING_EFFORTS);
+      setting.setDesc("Checking model reasoning support...");
+      dropdown.setDisabled(false);
+      return false;
+    }
+
+    if (support.status === "supported") {
+      const supportedEfforts = new Set<string>(support.efforts);
+      this.setReasoningOptions(dropdown, support.efforts);
+      setting.setDesc("This model supports reasoning effort.");
+      setting.descEl.addClass(styles.statusSuccess!);
+      dropdown.setDisabled(false);
+      return (
+        this.plugin.currentPreset.reasoningEffort !== undefined &&
+        !supportedEfforts.has(this.plugin.currentPreset.reasoningEffort)
+      );
+    }
+
+    if (support.status === "unsupported") {
+      this.setReasoningOptions(dropdown, []);
+      setting.setDesc(
+        "This model does not advertise reasoning effort support. Provider default will be used.",
+      );
+      setting.descEl.addClass(styles.statusWarning!);
+      dropdown.setDisabled(true);
+      return this.plugin.currentPreset.reasoningEffort !== undefined;
+    }
+
+    const description =
+      support.reason === "invalid-config"
+        ? "Enter a valid Base URL and model name to check reasoning support."
+        : support.reason === "lookup-failed"
+          ? "Could not check reasoning support. Verify the provider URL and API key, then retry."
+          : "This provider does not advertise reasoning capabilities. Check its model documentation before selecting an effort.";
+    this.setReasoningOptions(dropdown, REASONING_EFFORTS);
+    setting.setDesc(description);
+    setting.descEl.addClass(styles.statusMuted!);
+    dropdown.setDisabled(false);
+    return false;
+  }
+
+  private setReasoningOptions(
+    dropdown: DropdownComponent,
+    efforts: readonly string[],
+  ): void {
+    const selectedValue = this.plugin.currentPreset.reasoningEffort ?? "";
+    dropdown.selectEl.empty();
+    dropdown.addOption("", "Provider default");
+    for (const effort of efforts) {
+      dropdown.addOption(effort, capitalize(effort));
+    }
+    dropdown.setValue(selectedValue);
+  }
+
+  private clearStatusClasses(setting: Setting): void {
+    setting.descEl.removeClass(
+      styles.statusSuccess!,
+      styles.statusWarning!,
+      styles.statusMuted!,
+    );
+  }
+}
+
+function capitalize(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1);
 }

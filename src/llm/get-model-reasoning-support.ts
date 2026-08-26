@@ -1,0 +1,159 @@
+import {
+  isReasoningEffort,
+  REASONING_EFFORTS,
+  type ReasoningEffort,
+} from "./reasoning-effort";
+
+export type ModelReasoningSupport =
+  | {
+      readonly status: "supported";
+      readonly efforts: readonly ReasoningEffort[];
+    }
+  | { readonly status: "unsupported" }
+  | {
+      readonly status: "unknown";
+      readonly reason: "invalid-config" | "lookup-failed" | "not-advertised";
+    };
+
+export type ProviderModel = Record<string, unknown> & { readonly id: string };
+
+export type ProviderModelsResult =
+  | { readonly status: "success"; readonly models: readonly ProviderModel[] }
+  | {
+      readonly status: "unknown";
+      readonly reason: "invalid-config" | "lookup-failed" | "not-advertised";
+    };
+
+type GetProviderModelsParams = {
+  readonly baseUrl: string;
+  readonly apiKey: string;
+  readonly fetch: typeof globalThis.fetch;
+};
+
+export async function getModelReasoningSupport({
+  baseUrl,
+  apiKey,
+  model,
+  fetch,
+}: GetProviderModelsParams & { readonly model: string }): Promise<ModelReasoningSupport> {
+  if (!model) {
+    return { status: "unknown", reason: "invalid-config" };
+  }
+
+  const result = await getProviderModels({ baseUrl, apiKey, fetch });
+  return result.status === "success"
+    ? parseModelReasoningSupportFromModels(result.models, model)
+    : result;
+}
+
+export async function getProviderModels({
+  baseUrl,
+  apiKey,
+  fetch,
+}: GetProviderModelsParams): Promise<ProviderModelsResult> {
+  if (!baseUrl) {
+    return { status: "unknown", reason: "invalid-config" };
+  }
+
+  let modelsUrl: URL;
+  try {
+    modelsUrl = new URL(`${baseUrl.replace(/\/$/, "")}/models`);
+  } catch {
+    return { status: "unknown", reason: "invalid-config" };
+  }
+
+  const abortController = new AbortController();
+  const timeout = setTimeout(() => abortController.abort(), 10_000);
+  try {
+    const response = await fetch(modelsUrl, {
+      ...(apiKey
+        ? { headers: new Headers({ Authorization: `Bearer ${apiKey}` }) }
+        : {}),
+      signal: abortController.signal,
+    });
+    if (!response.ok) {
+      return { status: "unknown", reason: "lookup-failed" };
+    }
+
+    return parseProviderModels(await response.json());
+  } catch {
+    return { status: "unknown", reason: "lookup-failed" };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+export function parseModelReasoningSupport(
+  response: unknown,
+  modelId: string,
+): ModelReasoningSupport {
+  const result = parseProviderModels(response);
+  return result.status === "success"
+    ? parseModelReasoningSupportFromModels(result.models, modelId)
+    : { status: "unknown", reason: "not-advertised" };
+}
+
+export function parseProviderModels(response: unknown): ProviderModelsResult {
+  if (!isRecord(response) || !Array.isArray(response.data)) {
+    return { status: "unknown", reason: "not-advertised" };
+  }
+
+  const models = response.data.filter(isProviderModel);
+  return { status: "success", models };
+}
+
+export function parseModelReasoningSupportFromModels(
+  models: readonly ProviderModel[],
+  modelId: string,
+): ModelReasoningSupport {
+  const model = models.find((candidate) => candidate.id === modelId);
+  if (!model) {
+    return { status: "unknown", reason: "not-advertised" };
+  }
+
+  if (isRecord(model.reasoning)) {
+    const isMandatory = model.reasoning.mandatory === true;
+    const supportedEfforts = model.reasoning.supported_efforts;
+    if (supportedEfforts === null) {
+      return {
+        status: "supported",
+        efforts: isMandatory
+          ? REASONING_EFFORTS.filter((effort) => effort !== "none")
+          : REASONING_EFFORTS,
+      };
+    }
+    if (Array.isArray(supportedEfforts)) {
+      const recognizedEfforts = supportedEfforts.filter(isReasoningEffort);
+      const efforts = isMandatory
+        ? recognizedEfforts.filter((effort) => effort !== "none")
+        : recognizedEfforts;
+      if (recognizedEfforts.length > 0) {
+        return { status: "supported", efforts };
+      }
+      return supportedEfforts.length === 0
+        ? { status: "unsupported" }
+        : { status: "unknown", reason: "not-advertised" };
+    }
+    return { status: "unknown", reason: "not-advertised" };
+  }
+
+  if (Array.isArray(model.supported_parameters)) {
+    if (!model.supported_parameters.every((value) => typeof value === "string")) {
+      return { status: "unknown", reason: "not-advertised" };
+    }
+    return model.supported_parameters.includes("reasoning_effort") ||
+      model.supported_parameters.includes("reasoning")
+      ? { status: "unknown", reason: "not-advertised" }
+      : { status: "unsupported" };
+  }
+
+  return { status: "unknown", reason: "not-advertised" };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function isProviderModel(value: unknown): value is ProviderModel {
+  return isRecord(value) && typeof value.id === "string";
+}

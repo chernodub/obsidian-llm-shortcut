@@ -9,6 +9,7 @@ import { UserContentSelection } from "../prompt/user-content-selection/user-cont
 import type { PromptOptions } from "../prompt/user-prompt-options";
 import { AbortError } from "../utils/abort-error";
 import { createOpenAiRequestMessages } from "./create-open-ai-request-messages";
+import type { ReasoningEffort } from "./reasoning-effort";
 
 type GetResponseParams = {
   readonly userPromptString: string;
@@ -23,12 +24,38 @@ export class LLMClient {
   constructor(
     options: Pick<OpenAIOptions, "apiKey" | "baseURL" | "fetch" | "project">,
     private readonly model: string,
+    private readonly reasoningEffort?: ReasoningEffort,
   ) {
     this.client = new OpenAI({
       ...options,
       // So that it would work in the obsidian client
       dangerouslyAllowBrowser: true,
     });
+  }
+
+  async testConnection(signal?: AbortSignal): Promise<void> {
+    try {
+      const response = await this.client.chat.completions.create(
+        {
+          model: this.model,
+          messages: [{ role: "user", content: "Reply only with OK." }],
+          stream: true,
+          ...(this.reasoningEffort
+            ? { reasoning_effort: this.reasoningEffort }
+            : {}),
+        },
+        { signal },
+      );
+      for await (const _chunk of response) {
+        return;
+      }
+      throw new Error("Model returned an empty response stream");
+    } catch (error: unknown) {
+      if (error instanceof APIUserAbortError) {
+        throw new AbortError();
+      }
+      throw error;
+    }
   }
 
   async *getResponse({
@@ -58,6 +85,9 @@ export class LLMClient {
           model: this.model,
           messages,
           stream: true,
+          ...(this.reasoningEffort
+            ? { reasoning_effort: this.reasoningEffort }
+            : {}),
         },
         {
           signal,
