@@ -12,6 +12,10 @@ import {
 } from "obsidian";
 import { mapLlmErrorToReadable } from "./llm/error-handler";
 import { LLMClient } from "./llm/llm-client";
+import {
+  isReasoningEffort,
+  type ReasoningEffort,
+} from "./llm/reasoning-effort";
 import { logger } from "./logger";
 import { parsePromptOptionsFromFileProperties } from "./prompt/parse-prompt-options-from-file-properties/parse-prompt-options-from-file-properties";
 import { mergePromptOptions } from "./prompt/prompt-option-registry";
@@ -33,6 +37,7 @@ interface PluginSettings {
   apiKey: string;
   providerUrl: string;
   model: string;
+  reasoningEffort: ReasoningEffort | undefined;
   promptLibraryDirectory: string;
   project: string;
   customPromptCommandLabel: string;
@@ -43,6 +48,7 @@ const DEFAULT_SETTINGS: PluginSettings = {
   apiKey: "",
   providerUrl: "",
   model: "",
+  reasoningEffort: undefined,
   promptLibraryDirectory: "_prompts",
   project: "",
   customPromptCommandLabel: "Custom prompt",
@@ -409,6 +415,7 @@ export default class LlmShortcutPlugin extends Plugin {
         project: this.settings.project,
       },
       this.settings.model,
+      this.settings.reasoningEffort,
     );
   }
 
@@ -424,6 +431,9 @@ export default class LlmShortcutPlugin extends Plugin {
     this.settings = {
       ...DEFAULT_SETTINGS,
       ...data,
+      reasoningEffort: isReasoningEffort(data?.reasoningEffort)
+        ? data.reasoningEffort
+        : undefined,
       globalPromptOptions: {
         ...DEFAULT_SETTINGS.globalPromptOptions,
         ...data?.globalPromptOptions,

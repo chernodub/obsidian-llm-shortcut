@@ -9,6 +9,7 @@ import { UserContentSelection } from "../prompt/user-content-selection/user-cont
 import type { PromptOptions } from "../prompt/user-prompt-options";
 import { AbortError } from "../utils/abort-error";
 import { createOpenAiRequestMessages } from "./create-open-ai-request-messages";
+import type { ReasoningEffort } from "./reasoning-effort";
 
 type GetResponseParams = {
   readonly userPromptString: string;
@@ -23,6 +24,7 @@ export class LLMClient {
   constructor(
     options: Pick<OpenAIOptions, "apiKey" | "baseURL" | "fetch" | "project">,
     private readonly model: string,
+    private readonly reasoningEffort?: ReasoningEffort,
   ) {
     this.client = new OpenAI({
       ...options,
@@ -58,6 +60,9 @@ export class LLMClient {
           model: this.model,
           messages,
           stream: true,
+          ...(this.reasoningEffort
+            ? { reasoning_effort: this.reasoningEffort }
+            : {}),
         },
         {
           signal,

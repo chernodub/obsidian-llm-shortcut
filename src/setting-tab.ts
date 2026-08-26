@@ -1,4 +1,8 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
+import {
+  isReasoningEffort,
+  REASONING_EFFORTS,
+} from "./llm/reasoning-effort";
 import LlmShortcutPlugin from "./main";
 import { PROMPT_OPTION_DEFINITIONS } from "./prompt/prompt-option-registry";
 
@@ -61,6 +65,29 @@ export class SettingTab extends PluginSettingTab {
           })
           .setPlaceholder("gpt-4 or your preferred model"),
       );
+
+    new Setting(containerEl)
+      .setName("🧠 Reasoning effort")
+      .setDesc(
+        "The thinking level for reasoning models. Use provider default for models or providers that do not support this option.",
+      )
+      .addDropdown((dropdown) => {
+        dropdown.addOption("", "Provider default");
+        for (const effort of REASONING_EFFORTS) {
+          dropdown.addOption(
+            effort,
+            effort.charAt(0).toUpperCase() + effort.slice(1),
+          );
+        }
+
+        dropdown
+          .setValue(this.plugin.settings.reasoningEffort ?? "")
+          .onChange(async (value) => {
+            this.plugin.settings.reasoningEffort =
+              isReasoningEffort(value) ? value : undefined;
+            await this.plugin.saveSettings();
+          });
+      });
 
     new Setting(containerEl)
       .setName("📁 Project ID (optional)")
