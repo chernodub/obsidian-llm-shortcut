@@ -144,13 +144,7 @@ export class SettingTab extends PluginSettingTab {
       )
       .addDropdown((dropdown) => {
         reasoningControl.dropdown = dropdown;
-        dropdown.addOption("", "Provider default");
-        for (const effort of REASONING_EFFORTS) {
-          dropdown.addOption(
-            effort,
-            effort.charAt(0).toUpperCase() + effort.slice(1),
-          );
-        }
+        this.setReasoningOptions(dropdown, REASONING_EFFORTS);
 
         dropdown
           .setValue(this.plugin.settings.reasoningEffort ?? "")
@@ -262,11 +256,9 @@ export class SettingTab extends PluginSettingTab {
     support: ModelReasoningSupport | undefined,
   ): boolean {
     setting.descEl.style.color = "";
-    for (const option of Array.from(dropdown.selectEl.options)) {
-      option.disabled = false;
-    }
 
     if (!support) {
+      this.setReasoningOptions(dropdown, REASONING_EFFORTS);
       setting.setDesc("Checking model reasoning support...");
       dropdown.setDisabled(false);
       return false;
@@ -274,12 +266,8 @@ export class SettingTab extends PluginSettingTab {
 
     if (support.status === "supported") {
       const supportedEfforts = new Set<string>(support.efforts);
-      for (const option of Array.from(dropdown.selectEl.options)) {
-        option.disabled = option.value !== "" && !supportedEfforts.has(option.value);
-      }
-      setting.setDesc(
-        `Supported efforts: ${support.efforts.map(capitalize).join(", ")}.`,
-      );
+      this.setReasoningOptions(dropdown, support.efforts);
+      setting.setDesc("This model supports reasoning effort.");
       setting.descEl.style.color = "var(--text-success)";
       dropdown.setDisabled(false);
       return (
@@ -289,6 +277,7 @@ export class SettingTab extends PluginSettingTab {
     }
 
     if (support.status === "unsupported") {
+      this.setReasoningOptions(dropdown, []);
       setting.setDesc(
         "This model does not advertise reasoning effort support. Provider default will be used.",
       );
@@ -303,14 +292,27 @@ export class SettingTab extends PluginSettingTab {
         : support.reason === "lookup-failed"
           ? "Could not check reasoning support. Verify the provider URL and API key, then retry."
           : "This provider does not advertise reasoning capabilities. Check its model documentation before selecting an effort.";
+    this.setReasoningOptions(dropdown, REASONING_EFFORTS);
     setting.setDesc(description);
     setting.descEl.style.color = "var(--text-muted)";
     dropdown.setDisabled(false);
     return false;
   }
+
+  private setReasoningOptions(
+    dropdown: DropdownComponent,
+    efforts: readonly string[],
+  ): void {
+    const selectedValue = this.plugin.settings.reasoningEffort ?? "";
+    dropdown.selectEl.empty();
+    dropdown.addOption("", "Provider default");
+    for (const effort of efforts) {
+      dropdown.addOption(effort, capitalize(effort));
+    }
+    dropdown.setValue(selectedValue);
+  }
 }
 
 function capitalize(value: string): string {
-  if (value === "xhigh") return "XHigh";
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
