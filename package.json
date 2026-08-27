@@ -21,23 +21,23 @@
   "author": "chernodubv",
   "license": "MIT",
   "devDependencies": {
-    "@eslint/js": "^9.39.1",
-    "@eslint/json": "^0.14.0",
-    "@eslint/markdown": "^7.5.1",
-    "@release-it/bumper": "^7.0.5",
-    "@types/node": "^24.10.1",
-    "esbuild": "^0.27.0",
-    "eslint": "^9.39.1",
-    "globals": "^16.5.0",
-    "obsidian": "^1.10.3",
-    "prettier": "^3.6.2",
-    "release-it": "^19.2.2",
+    "@eslint/js": "^10.0.1",
+    "@eslint/json": "^2.0.1",
+    "@eslint/markdown": "^8.0.3",
+    "@release-it/bumper": "^8.0.0",
+    "@types/node": "^24.13.3",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.9.1",
+    "globals": "^17.11.0",
+    "obsidian": "^1.13.1",
+    "prettier": "^3.9.6",
+    "release-it": "^21.0.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.4",
-    "vitest": "^4.0.8"
+    "typescript-eslint": "^8.68.0",
+    "vitest": "^4.1.11"
   },
   "dependencies": {
     "clsx": "^2.1.1",
-    "openai": "^7.5.0"
+    "openai": "^7.7.0"
   }
 }

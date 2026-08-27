@@ -36,7 +36,7 @@ import { PLUGIN_NAME } from "./utils/constants";
 import { obsidianFetchAdapter } from "./utils/obsidian/obsidian-fetch-adapter";
 
 export default class LlmShortcutPlugin extends Plugin {
-  public settings: PluginSettings = createDefaultSettings();
+  public override settings: PluginSettings = createDefaultSettings();
   private llmClient?: LLMClient;
   private readonly loaderStrategy: LoaderStrategy;
   private commands: Command[] = [];
