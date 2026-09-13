@@ -1,4 +1,4 @@
-import { App, Modal } from "obsidian";
+import { App, Modal, Platform } from "obsidian";
 import { logger } from "../../logger";
 import "./prompt-modal.css";
 
@@ -45,6 +45,17 @@ export class CustomPromptModal extends Modal {
       cls: "mod-cta",
       attr: { type: "button" },
     });
+    if (!Platform.isMobile) {
+      this.submitButton.createEl("span", {
+        cls: "llm-shortcut-submit-shortcut",
+        text: Platform.isMacOS ? "⌘ Enter" : "Ctrl+Enter",
+        attr: { "aria-hidden": "true" },
+      });
+      this.submitButton.setAttribute(
+        "aria-label",
+        `Submit (${Platform.isMacOS ? "Command" : "Control"}+Enter)`,
+      );
+    }
     this.submitButton.addEventListener("click", () => {
       this.handleSubmit();
     });

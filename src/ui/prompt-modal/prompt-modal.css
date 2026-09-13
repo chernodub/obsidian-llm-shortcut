@@ -7,6 +7,11 @@
   overflow: auto;
 }
 
+/* Leave room for focus rings without overriding Obsidian's phone padding. */
+.llm-shortcut-prompt-modal :where(.modal-content) {
+  padding: max(4px, var(--input-border-width-focus, 2px));
+}
+
 .llm-shortcut-prompt-modal textarea {
   display: block;
   box-sizing: border-box;
@@ -26,6 +31,12 @@
 .llm-shortcut-prompt-modal .modal-button-container {
   flex-shrink: 0;
   margin-top: 0;
+}
+
+.llm-shortcut-prompt-modal .llm-shortcut-submit-shortcut {
+  margin-inline-start: 8px;
+  font-size: var(--font-ui-smaller);
+  opacity: 0.75;
 }
 
 @media (max-width: 600px) {
