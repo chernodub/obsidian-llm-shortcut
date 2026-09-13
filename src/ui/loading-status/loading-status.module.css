@@ -1,7 +1,21 @@
-.container {
+.container,
+:global(.status-bar-item) > .container {
   display: flex;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+}
+
+:global(.status-bar-item) > .container {
+  max-width: min(32ch, 40vw);
+}
+
+:global(.status-bar-item) > .container > .message {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .cancellable {
