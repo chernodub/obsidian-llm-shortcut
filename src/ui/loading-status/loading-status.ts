@@ -21,6 +21,7 @@ export function createLoadingStatusFragment(message: string): DocumentFragment {
   container.appendChild(spinner);
 
   const text = document.createElement("span");
+  text.classList.add(clsx(styles.message));
   text.textContent = message;
 
   container.appendChild(text);
