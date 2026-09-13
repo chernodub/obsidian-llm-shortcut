@@ -1,0 +1,61 @@
+/* Keep the modal's selectors stable across builds and scoped to this plugin. */
+.llm-shortcut-prompt-modal .modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* Leave room for focus rings without overriding Obsidian's phone padding. */
+.llm-shortcut-prompt-modal :where(.modal-content) {
+  padding: max(4px, var(--input-border-width-focus, 2px));
+}
+
+.llm-shortcut-prompt-modal textarea {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 140px;
+  max-height: min(50vh, 520px);
+  flex: 1 1 auto;
+  resize: none;
+}
+
+@media (pointer: fine) {
+  .llm-shortcut-prompt-modal textarea {
+    resize: vertical;
+  }
+}
+
+.llm-shortcut-prompt-modal .modal-button-container {
+  flex-shrink: 0;
+  margin-top: 0;
+}
+
+.llm-shortcut-prompt-modal .llm-shortcut-submit-shortcut {
+  margin-inline-start: 8px;
+  font-size: var(--font-ui-smaller);
+  opacity: 0.75;
+}
+
+@media (max-width: 600px) {
+  .modal.llm-shortcut-prompt-modal {
+    width: 100%;
+    max-width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .llm-shortcut-prompt-modal textarea {
+    max-height: none;
+  }
+
+  .llm-shortcut-prompt-modal .modal-button-container button {
+    flex: 1 1 0;
+  }
+}
