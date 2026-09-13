@@ -1,7 +1,8 @@
-import clsx from "clsx";
 import { App, Modal } from "obsidian";
 import { logger } from "../../logger";
-import styles from "./prompt-modal.module.css";
+import "./prompt-modal.css";
+
+const MODAL_CLASS = "llm-shortcut-prompt-modal";
 
 export class CustomPromptModal extends Modal {
   private textareaEl: HTMLTextAreaElement | null = null;
@@ -20,27 +21,21 @@ export class CustomPromptModal extends Modal {
     const { contentEl } = this;
 
     contentEl.empty();
-    contentEl.addClass(clsx(styles.content));
-    this.modalEl.addClass(clsx(styles.modalRoot));
+    this.modalEl.addClass(MODAL_CLASS);
 
     this.createForm(contentEl);
     this.createFooter(contentEl);
   }
 
   private createFooter(contentEl: HTMLElement) {
-    const footerEl = contentEl.createDiv({
-      cls: clsx(styles.footer),
-    });
-
-    const buttonContainer = footerEl.createDiv({
-      cls: clsx(styles.actions),
+    const buttonContainer = contentEl.createDiv({
+      cls: "modal-button-container",
     });
 
     const cancelButton = buttonContainer.createEl("button", {
       text: "Cancel",
       attr: { type: "button" },
     });
-    cancelButton.addClass(clsx(styles.button));
     cancelButton.addEventListener("click", () => {
       this.close();
     });
@@ -50,24 +45,19 @@ export class CustomPromptModal extends Modal {
       cls: "mod-cta",
       attr: { type: "button" },
     });
-    this.submitButton.addClass(clsx(styles.button));
     this.submitButton.addEventListener("click", () => {
       this.handleSubmit();
     });
   }
 
   private createForm(contentEl: HTMLElement) {
-    const formEl = contentEl.createDiv({
-      cls: clsx(styles.form),
-    });
-
-    this.textareaEl = formEl.createEl("textarea", {
+    this.textareaEl = contentEl.createEl("textarea", {
       attr: {
+        "aria-label": this.heading,
         placeholder: "Enter your prompt here...",
         rows: 8,
       },
     });
-    this.textareaEl.addClass(clsx(styles.textarea));
     this.textareaEl.addEventListener("keydown", this.handleTextareaKeydown);
     this.textareaEl.focus();
   }
@@ -82,9 +72,8 @@ export class CustomPromptModal extends Modal {
       );
     }
 
-    contentEl.removeClass(clsx(styles.content));
     contentEl.empty();
-    this.modalEl.removeClass(clsx(styles.modalRoot));
+    this.modalEl.removeClass(MODAL_CLASS);
     this.textareaEl = null;
     this.submitButton = null;
   }
